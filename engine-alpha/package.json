@@ -1,0 +1,14 @@
+{
+  "name": "engine-alpha",
+  "version": "1.0.0",
+  "description": "RAM Machine engine",
+  "main": "engine.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^27.0.4"
+  }
+}
