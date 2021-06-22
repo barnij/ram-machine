@@ -1,6 +1,7 @@
 const parser = require('./parser');
 const interpreter = require('./interpreter');
 
+// output argument seems unnecessary
 function make_empty_env(input, output) {
   let result = {};
   result.input = input;
