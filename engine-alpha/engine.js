@@ -1,30 +1,31 @@
 const parser = require('./parser');
 const interpreter = require('./interpreter');
 
-// output argument seems unnecessary
-function make_empty_env(input, output) {
+function make_empty_env(input) {
   let result = {};
   result.input = input;
   result.input_it = 0;
-  result.output = output;
+  result.output = [];
   result.output_it = 0;
   result.env = [];
   return result;
 }
 
-function make_state_from_file(filepath, input=[], output=[]) {
+function make_state_from_file(filepath, input=[]) {
   let result = {};
-  result = make_empty_env(input, output);
+  result = make_empty_env(input);
   result.program = parser.parse_file(filepath);
   result.prog_it = result.program.prog;
+  result.completed = false;
   return result;
 }
 
-function make_state_from_string(str, input=[], output=[]) {
+function make_state_from_string(str, input=[]) {
   let result = {};
-  result = make_empty_env(input, output);
+  result = make_empty_env(input);
   result.program = parser.parse_string(str);
   result.prog_it = result.program.prog;
+  result.completed = false;
   return result;
 }
 
