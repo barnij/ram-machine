@@ -1,31 +1,18 @@
+const environment = require('./environment');
 const parser = require('./parser');
 const interpreter = require('./interpreter');
 
-function makeEmptyEnv(input) {
-  let env = {};
-  env.input = input;
-  env.inputHead = 0;
-  env.output = [];
-  env.outputHead = 0;
-  env.registers = new Map();
-  return env;
-}
-
 function makeStateFromFile(filepath, input=[]) {
-  let state = {};
-  state.env = makeEmptyEnv(input);
-  state.program = parser.parseFile(filepath);
-  state.programHead = result.program.prog;
-  state.completed = false;
+  let env = new environment.Env(input);
+  let program = parser.parseFile(filepath);
+  let state = new environment.State(program, env);
   return state;
 }
 
 function makeStateFromString(str, input=[]) {
-  let state = {};
-  state.env = makeEmptyEnv(input);
-  state.program = parser.parseString(str);
-  state.programHead = result.program.prog;
-  state.completed = false;
+  let env = new environment.Env(input);
+  let program = parser.parseString(str);
+  let state = new environment.State(program, env);
   return state;
 }
 
