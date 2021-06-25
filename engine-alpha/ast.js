@@ -56,3 +56,24 @@ function Program(labels, programTree) {
     this.programTree = programTree;
 }
 
+module.exports = {
+  Const, 
+  Address,
+  Reference,
+  Label,
+  Load,
+  Store,
+  Add,
+  Sub,
+  Mult,
+  Div,
+  Read,
+  Write,
+  Jump,
+  Jgtz,
+  Jzero,
+  Halt,
+  Skip,
+  Combine,
+  Program
+}
