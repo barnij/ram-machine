@@ -2,31 +2,31 @@ const parser = require('./parser');
 const interpreter = require('./interpreter');
 
 function makeEmptyEnv(input) {
-  let result = {};
-  result.input = input;
-  result.inputHead = 0;
-  result.output = [];
-  result.outputHead = 0;
-  result.registers = new Map();
-  return result;
+  let env = {};
+  env.input = input;
+  env.inputHead = 0;
+  env.output = [];
+  env.outputHead = 0;
+  env.registers = new Map();
+  return env;
 }
 
 function makeStateFromFile(filepath, input=[]) {
-  let result = {};
-  result = makeEmptyEnv(input);
-  result.program = parser.parseFile(filepath);
-  result.programHead = result.program.prog;
-  result.completed = false;
-  return result;
+  let state = {};
+  state.env = makeEmptyEnv(input);
+  state.program = parser.parseFile(filepath);
+  state.programHead = result.program.prog;
+  state.completed = false;
+  return state;
 }
 
 function makeStateFromString(str, input=[]) {
-  let result = {};
-  result = makeEmptyEnv(input);
-  result.program = parser.parseString(str);
-  result.programHead = result.program.prog;
-  result.completed = false;
-  return result;
+  let state = {};
+  state.env = makeEmptyEnv(input);
+  state.program = parser.parseString(str);
+  state.programHead = result.program.prog;
+  state.completed = false;
+  return state;
 }
 
 function stepInstruction(state) {
