@@ -2,15 +2,15 @@ const ERROR_CODE = null;
 const EMPTY_LINE = /^\s*$/;
 const SPACE = /\s+/;
 
-function parse_instruction(instruction) {
+function parseInstruction(instruction) {
   instruction = instruction.split(SPACE).filter((x) => {return x != ''});
   return {instruction: instruction[0], argument: instruction[1]};
 }
 
-function parse_line(line) {
+function parseLine(line) {
   line = line.split('#')[0];
   if (line.match(EMPTY_LINE)) {
-    return {instruction: "skip"};
+    return {instruction: "skip", argument: null, label: null};
   }
   let lines = line.split(':');
   if (lines.length > 2) {
@@ -19,20 +19,20 @@ function parse_line(line) {
     var result = {label: lines[0]};
     var inst = lines[1];
   } else {
-    result = {};
+    result = {label: null};
     inst = lines[0];
   }
-  inst = parse_instruction(inst);
+  inst = parseInstruction(inst);
   result.instruction = inst.instruction;
   result.argument = inst.argument;
   return result;
 }
 
-function parse_string(str) {
+function parseString(str) {
   let lines = str.split('\n').filter((x) => {return !x.match(EMPTY_LINE)});
   lines.push('halt');
   let tree = {labels: {}};
-  tree.prog = parse_line(lines[lines.length-1]);
+  tree.prog = parseLine(lines[lines.length-1]);
   if (tree.prog == ERROR_CODE) {
     return ERROR_CODE;
   }
@@ -40,7 +40,7 @@ function parse_string(str) {
     tree.labels[tree.prog.label] = tree.prog;
   }
   for (i=lines.length-2; i>=0; i--) {
-    let inst = parse_line(lines[i]);
+    let inst = parseLine(lines[i]);
     if (inst == ERROR_CODE) {
       return ERROR_CODE;
     }
@@ -53,14 +53,14 @@ function parse_string(str) {
 }
 
 const fs = require('fs');
-function parse_file(filepath) {
+function parseFile(filepath) {
   var src = fs.readFileSync(filepath, 'utf-8');
-  return parse_string(src);
+  return parseString(src);
 }
 
 module.exports = {
-  parse_file,
-  parse_string,
-  parse_line,
-  parse_instruction
+  parseFile,
+  parseString,
+  parseLine,
+  parseInstruction
 }
