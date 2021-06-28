@@ -1,6 +1,7 @@
 const ast = require('./ast');
-const { parseInstruction, parseOperandum } = require('./parser');
+const { parseInstruction, parseOperandum, parseLabel } = require('./parser');
 
+//#region parsing argument: operandum | label
 test('parsing empty operandum argument throws Error', () => {
     let operandumString = '';
     expect(() => parseOperandum(operandumString)).toThrowError('No argument was given');
@@ -101,24 +102,33 @@ test('parsing NOT_INTEGER operandum throws Error', () => {
 });
 
 
+test('parsing label string containing nonalphanumeric characters throws Error', () => {
+    let nonalphanumericLabel = 'label1!';
+    expect( () => parseLabel(nonalphanumericLabel) ).toThrowError('Label can contain only alphanumeric characters.');
 
-// test('NUMBER argument string parses to Address', () => {
-//     let argumentString = '127';
-//     expect(parseArgument(argumentString)).toEqual(new ast.Address(BigInt(127)));
-//     expect(parseArgument(argumentString)).toBeInstanceOf(ast.Address);
+    nonalphanumericLabel = 'my label';
+    expect( () => parseLabel(nonalphanumericLabel) ).toThrowError('Label can contain only alphanumeric characters.');
 
-//     argumentString = '-13';
-//     expect(parseArgument(argumentString)).toEqual(new ast.Address(BigInt(-13)));
-//     expect(parseArgument(argumentString)).toBeInstanceOf(ast.Address);
-// });
+    nonalphanumericLabel = 'my_label';
+    expect( () => parseLabel(nonalphanumericLabel) ).toThrowError('Label can contain only alphanumeric characters.');
+});
 
-// test('^POSITIVE_NUMBER argument string parses to Reference', () => {
-//     let argumentString = '^7819';
-//     expect(parseArgument(argumentString)).toEqual(new ast.Reference(BigInt(7819)));
-//     expect(parseArgument(argumentString)).toBeInstanceOf(ast.Reference);
-// });
+test('alphanumeric only label string parses to Label', () => {
+    let alphanumericLabel = 'Label1';
+    expect(parseLabel(alphanumericLabel)).toEqual(new ast.Label(alphanumericLabel));
+    expect(parseLabel(alphanumericLabel)).toBeInstanceOf(ast.Label);
 
-test('empty instruction parses to skip', () => {
+    alphanumericLabel = '1';
+    expect(parseLabel(alphanumericLabel)).toEqual(new ast.Label(alphanumericLabel));
+    expect(parseLabel(alphanumericLabel)).toBeInstanceOf(ast.Label);
+
+    alphanumericLabel = 'JumpHere';
+    expect(parseLabel(alphanumericLabel)).toEqual(new ast.Label(alphanumericLabel));
+    expect(parseLabel(alphanumericLabel)).toBeInstanceOf(ast.Label);
+});
+//#endregion
+
+test('empty instruction string parses to skip', () => {
     let skipInstruction = new ast.Skip();
     let emptyInstruction = '';
     expect(parseInstruction(emptyInstruction)).toEqual(skipInstruction);
@@ -127,4 +137,60 @@ test('empty instruction parses to skip', () => {
     let emptyWhitespaceInstruction = '     ';
     expect(parseInstruction(emptyWhitespaceInstruction)).toEqual(skipInstruction);
     expect(parseInstruction(emptyWhitespaceInstruction)).toBeInstanceOf(ast.Skip);
-})
+});
+
+test('parsing instruction string with invalid instruction code throws Error', () => {
+    let invalidCodeInstruction = 'SUBSTRACT';
+    expect(() => parseInstruction(invalidCodeInstruction)).toThrowError('Invalid instruction code.');
+});
+
+test('halt instruction string parses to Halt', () => {
+    let haltInstruction = 'halt';
+    expect(parseInstruction(haltInstruction)).toEqual(new ast.Halt());
+    expect(parseInstruction(haltInstruction)).toBeInstanceOf(ast.Halt);
+});
+
+test('parsing instruction string with insufficient arguments throws Error', () => {
+    let argumentInsufficientInstruction = 'add';
+    expect(() => parseInstruction(argumentInsufficientInstruction)).toThrowError('Insufficient arguments for instruction.');
+});
+
+test('parsing instruction with excessive content throws error', () => {
+    let excessiveInstruction = 'add ^1 2';
+    expect(()=>parseInstruction(excessiveInstruction)).toThrowError('Unexpected data after instruction.');
+    excessiveInstruction = 'halt 0';
+    expect(()=>parseInstruction(excessiveInstruction)).toThrowError('Unexpected data after instruction.');
+});
+
+test('parsing instruction with invalid argument syntax throws error', () => {
+    let invalidOperandumArgument = 'read 5a';
+    expect(() => parseInstruction(invalidOperandumArgument)).toThrowError('Operandum syntax error');
+
+    let invalidLabelArgument = 'jump label+';
+    expect(() => parseInstruction(invalidLabelArgument)).toThrowError('Label syntax error.');
+});
+
+test('parsing instruction with invalid argument type throws error', () => {
+    let invalidReadArgument = 'read =5';
+    expect(() => parseInstruction(invalidReadArgument)).toThrowError('Argument type error.');
+});
+
+// test('proper instruction string parses to corresponding instruction object', () => {
+//     let readInstructionString = 'read 1';
+//     expect(parseInstruction(readInstructionString)).toEqual(
+//         new ast.Read(new ast.Address(BigInt(1)))
+//     );
+//     readInstructionString = 'read ^1';
+//     expect(parseInstruction(readInstructionString)).toEqual(
+//         new ast.Read(new ast.Address(BigInt(1)))
+//     );
+
+//     let storeInstructionString = 'store 0';
+//     expect(parseInstruction(readInstructionString)).toEqual(
+//         new ast.Read(new ast.Address(BigInt(1)))
+//     );
+//     storeInstructionString = 'store ^10';
+//     expect(parseInstruction(readInstructionString)).toEqual(
+//         new ast.Read(new ast.Address(BigInt(1)))
+//     );
+// })
