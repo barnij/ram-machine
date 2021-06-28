@@ -1,6 +1,7 @@
 const environment = require('./environment');
 const parser = require('./parser');
 const interpreter = require('./interpreter');
+const status = require('./status');
 
 function makeStateFromFile(filepath, input=[]) {
   let env = new environment.Env(input);
@@ -17,21 +18,28 @@ function makeStateFromString(str, input=[]) {
 }
 
 function stepInstruction(state) {
-  // TODO
+  let success = interpreter.interpInstruction(state);
+  return success;
 }
 
 function complete(state) {
-  // TODO
+  while (!state.completed) {
+    let success = interpreter.interpInstruction(state);
+    if (success.constructor == status.Ok) {
+      continue;
+    }
+    return success;
+  }
+  return new status.Ok();
 }
 
 function getOutput(state) {
-  return state.output;
+  return state.env.output;
 }
 
 function getRegisters(state) {
-  return state.registers;
+  return state.env.registers;
 }
-
 
 module.exports = {
   makeStateFromFile,
