@@ -6,7 +6,7 @@ const SPACE = /\s+/;
 
 function parseOperandum(argumentString) {
     if ( argumentString == '' ) {
-        throw Error('No argument was given');
+        throw Error('No argument was given.');
     }
     let operator = argumentString[0];
     let valueString;
@@ -40,7 +40,13 @@ function parseOperandum(argumentString) {
 }
 
 function parseLabel(argumentString) {
-
+    if(argumentString == '') {
+        throw Error('No argument was given.');
+    }
+    if(argumentString.match(/^[0-9a-z]+$/i)) {
+        return new ast.Label(argumentString);
+    }
+    throw Error('Label can contain only alphanumeric characters.');
 }
 
 function parseInstruction(instructionString) {

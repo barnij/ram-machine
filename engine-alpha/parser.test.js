@@ -1,5 +1,5 @@
 const ast = require('./ast');
-const { parseInstruction, parseOperandum } = require('./parser');
+const { parseInstruction, parseOperandum, parseLabel } = require('./parser');
 
 test('parsing empty operandum argument throws Error', () => {
     let operandumString = '';
@@ -100,6 +100,31 @@ test('parsing NOT_INTEGER operandum throws Error', () => {
     expect( () => parseOperandum(operandumString) ).toThrowError('Argument has to be one of NONNEGATIVE_INTEGER, =INTEGER, ^NONNEGATIVE_INTEGER.');
 });
 
+
+test('parsing label string containing nonalphanumeric characters throws Error', () => {
+    let nonalphanumericLabel = 'label1!';
+    expect( () => parseLabel(nonalphanumericLabel) ).toThrowError('Label can contain only alphanumeric characters.');
+
+    nonalphanumericLabel = 'my label';
+    expect( () => parseLabel(nonalphanumericLabel) ).toThrowError('Label can contain only alphanumeric characters.');
+
+    nonalphanumericLabel = 'my_label';
+    expect( () => parseLabel(nonalphanumericLabel) ).toThrowError('Label can contain only alphanumeric characters.');
+});
+
+test('alphanumeric only label string parses to Label', () => {
+    let alphanumericLabel = 'Label1';
+    expect(parseLabel(alphanumericLabel)).toEqual(new ast.Label(alphanumericLabel));
+    expect(parseLabel(alphanumericLabel)).toBeInstanceOf(ast.Label);
+
+    alphanumericLabel = '1';
+    expect(parseLabel(alphanumericLabel)).toEqual(new ast.Label(alphanumericLabel));
+    expect(parseLabel(alphanumericLabel)).toBeInstanceOf(ast.Label);
+
+    alphanumericLabel = 'JumpHere';
+    expect(parseLabel(alphanumericLabel)).toEqual(new ast.Label(alphanumericLabel));
+    expect(parseLabel(alphanumericLabel)).toBeInstanceOf(ast.Label);
+});
 
 
 // test('NUMBER argument string parses to Address', () => {
