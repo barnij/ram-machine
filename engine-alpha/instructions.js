@@ -20,7 +20,7 @@ function instructionLoad(instruction, env) {
       break;
 
     case ast.Address:
-      arg = getRegister(arg, env);
+      arg = getRegister(arg.value, env);
       if (arg.constructor == ReferenceError) {
         return arg;
       }
@@ -29,7 +29,7 @@ function instructionLoad(instruction, env) {
       break;
 
     case ast.Reference:
-      arg = getRegister(arg, env);
+      arg = getRegister(arg.value, env);
       if (arg.constructor == ReferenceError) {
         return arg;
       }
@@ -55,7 +55,7 @@ function instructionStore(instruction, env) {
       break;
 
     case ast.Reference:
-      arg = getRegister(arg, env);
+      arg = getRegister(arg.value, env);
       if (arg.constructor == ReferenceError) {
         return arg;
       }
@@ -81,7 +81,7 @@ function instructionAdd(instruction, env) {
       break;
 
     case ast.Address:
-      arg = getRegister(arg, env);
+      arg = getRegister(arg.value, env);
       if (arg.constructor == ReferenceError) {
         return arg;
       }
@@ -93,7 +93,7 @@ function instructionAdd(instruction, env) {
       break;
 
     case ast.Reference:
-      arg = getRegister(arg, env);
+      arg = getRegister(arg.value, env);
       if (arg.constructor == ReferenceError) {
         return arg;
       }
@@ -119,7 +119,7 @@ function instructionSub(instruction, env) {
       break;
 
     case ast.Address:
-      arg = getRegister(arg, env);
+      arg = getRegister(arg.value, env);
       if (arg.constructor == ReferenceError) {
         return arg;
       }
@@ -131,7 +131,7 @@ function instructionSub(instruction, env) {
       break;
 
     case ast.Reference:
-      arg = getRegister(arg, env);
+      arg = getRegister(arg.value, env);
       if (arg.constructor == ReferenceError) {
         return arg;
       }
@@ -157,7 +157,7 @@ function instructionMult(instruction, env) {
       break;
 
     case ast.Address:
-      arg = getRegister(arg, env);
+      arg = getRegister(arg.value, env);
       if (arg.constructor == ReferenceError) {
         return arg;
       }
@@ -169,7 +169,7 @@ function instructionMult(instruction, env) {
       break;
 
     case ast.Reference:
-      arg = getRegister(arg, env);
+      arg = getRegister(arg.value, env);
       if (arg.constructor == ReferenceError) {
         return arg;
       }
@@ -198,7 +198,7 @@ function instructionDiv(instruction, env) {
       break;
 
     case ast.Address:
-      arg = getRegister(arg, env);
+      arg = getRegister(arg.value, env);
       if (arg.constructor == ReferenceError) {
         return arg;
       }
@@ -213,7 +213,7 @@ function instructionDiv(instruction, env) {
       break;
 
     case ast.Reference:
-      arg = getRegister(arg, env);
+      arg = getRegister(arg.value, env);
       if (arg.constructor == ReferenceError) {
         return arg;
       }
@@ -227,11 +227,74 @@ function instructionDiv(instruction, env) {
   }
 }
 
+function instructionRead(instruction, env) {
+  let arg = instruction.argument;
+  switch (arg.constructor) {
+    case ast.Address:
+      if (env.input[env.inputHead] == undefined) {
+        return new ReferenceError("too few input members");
+      }
+      env.registers[arg.value] = env.input[env.inputHead];
+      env.inputHead++;
+      return new status.Ok();
+      break;
+
+    case ast.Reference:
+      arg = getRegister(arg.value, env);
+      if (arg.constructor == ReferenceError) {
+        return arg;
+      }
+      let success = instructionRead(new ast.Read(new ast.Address(arg)), env);
+      return success;
+      break;
+
+    default:
+      return new TypeError("invalid argument in instruction read");
+      break;
+  }
+}
+
+function instructionWrite(instruction, env) {
+  let arg = instruction.argument;
+  switch (arg.constructor) {
+    case ast.Const:
+      env.output[env.outputHead] = arg.value;
+      env.outputHead++;
+      return new status.Ok();
+      break;
+
+    case ast.Address:
+      arg = getRegister(arg.value, env);
+      if (arg == undefined) {
+        return new ReferenceError("register " + arg + " is empty");
+      }
+      env.output[env.outputHead] = arg;
+      env.outputHead++;
+      return new status.Ok();
+      break;
+
+    case ast.Reference:
+      arg = getRegister(arg.value, env);
+      if (arg.constructor == ReferenceError) {
+        return arg;
+      }
+      let success = instructionWrite(new ast.Write(new ast.Address(arg)), env);
+      return success;
+      break;
+
+    default:
+      return new TypeError("invalid argument in instruction write");
+      break;
+  }
+}
+
 module.exports = {
   instructionLoad,
   instructionStore,
   instructionAdd,
   instructionSub,
   instructionMult,
-  instructionDiv
+  instructionDiv,
+  instructionRead,
+  instructionWrite
 }

@@ -1,44 +1,41 @@
 const ast = require('./ast');
 const inst = require('./instructions');
+const status = require('./status');
 
 function interpInstruction(state) {
   let env = state.env;
   let instruction = state.programHead;
   switch (instruction.constructor) {
     case ast.Load:
-      let success = inst.instructionLoad(instruction, env);
-      return success;
+      success = inst.instructionLoad(instruction, env);
       break;
 
     case ast.Store:
-      let success = inst.instructionStore(instruction, env);
-      return success;
+      success = inst.instructionStore(instruction, env);
       break;
 
     case ast.Add:
-      let success = inst.instructionAdd(instruction, env);
-      return success;
+      success = inst.instructionAdd(instruction, env);
       break;
 
     case ast.Sub:
-      let success = inst.instructionSub(instruction, env);
-      return success;
+      success = inst.instructionSub(instruction, env);
       break;
 
     case ast.Mult:
-      let success = inst.instructionMult(instruction, env);
-      return success;
+      success = inst.instructionMult(instruction, env);
       break;
 
     case ast.Div:
-      let success = inst.instructionDiv(instruction, env);
-      return success;
+      success = inst.instructionDiv(instruction, env);
       break;
 
     case ast.Read:
+      success = inst.instructionRead(instruction, env);
       break;
 
     case ast.Write:
+      success = inst.instructionWrite(instruction, env);
       break;
 
     case ast.Jump:
@@ -60,9 +57,10 @@ function interpInstruction(state) {
       break;
 
     default:
-      // runtime error
+      var success = new Error("Unrecognized instruction");
       break;
   }
+  return success;
 }
 
 module.exports = {
