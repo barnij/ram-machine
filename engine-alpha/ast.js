@@ -39,7 +39,7 @@ function Label(value) {
 function Load(argument) {
     this.argument = argument;
 }
-Load.prototype.verifyArgument = function () {
+Load.prototype.validateArgument = function () {
     return this.argument instanceof Operandum && !(this.argument instanceof Const);
     // alternativly
     // return this.argument instanceof Reference || this.argument instanceof Address;
@@ -47,7 +47,7 @@ Load.prototype.verifyArgument = function () {
 function Store(argument) {
     this.argument = argument;
 }
-Store.prototype.verifyArgument = function () {
+Store.prototype.validateArgument = function () {
     return this.argument instanceof Operandum && !(this.argument instanceof Const);
 }
 
@@ -96,11 +96,20 @@ Write.prototype.validateArgument = function () {
 function Jump(argument) {
     this.argument = argument;
 }
+Jump.prototype.validateArgument = function () {
+    return this.argument instanceof Label;
+}
 function Jgtz(argument) {
     this.argument = argument;
 }
+Jgtz.prototype.validateArgument = function () {
+    return this.argument instanceof Label;
+}
 function Jzero(argument) {
     this.argument = argument;
+}
+Jzero.prototype.validateArgument = function () {
+    return this.argument instanceof Label;
 }
 function Halt() {};
 function Skip() {};

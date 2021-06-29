@@ -1,5 +1,5 @@
 const ast = require('./ast');
-const { parseInstruction, parseOperandum, parseLabel } = require('./parser');
+const { parseInstruction, parseOperandum, parseLabel, parseLine, parseCode } = require('./parser');
 
 //#region parsing argument: operandum | label
 test('parsing empty operandum argument throws Error', () => {
@@ -175,22 +175,62 @@ test('parsing instruction with invalid argument type throws error', () => {
     expect(() => parseInstruction(invalidReadArgument)).toThrowError('Argument type error.');
 });
 
-// test('proper instruction string parses to corresponding instruction object', () => {
-//     let readInstructionString = 'read 1';
-//     expect(parseInstruction(readInstructionString)).toEqual(
-//         new ast.Read(new ast.Address(BigInt(1)))
-//     );
-//     readInstructionString = 'read ^1';
-//     expect(parseInstruction(readInstructionString)).toEqual(
-//         new ast.Read(new ast.Address(BigInt(1)))
-//     );
+test('proper instruction string parses to corresponding instruction object', () => {
+    let readInstructionString = 'read 1';
+    expect(parseInstruction(readInstructionString)).toEqual(
+        new ast.Read(new ast.Address(BigInt(1)))
+    );
+    readInstructionString = 'read ^1';
+    expect(parseInstruction(readInstructionString)).toEqual(
+        new ast.Read(new ast.Address(BigInt(1)))
+    );
 
-//     let storeInstructionString = 'store 0';
-//     expect(parseInstruction(readInstructionString)).toEqual(
-//         new ast.Read(new ast.Address(BigInt(1)))
-//     );
-//     storeInstructionString = 'store ^10';
-//     expect(parseInstruction(readInstructionString)).toEqual(
-//         new ast.Read(new ast.Address(BigInt(1)))
-//     );
-// })
+    let storeInstructionString = 'store 0';
+    expect(parseInstruction(readInstructionString)).toEqual(
+        new ast.Store(new ast.Address(BigInt(1)))
+    );
+    storeInstructionString = 'store ^10';
+    expect(parseInstruction(readInstructionString)).toEqual(
+        new ast.Store(new ast.Address(BigInt(1)))
+    );
+    let jumpInstructionString = 'jump overthere';
+    expect(parseInstruction(jumpInstructionString)).toEqual(
+        new ast.Jump(new ast.Label('overthere'))
+    );
+})
+
+test('parsing line with invalid label throws error', () => {
+    let invalidLabelLine = 'label_1: read 0';
+    expect(() => parseLine(invalidLabelLine)).toThrowError('Label can contain only alphanumeric characters.');
+
+    invalidLabelLine = 'label1 :';
+    expect(() => parseLine(invalidLabelLine)).toThrowError('Label can contain only alphanumeric characters.');
+});
+
+test('unlabeled line parses to object with null label and instruction object', () => {
+    let unlabeledLine = ' read 0';
+    expect(parseLine(unlabeledLine).label).toBeNull();
+});
+test('labeled line parses to object with label string and instruction object', () => {
+    let labeledLine = 'here: halt';
+    expect(parseLine(labeledLine)).toEqual(
+        {
+            label: 'here',
+            instruction: new ast.Halt()
+        }
+    )
+});
+
+test('code parses to proper syntax tree and labels', () => {
+    code =  'here: read  0\n' + 
+            '      store 1\n' + 
+            '      jump  here';
+    line1 = new ast.Read(new ast.Address(BigInt(0)));
+    line2 = new ast.Store(new ast.Address(BigInt(1)));
+    line3 = new ast.Jump(new ast.Label('here'));
+    parsedCode = {
+        labeledInstructions: {'here': line1 },
+        codeTree: new ast.Combine(line1, new ast.Combine(line2, new ast.Combine(line3, new ast.Halt())))
+    };
+    expect(parseCode(code)).toEqual(parsedCode);
+})
