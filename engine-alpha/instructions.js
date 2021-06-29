@@ -288,6 +288,76 @@ function instructionWrite(instruction, env) {
   }
 }
 
+function instructionJump(instruction, state) {
+  let arg = instruction.argument;
+  switch (arg.constructor) {
+    case ast.Label:
+      if (state.labels[arg.value] == undefined) {
+        return new ReferenceError("unrecognized label " + arg.value);
+      }
+      state.programHead = state.labels[arg.value];
+      return new status.Ok();
+      break;
+    
+    default:
+      return new TypeError("invalid argument in instruction jump");
+      break;
+  }
+}
+
+function instructionJgtz(instruction, state) {
+  let arg = instruction.argument;
+  switch (arg.constructor) {
+    case ast.Label:
+      if (state.labels[arg.value] == undefined) {
+        return new ReferenceError("unrecognized label " + arg.value);
+      }
+      if (env.registers[acc] == undefined) {
+        return new ReferenceError("register " + acc + " is empty");
+      }
+      if (env.registers[acc] > 0) {
+        state.programHead = state.labels[arg.value];
+      }
+      return new status.Ok();
+      break;
+    
+    default:
+      return new TypeError("invalid argument in instruction jgtz");
+      break;
+  }
+}
+
+function instructionJzero(instruction, state) {
+  let arg = instruction.argument;
+  switch (arg.constructor) {
+    case ast.Label:
+      if (state.labels[arg.value] == undefined) {
+        return new ReferenceError("unrecognized label " + arg.value);
+      }
+      if (env.registers[acc] == undefined) {
+        return new ReferenceError("register " + acc + " is empty");
+      }
+      if (env.registers[acc] == 0) {
+        state.programHead = state.labels[arg.value];
+      }
+      return new status.Ok();
+      break;
+    
+    default:
+      return new TypeError("invalid argument in instruction jzero");
+      break;
+  }
+}
+
+function instructionHalt(state) {
+  state.completed = true;
+  return new status.Ok();
+}
+
+function instructionSkip() {
+  return new status.Ok();
+}
+
 module.exports = {
   instructionLoad,
   instructionStore,
@@ -296,5 +366,10 @@ module.exports = {
   instructionMult,
   instructionDiv,
   instructionRead,
-  instructionWrite
+  instructionWrite,
+  instructionJump,
+  instructionJgtz,
+  instructionJzero,
+  instructionHalt,
+  instructionSkip
 }

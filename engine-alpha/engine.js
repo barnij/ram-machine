@@ -18,13 +18,13 @@ function makeStateFromString(str, input=[]) {
 }
 
 function stepInstruction(state) {
-  let success = interpreter.interpInstruction(state);
+  let success = interpreter.interpInstruction(state.programHead, state);
   return success;
 }
 
 function complete(state) {
   while (!state.completed) {
-    let success = interpreter.interpInstruction(state);
+    let success = interpreter.interpInstruction(state.programHead, state);
     if (success.constructor == status.Ok) {
       continue;
     }

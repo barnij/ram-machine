@@ -1,10 +1,8 @@
 const ast = require('./ast');
 const inst = require('./instructions');
-const status = require('./status');
 
-function interpInstruction(state) {
+function interpInstruction(instruction, state) {
   let env = state.env;
-  let instruction = state.programHead;
   switch (instruction.constructor) {
     case ast.Load:
       success = inst.instructionLoad(instruction, env);
@@ -39,21 +37,29 @@ function interpInstruction(state) {
       break;
 
     case ast.Jump:
+      success = inst.instructionJump(instruction, state);
       break;
 
     case ast.Jgtz:
+      success = inst.instructionJgtz(instruction, state);
       break;
 
     case ast.Jzero:
+      success = inst.instructionJzero(instruction, state);
       break;
 
     case ast.Halt:
+      success = inst.instructionHalt(state);
       break;
 
     case ast.Skip:
+      success = inst.instructionSkip();
       break;
 
     case ast.Combine:
+      state.programHead = instruction.nextInstruction;
+      interpInstruction(instruction.instruction);
+      success = new status.Ok();
       break;
 
     default:
