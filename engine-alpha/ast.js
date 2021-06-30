@@ -40,7 +40,7 @@ function Load(argument) {
     this.argument = argument;
 }
 Load.prototype.validateArgument = function () {
-    return this.argument instanceof Operandum && !(this.argument instanceof Const);
+    return this.argument instanceof Operandum;
     // alternativly
     // return this.argument instanceof Reference || this.argument instanceof Address;
 }
@@ -90,7 +90,7 @@ function Write(argument) {
     this.argument = argument;
 }
 Write.prototype.validateArgument = function () {
-    return this.argument instanceof Operandum && !(this.argument instanceof Const);
+    return this.argument instanceof Operandum;
 }
 
 function Jump(argument) {

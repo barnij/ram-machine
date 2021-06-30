@@ -62,6 +62,7 @@ function parseInstruction(instructionString) {
 
     const instructionConstructors = {
         'read': ast.Read,
+        'load': ast.Load,
         'store': ast.Store,
         'add': ast.Add,
         'sub': ast.Sub,
@@ -106,7 +107,7 @@ function parseInstruction(instructionString) {
     }
     let instruction = new instructionConstructors[instructionCode](argument);
     if(!instruction.validateArgument()) {
-        throw new Error('Argument type error.');
+        throw new Error('Argument type error.' + instructionCode);
     }
     return instruction;
 }
@@ -138,9 +139,9 @@ function parseLine(lineString) {
 
 function parseCode(codeString) {
     let lines = codeString.split(/\r\n|\n\r|\n|\r/);
-    let labeledInstructions = {}
+    let labels = {}
     let nextInstruction = new ast.Halt();
-    let codeTree = null;
+    let programTree = null;
     for(let i = lines.length - 1; i >= 0; i--){
         let parsedLine;
         try {
@@ -149,13 +150,13 @@ function parseCode(codeString) {
             throw error;
         }
         if (parsedLine.label !== null) {
-            labeledInstructions[parsedLine.label]= parsedLine.instruction;
+            labels[parsedLine.label]= parsedLine.instruction;
         }
-        codeTree = new ast.Combine(parsedLine.instruction, nextInstruction);
-        nextInstruction = codeTree;
+        programTree = new ast.Combine(parsedLine.instruction, nextInstruction);
+        nextInstruction = programTree;
         
     }
-    return { labeledInstructions: labeledInstructions, codeTree: codeTree }
+    return { labeledInstructions: labels, codeTree: programTree }
 
 }
 

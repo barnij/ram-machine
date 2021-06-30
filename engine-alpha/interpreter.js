@@ -1,5 +1,6 @@
 const ast = require('./ast');
 const inst = require('./instructions');
+const status = require('./status');
 
 function interpInstruction(instruction, state) {
   let env = state.env;
@@ -58,7 +59,7 @@ function interpInstruction(instruction, state) {
 
     case ast.Combine:
       state.programHead = instruction.nextInstruction;
-      interpInstruction(instruction.instruction);
+      interpInstruction(instruction.instruction, state);
       success = new status.Ok();
       break;
 
