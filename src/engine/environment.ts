@@ -23,7 +23,6 @@ class InputTape {
   constructor(private values: BigInt[]) {}
 
   read(): BigInt {
-    /* eslint-disable-next-line eqeqeq */
     if (this.values[this.nextIndex] == null) {
       throw new InputError();
     }
