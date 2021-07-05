@@ -1,7 +1,7 @@
 export type Argument = Operandum | Label;
 
 export class Operandum {
-  constructor(public value: Number) {}
+  constructor(public value: BigInt) {}
 }
 
 export class Const extends Operandum {}
