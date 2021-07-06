@@ -2,20 +2,53 @@ import * as ast from './ast';
 import {ParserSyntaxError, ParserTypeError} from './errors';
 
 const EMPTY_LINE = /^\s*$/;
+const WHITESPACE = /\s+/;
 const DECIMAL_BIG_INT = /^(0|(-?[1-9]\d*))$/;
 const LABEL = /^[a-z0-9]+$/;
+const OPERANDUM_INSTRUCTION_CODES = [
+  'read',
+  'write',
+  'load',
+  'store',
+  'add',
+  'sub',
+  'div',
+  'mult',
+];
+const LABEL_INSTRUCION_CODES = ['jump', 'jgtz', 'jzero'];
+
 export function parseBigInt(string: string): BigInt | null {
   if (string.match(DECIMAL_BIG_INT)) {
     return BigInt(string);
   }
   return null;
 }
-function validateLabel(label: ast.Label): Boolean {
-  return label.value.match(LABEL) !== null;
+// function validateLabel(label: ast.Label): Boolean {
+//   return label.value.match(LABEL) !== null;
+// }
+
+export function validateArgument(
+  instructionCode: string,
+  instructionArgument: ast.Argument
+): boolean {
+  if (LABEL_INSTRUCION_CODES.includes(instructionCode)) {
+    return instructionArgument instanceof ast.Label;
+  }
+  if (OPERANDUM_INSTRUCTION_CODES.includes(instructionCode)) {
+    if (instructionCode === 'store' || instructionCode === 'read') {
+      return (
+        instructionArgument instanceof ast.Address ||
+        instructionArgument instanceof ast.Reference
+      );
+    } else {
+      return instructionArgument instanceof ast.Operandum;
+    }
+  }
+  return false;
 }
 
 export class Parser {
-  public parseOperandum(string: string): ast.Operandum {
+  parseOperandum(string: string): ast.Operandum {
     if (string === '') throw new ParserSyntaxError('Empty operandum.');
     const operator = string[0];
     let valueString: string;
@@ -50,12 +83,79 @@ export class Parser {
       }
     }
   }
-  public parseLabel(string: String): ast.Label {
+  parseLabel(string: String): ast.Label {
     if (string.match(LABEL)) {
       return new ast.Label(string);
     }
     throw new ParserSyntaxError(
       'Label can contain only alphanumeric characters.'
     );
+  }
+  parseInstruction(string: String): ast.Instruction {
+    if (string.match(EMPTY_LINE)) {
+      return new ast.Skip();
+    }
+    const [instructionCode, ...instructionArguments] = string.split(WHITESPACE);
+    if (instructionCode === 'halt') {
+      if (instructionArguments.length !== 0) {
+        throw new ParserSyntaxError();
+      }
+      return new ast.Halt();
+    }
+    if (
+      !OPERANDUM_INSTRUCTION_CODES.includes(instructionCode) &&
+      !LABEL_INSTRUCION_CODES.includes(instructionCode)
+    ) {
+      throw new ParserSyntaxError(
+        instructionCode + 'is not a valid instruction code.'
+      );
+    }
+    if (instructionArguments.length !== 1) {
+      throw new ParserSyntaxError(
+        'Instruction ' + instructionCode + 'expects exactly one argument'
+      );
+    }
+    const instructionArgument = instructionArguments[0];
+    if (OPERANDUM_INSTRUCTION_CODES.includes(instructionCode)) {
+      const operandumArgument = this.parseOperandum(instructionArgument);
+      if (!validateArgument(instructionCode, operandumArgument)) {
+        throw new ParserTypeError();
+      }
+      switch (instructionCode) {
+        case 'load':
+          return new ast.Load(operandumArgument);
+        case 'store':
+          return new ast.Store(operandumArgument);
+        case 'add':
+          return new ast.Add(operandumArgument);
+        case 'sub':
+          return new ast.Sub(operandumArgument);
+        case 'mult':
+          return new ast.Mult(operandumArgument);
+        case 'div':
+          return new ast.Div(operandumArgument);
+        case 'read':
+          return new ast.Read(operandumArgument);
+        case 'write':
+          return new ast.Write(operandumArgument);
+        default:
+          throw new ParserSyntaxError();
+      }
+    } else {
+      const labelArgument = this.parseLabel(instructionArgument);
+      if (!validateArgument(instructionCode, labelArgument)) {
+        throw new ParserTypeError();
+      }
+      switch (instructionCode) {
+        case 'jump':
+          return new ast.Jump(labelArgument);
+        case 'jgtz':
+          return new ast.Jgtz(labelArgument);
+        case 'jzero':
+          return new ast.Jzero(labelArgument);
+        default:
+          throw new ParserSyntaxError();
+      }
+    }
   }
 }
