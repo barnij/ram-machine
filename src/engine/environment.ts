@@ -12,17 +12,17 @@ export class State {
 export class Environment {
   input: InputTape;
   output = new OutputTape();
-  registers: Map<BigInt, BigInt> = new Map<BigInt, BigInt>();
-  constructor(inputValues: BigInt[]) {
+  registers: Map<bigint, bigint> = new Map<bigint, bigint>();
+  constructor(inputValues: bigint[]) {
     this.input = new InputTape(inputValues);
   }
 }
 
 class InputTape {
   private nextIndex = 0;
-  constructor(private values: BigInt[]) {}
+  constructor(private values: bigint[]) {}
 
-  read(): BigInt {
+  read(): bigint {
     if (this.values[this.nextIndex] == null) {
       throw new InputError();
     }
@@ -32,9 +32,9 @@ class InputTape {
 }
 
 class OutputTape {
-  private values: BigInt[] = [];
+  private values: bigint[] = [];
 
-  write(value: BigInt) {
+  write(value: bigint) {
     this.values.push(value);
   }
 }
