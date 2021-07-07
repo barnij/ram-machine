@@ -75,7 +75,7 @@ export function instructionStore(instruction: ast.Store, state: State): Ok {
   }
 }
 
-export function instructionAdd(instruction: ast.Store, state: State): Ok {
+export function instructionAdd(instruction: ast.Add, state: State): Ok {
   let arg: ast.Operandum | bigint = instruction.argument;
   let actionResult: RuntimeError | Ok = new RuntimeError('undefined behaviour');
   const accValue = getRegister(ACCUMULATOR, state.environmet);
@@ -104,7 +104,7 @@ export function instructionAdd(instruction: ast.Store, state: State): Ok {
   }
 }
 
-export function instructionSub(instruction: ast.Store, state: State): Ok {
+export function instructionSub(instruction: ast.Sub, state: State): Ok {
   let arg: ast.Operandum | bigint = instruction.argument;
   let actionResult: RuntimeError | Ok = new RuntimeError('undefined behaviour');
   const accValue = getRegister(ACCUMULATOR, state.environmet);
@@ -133,7 +133,7 @@ export function instructionSub(instruction: ast.Store, state: State): Ok {
   }
 }
 
-export function instructionMult(instruction: ast.Store, state: State): Ok {
+export function instructionMult(instruction: ast.Mult, state: State): Ok {
   let arg: ast.Operandum | bigint = instruction.argument;
   let actionResult: RuntimeError | Ok = new RuntimeError('undefined behaviour');
   const accValue = getRegister(ACCUMULATOR, state.environmet);
@@ -162,7 +162,7 @@ export function instructionMult(instruction: ast.Store, state: State): Ok {
   }
 }
 
-export function instructionDiv(instruction: ast.Store, state: State): Ok {
+export function instructionDiv(instruction: ast.Div, state: State): Ok {
   let arg: ast.Operandum | bigint = instruction.argument;
   let actionResult: RuntimeError | Ok = new RuntimeError('undefined behaviour');
   const accValue = getRegister(ACCUMULATOR, state.environmet);
@@ -197,7 +197,7 @@ export function instructionDiv(instruction: ast.Store, state: State): Ok {
   }
 }
 
-export function instructionRead(instruction: ast.Store, state: State): Ok {
+export function instructionRead(instruction: ast.Read, state: State): Ok {
   let arg: ast.Operandum | bigint = instruction.argument;
   let actionResult: RuntimeError | Ok = new RuntimeError('undefined behaviour');
   switch (arg.constructor) {
@@ -220,7 +220,7 @@ export function instructionRead(instruction: ast.Store, state: State): Ok {
   }
 }
 
-export function instructionWrite(instruction: ast.Load, state: State): Ok {
+export function instructionWrite(instruction: ast.Write, state: State): Ok {
   let arg: ast.Operandum | bigint = instruction.argument;
   let actionResult: RuntimeError | Ok = new RuntimeError('undefined behaviour');
   switch (arg.constructor) {
