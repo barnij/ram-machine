@@ -1,5 +1,7 @@
 import * as ast from './ast';
 import {ParserSyntaxError, ParserTypeError, ParserError} from './errors';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const EMPTY_LINE = /^\s*$/;
 const WHITESPACE = /\s+/;
@@ -234,5 +236,9 @@ export class Parser {
     }
     if (errorCaught) throw new ParserError();
     return new ast.Program(labels, programTree);
+  }
+  parseProgramFile(pathToFile: string): ast.Program {
+    const data = fs.readFileSync(path.resolve(__dirname, pathToFile), 'utf-8');
+    return this.parseProgram(data);
   }
 }

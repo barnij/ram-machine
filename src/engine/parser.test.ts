@@ -1,7 +1,6 @@
 import {Parser, parseBigInt, validateArgumentType} from './parser';
 import {ParserError, ParserSyntaxError, ParserTypeError} from './errors';
 import * as ast from './ast';
-
 //#region Helper functions
 // parseBigInt
 test('parseBigInt - parsing string with leading zeros returns null', () => {
@@ -296,5 +295,31 @@ test('Parser: parseProgram - program with jumps', () => {
     )
   );
   expect(parser.parseProgram(programString)).toStrictEqual(parsedProgram);
+});
+
+// parseProgramFile
+test('Parser: parseProgramFile - test1.ramcode', () => {
+  const parser = new Parser();
+  const path = '../../test_programs/test1.ramcode';
+  const line1 = new ast.Jump(new ast.Label('jump2'));
+  const line2 = new ast.Jump(new ast.Label('jump3'));
+  const line3 = new ast.Jump(new ast.Label('jump4'));
+  const line4 = new ast.Jump(new ast.Label('jump1'));
+  const parsedProgram = new ast.Program(
+    new Map<string, ast.Instruction>([
+      ['jump1', line1],
+      ['jump2', line2],
+      ['jump3', line3],
+      ['jump4', line4],
+    ]),
+    new ast.Combine(
+      line1,
+      new ast.Combine(
+        line2,
+        new ast.Combine(line3, new ast.Combine(line4, new ast.Halt()))
+      )
+    )
+  );
+  expect(parser.parseProgramFile(path)).toStrictEqual(parsedProgram);
 });
 //#endregion
