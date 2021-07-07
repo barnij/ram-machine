@@ -23,11 +23,11 @@ export function parseBigInt(string: string): BigInt | null {
   }
   return null;
 }
-// function validateLabel(label: ast.Label): Boolean {
-//   return label.value.match(LABEL) !== null;
-// }
+function validateLabel(label: ast.Label): Boolean {
+  return label.value.match(LABEL) !== null;
+}
 
-export function validateArgument(
+export function validateArgumentType(
   instructionCode: string,
   instructionArgument: ast.Argument
 ): boolean {
@@ -118,7 +118,7 @@ export class Parser {
     const instructionArgument = instructionArguments[0];
     if (OPERANDUM_INSTRUCTION_CODES.includes(instructionCode)) {
       const operandumArgument = this.parseOperandum(instructionArgument);
-      if (!validateArgument(instructionCode, operandumArgument)) {
+      if (!validateArgumentType(instructionCode, operandumArgument)) {
         throw new ParserTypeError();
       }
       switch (instructionCode) {
@@ -143,7 +143,7 @@ export class Parser {
       }
     } else {
       const labelArgument = this.parseLabel(instructionArgument);
-      if (!validateArgument(instructionCode, labelArgument)) {
+      if (!validateArgumentType(instructionCode, labelArgument)) {
         throw new ParserTypeError();
       }
       switch (instructionCode) {
@@ -157,5 +157,27 @@ export class Parser {
           throw new ParserSyntaxError();
       }
     }
+  }
+  parseLine(string: String): {
+    label: null | ast.Label;
+    instruction: ast.Instruction;
+  } {
+    let label: null | ast.Label;
+    const commentlessString = string.split('#')[0];
+    const commentEndIndex = commentlessString.indexOf(':');
+    let instructionString = commentlessString.trim();
+    if (commentEndIndex < 0) {
+      label = null;
+    } else {
+      const labelString = commentlessString.slice(0, commentEndIndex);
+      label = new ast.Label(labelString);
+      if (!validateLabel(label))
+        throw new ParserSyntaxError(
+          'Label can contain only alphanumeric characters.'
+        );
+      instructionString = commentlessString.slice(commentEndIndex + 1).trim();
+    }
+    const instruction = this.parseInstruction(instructionString);
+    return {label: label, instruction: instruction};
   }
 }
