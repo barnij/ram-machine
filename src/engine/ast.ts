@@ -9,7 +9,7 @@ export class Address extends Operandum {}
 export class Reference extends Operandum {}
 
 export class Label {
-  constructor(public value: String) {}
+  constructor(public value: string) {}
 }
 
 export type Instruction =
