@@ -17,7 +17,7 @@ const OPERANDUM_INSTRUCTION_CODES = [
 ];
 const LABEL_INSTRUCION_CODES = ['jump', 'jgtz', 'jzero'];
 
-export function parseBigInt(string: string): BigInt | null {
+export function parseBigInt(string: string): bigint | null {
   if (string.match(DECIMAL_BIG_INT)) {
     return BigInt(string);
   }
@@ -181,6 +181,18 @@ export class Parser {
     return {label: label, instruction: instruction};
   }
   // parseProgram(string: string): ast.Program {
-
+  //   const lines = string.split(/\r\n|\n\r|\n|\r/);
+  //   const labels = new Map<string, ast.Instruction>();
+  //   let nextInstruction = new ast.Halt();
+  //   let programTree: ast.Instruction;
+  //   let parserError = false;
+  //   for (let i = lines.length - 1; i >= 0; i--) {
+  //     try {
+  //       const parsedLine = this.parseLine(lines[i]);
+  //     }
+  //     programTree = new ast.Combine(
+  //       parsedLine,
+  //     )
+  //   }
   // }
 }

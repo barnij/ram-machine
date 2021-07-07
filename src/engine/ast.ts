@@ -1,7 +1,7 @@
 export type Argument = Operandum | Label;
 
 export class Operandum {
-  constructor(public value: BigInt) {}
+  constructor(public value: bigint) {}
 }
 
 export class Const extends Operandum {}
@@ -84,7 +84,7 @@ export class Combine {
 
 export class Program {
   constructor(
-    public labels: Map<String, Instruction>,
+    public labels: Map<string, Instruction>,
     public programTree: Instruction
   ) {}
 }
