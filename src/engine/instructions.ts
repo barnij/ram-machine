@@ -196,3 +196,57 @@ export function instructionDiv(instruction: ast.Store, state: State): Ok {
     throw actionResult;
   }
 }
+
+export function instructionRead(instruction: ast.Store, state: State): Ok {
+  let arg: ast.Operandum | bigint = instruction.argument;
+  let actionResult: RuntimeError | Ok = new RuntimeError('undefined behaviour');
+  switch (arg.constructor) {
+    case ast.Address:
+      setRegister(arg.value, state.environmet.input.read(), state.environmet);
+      actionResult = new Ok();
+      break;
+    case ast.Reference:
+      arg = getRegister(arg.value, state.environmet);
+      actionResult = instructionRead(new ast.Read(new ast.Address(arg)), state);
+      break;
+    default:
+      actionResult = new RuntimeError('invalid argumetn in instruction read');
+      break;
+  }
+  if (actionResult instanceof Ok) {
+    return actionResult;
+  } else {
+    throw actionResult;
+  }
+}
+
+export function instructionWrite(instruction: ast.Load, state: State): Ok {
+  let arg: ast.Operandum | bigint = instruction.argument;
+  let actionResult: RuntimeError | Ok = new RuntimeError('undefined behaviour');
+  switch (arg.constructor) {
+    case ast.Const:
+      state.environmet.output.write(arg.value);
+      actionResult = new Ok();
+      break;
+    case ast.Address:
+      arg = getRegister(arg.value, state.environmet);
+      state.environmet.output.write(arg);
+      actionResult = new Ok();
+      break;
+    case ast.Reference:
+      arg = getRegister(arg.value, state.environmet);
+      actionResult = instructionWrite(
+        new ast.Write(new ast.Address(arg)),
+        state
+      );
+      break;
+    default:
+      actionResult = new RuntimeError('invalid argumetn in instruction write');
+      break;
+  }
+  if (actionResult instanceof Ok) {
+    return actionResult;
+  } else {
+    throw actionResult;
+  }
+}
