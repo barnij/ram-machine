@@ -1,5 +1,5 @@
 import * as ast from './ast';
-import {ParserSyntaxError, ParserTypeError} from './errors';
+import {ParserSyntaxError, ParserTypeError, ParserError} from './errors';
 
 const EMPTY_LINE = /^\s*$/;
 const WHITESPACE = /\s+/;
@@ -180,19 +180,59 @@ export class Parser {
     const instruction = this.parseInstruction(instructionString);
     return {label: label, instruction: instruction};
   }
-  // parseProgram(string: string): ast.Program {
-  //   const lines = string.split(/\r\n|\n\r|\n|\r/);
-  //   const labels = new Map<string, ast.Instruction>();
-  //   let nextInstruction = new ast.Halt();
-  //   let programTree: ast.Instruction;
-  //   let parserError = false;
-  //   for (let i = lines.length - 1; i >= 0; i--) {
-  //     try {
-  //       const parsedLine = this.parseLine(lines[i]);
-  //     }
-  //     programTree = new ast.Combine(
-  //       parsedLine,
-  //     )
-  //   }
-  // }
+  parseProgram(string: string): ast.Program {
+    const lines = string.trim().split(/\r\n|\n\r|\n|\r/);
+    const labels = new Map<string, ast.Instruction>();
+    let programTree = new ast.Halt();
+    let errorCaught = false;
+    const instructions: (ast.Instruction | null)[] = [];
+    const parserErrors = new Map<number, ParserError>();
+
+    if (string.match(EMPTY_LINE)) return new ast.Program(labels, programTree);
+
+    for (let i = 0; i < lines.length; i++) {
+      let parsedLine: {
+        label: ast.Label | null;
+        instruction: ast.Instruction;
+      } | null;
+      parsedLine = null;
+      try {
+        parsedLine = this.parseLine(lines[i]);
+      } catch (error) {
+        errorCaught = true;
+        parserErrors.set(i, error);
+      }
+      if (parsedLine !== null) {
+        instructions.push(parsedLine.instruction);
+        if (parsedLine.label !== null) {
+          if (labels.get(parsedLine.label.value) !== undefined) {
+            errorCaught = true;
+            parserErrors.set(i, new ParserSyntaxError('Repeated label.'));
+          } else {
+            labels.set(parsedLine.label.value, parsedLine.instruction);
+          }
+        }
+      }
+    }
+
+    for (let i = instructions.length - 1; i >= 0; i--) {
+      const instruction = instructions[i];
+      if (instruction !== null) {
+        if (
+          instruction instanceof ast.Jump ||
+          instruction instanceof ast.Jgtz ||
+          instruction instanceof ast.Jzero
+        ) {
+          if (![...labels.keys()].includes(instruction.argument.value)) {
+            throw new ParserSyntaxError('No matching label.');
+          }
+        }
+        if (!errorCaught) {
+          programTree = new ast.Combine(instruction, programTree);
+        }
+      }
+    }
+    if (errorCaught) throw new ParserError();
+    return new ast.Program(labels, programTree);
+  }
 }

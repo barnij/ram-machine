@@ -1,5 +1,5 @@
 import {Parser, parseBigInt, validateArgumentType} from './parser';
-import {ParserSyntaxError, ParserTypeError} from './errors';
+import {ParserError, ParserSyntaxError, ParserTypeError} from './errors';
 import * as ast from './ast';
 
 //#region Helper functions
@@ -247,5 +247,54 @@ test('Parser: parseLine - parsing line without label returns object with null me
     instruction: new ast.Read(new ast.Reference(BigInt('0'))),
   };
   expect(parser.parseLine(invalidLabelLine)).toStrictEqual(labeledInstruction);
+});
+
+// parseProgram
+test('Parser: parseProgram - empty program', () => {
+  const parser = new Parser();
+  const emptyProgramString = '';
+  const parsedProgram = new ast.Program(
+    new Map<string, ast.Instruction>(),
+    new ast.Halt()
+  );
+  expect(parser.parseProgram(emptyProgramString)).toStrictEqual(parsedProgram);
+});
+test('Parser: parseProgram - repeated label throws Error', () => {
+  const parser = new Parser();
+  const programString = 'here: load =1\nhere: read 0\n';
+  expect(() => parser.parseProgram(programString)).toThrowError(ParserError);
+});
+test('Parser: parseProgram - jump with argument not coresponding to any label throws error', () => {
+  const parser = new Parser();
+  const programString = 'here: load =1\njump there\n';
+  expect(() => parser.parseProgram(programString)).toThrowError(ParserError);
+});
+test('Parser: parseProgram - program with jumps', () => {
+  const parser = new Parser();
+  const programString =
+    'jump1: jump jump2\n' +
+    'jump2: jump jump3\n' +
+    'jump3: jump jump4\n' +
+    'jump4: jump jump1\n';
+  const line1 = new ast.Jump(new ast.Label('jump2'));
+  const line2 = new ast.Jump(new ast.Label('jump3'));
+  const line3 = new ast.Jump(new ast.Label('jump4'));
+  const line4 = new ast.Jump(new ast.Label('jump1'));
+  const parsedProgram = new ast.Program(
+    new Map<string, ast.Instruction>([
+      ['jump1', line1],
+      ['jump2', line2],
+      ['jump3', line3],
+      ['jump4', line4],
+    ]),
+    new ast.Combine(
+      line1,
+      new ast.Combine(
+        line2,
+        new ast.Combine(line3, new ast.Combine(line4, new ast.Halt()))
+      )
+    )
+  );
+  expect(parser.parseProgram(programString)).toStrictEqual(parsedProgram);
 });
 //#endregion
