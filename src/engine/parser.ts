@@ -83,7 +83,7 @@ export class Parser {
       }
     }
   }
-  parseLabel(string: String): ast.Label {
+  parseLabel(string: string): ast.Label {
     if (string.match(LABEL)) {
       return new ast.Label(string);
     }
@@ -91,7 +91,7 @@ export class Parser {
       'Label can contain only alphanumeric characters.'
     );
   }
-  parseInstruction(string: String): ast.Instruction {
+  parseInstruction(string: string): ast.Instruction {
     if (string.match(EMPTY_LINE)) {
       return new ast.Skip();
     }
@@ -158,7 +158,7 @@ export class Parser {
       }
     }
   }
-  parseLine(string: String): {
+  parseLine(string: string): {
     label: null | ast.Label;
     instruction: ast.Instruction;
   } {
@@ -180,4 +180,7 @@ export class Parser {
     const instruction = this.parseInstruction(instructionString);
     return {label: label, instruction: instruction};
   }
+  // parseProgram(string: string): ast.Program {
+
+  // }
 }
