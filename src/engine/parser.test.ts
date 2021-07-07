@@ -235,7 +235,7 @@ test('Parser: parseLine - parsing line with proper label returns object with it'
   const labeledInstruction = {
     label: new ast.Label('label1'),
     instruction: new ast.Read(new ast.Reference(BigInt('0'))),
-  }
+  };
   expect(parser.parseLine(invalidLabelLine)).toStrictEqual(labeledInstruction);
 });
 
