@@ -1,6 +1,6 @@
 import * as ast from './ast';
 import {Ok} from './status';
-import {RegisterError, RuntimeError} from './errors';
+import {RegisterError, RuntimeError, LabelError} from './errors';
 import {State, Environment} from './environment';
 
 const ACCUMULATOR = BigInt(0);
@@ -249,4 +249,89 @@ export function instructionWrite(instruction: ast.Write, state: State): Ok {
   } else {
     throw actionResult;
   }
+}
+
+export function instructionJump(instruction: ast.Jump, state: State): Ok {
+  const arg: ast.Label = instruction.argument;
+  let actionResult: RuntimeError | Ok = new RuntimeError('undefined behaviour');
+  switch (arg.constructor) {
+    case ast.Label: {
+      const jumpTarget = state.program.labels.get(arg.value);
+      if (jumpTarget == null) {
+        throw new LabelError('unrecognized label ' + arg.value);
+      } else {
+        state.nextInstruction = jumpTarget;
+      }
+      break;
+    }
+    default:
+      actionResult = new RuntimeError('invalid argumetn in instruction jump');
+      break;
+  }
+  if (actionResult instanceof Ok) {
+    return actionResult;
+  } else {
+    throw actionResult;
+  }
+}
+
+export function instructionJgtz(instruction: ast.Jgtz, state: State): Ok {
+  const arg: ast.Label = instruction.argument;
+  let actionResult: RuntimeError | Ok = new RuntimeError('undefined behaviour');
+  switch (arg.constructor) {
+    case ast.Label: {
+      const jumpTarget = state.program.labels.get(arg.value);
+      if (jumpTarget == null) {
+        throw new LabelError('unrecognized label ' + arg.value);
+      } else {
+        if (getRegister(ACCUMULATOR, state.environmet) > BigInt(0)) {
+          state.nextInstruction = jumpTarget;
+        }
+      }
+      break;
+    }
+    default:
+      actionResult = new RuntimeError('invalid argumetn in instruction jgtz');
+      break;
+  }
+  if (actionResult instanceof Ok) {
+    return actionResult;
+  } else {
+    throw actionResult;
+  }
+}
+
+export function instructionJzero(instruction: ast.Jzero, state: State): Ok {
+  const arg: ast.Label = instruction.argument;
+  let actionResult: RuntimeError | Ok = new RuntimeError('undefined behaviour');
+  switch (arg.constructor) {
+    case ast.Label: {
+      const jumpTarget = state.program.labels.get(arg.value);
+      if (jumpTarget == null) {
+        throw new LabelError('unrecognized label ' + arg.value);
+      } else {
+        if (getRegister(ACCUMULATOR, state.environmet) === BigInt(0)) {
+          state.nextInstruction = jumpTarget;
+        }
+      }
+      break;
+    }
+    default:
+      actionResult = new RuntimeError('invalid argumetn in instruction jzero');
+      break;
+  }
+  if (actionResult instanceof Ok) {
+    return actionResult;
+  } else {
+    throw actionResult;
+  }
+}
+
+export function instructionHalt(state: State): Ok {
+  state.completed = true;
+  return new Ok();
+}
+
+export function instructionSkip(): Ok {
+  return new Ok();
 }
