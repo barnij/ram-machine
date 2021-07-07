@@ -12,6 +12,12 @@ export class Engine {
     return new State(parsedProgram, env);
   }
 
+  makeStateFromFile(path: string, input: bigint[]): State {
+    const env = new Environment(input);
+    const parsedProgram = this.parser.parseProgramFile(path);
+    return new State(parsedProgram, env);
+  }
+
   stepInstruction(state: State): Ok {
     return this.interpreter.interpInstruction(state.nextInstruction, state);
   }
