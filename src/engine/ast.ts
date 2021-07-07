@@ -9,7 +9,7 @@ export class Address extends Operandum {}
 export class Reference extends Operandum {}
 
 export class Label {
-  constructor(public value: String) {}
+  constructor(public value: string) {}
 }
 
 export type Instruction =
@@ -84,7 +84,7 @@ export class Combine {
 
 export class Program {
   constructor(
-    public labels: Map<String, Instruction>,
+    public labels: Map<string, Instruction>,
     public programTree: Instruction
   ) {}
 }
