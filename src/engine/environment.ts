@@ -4,7 +4,7 @@ import {Instruction, Program} from './ast';
 export class State {
   nextInstruction: Instruction;
   completed = false;
-  constructor(public program: Program, public environmet: Environment) {
+  constructor(public program: Program, public environment: Environment) {
     this.nextInstruction = program.programTree;
   }
 }
