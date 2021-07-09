@@ -56,6 +56,7 @@ export function instructionStore(instruction: ast.Store, state: State): Ok {
         getRegister(ACCUMULATOR, state.environmet),
         state.environmet
       );
+      actionResult = new Ok();
       break;
     case ast.Reference:
       arg = getRegister(arg.value, state.environmet);

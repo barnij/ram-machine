@@ -108,3 +108,71 @@ test('instructionLoad - load value from reference to empty register throws Regis
     }
   }
 });
+
+// instructionStore
+test('instructionStore - store value in register', () => {
+  const program = 'store 177';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(1234));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  if (state.nextInstruction instanceof ast.Combine) {
+    expect(state.nextInstruction.instruction).toBeInstanceOf(ast.Store);
+    const instruction = state.nextInstruction.instruction;
+    if (instruction instanceof ast.Store) {
+      const actionResult = inst.instructionStore(instruction, state);
+      expect(actionResult).toBeInstanceOf(Ok);
+      expect(state.environmet.registers.get(BigInt(177))).toStrictEqual(
+        BigInt(1234)
+      );
+    }
+  }
+});
+
+test('instructionStore - store value in reference', () => {
+  const program = 'store ^177';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(1234));
+  state.environmet.registers.set(BigInt(177), BigInt(1235));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  if (state.nextInstruction instanceof ast.Combine) {
+    expect(state.nextInstruction.instruction).toBeInstanceOf(ast.Store);
+    const instruction = state.nextInstruction.instruction;
+    if (instruction instanceof ast.Store) {
+      const actionResult = inst.instructionStore(instruction, state);
+      expect(actionResult).toBeInstanceOf(Ok);
+      expect(state.environmet.registers.get(BigInt(1235))).toStrictEqual(
+        BigInt(1234)
+      );
+    }
+  }
+});
+
+test('instructionStore - store empty accumulator in register throws RegisterError', () => {
+  const program = 'store 177';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  if (state.nextInstruction instanceof ast.Combine) {
+    expect(state.nextInstruction.instruction).toBeInstanceOf(ast.Store);
+    const instruction = state.nextInstruction.instruction;
+    if (instruction instanceof ast.Store) {
+      expect(() => inst.instructionStore(instruction, state)).toThrowError(
+        RegisterError
+      );
+    }
+  }
+});
+
+test('instructionStore - store empty accumulator in empty reference throws RegisterError', () => {
+  const program = 'store ^177';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  if (state.nextInstruction instanceof ast.Combine) {
+    expect(state.nextInstruction.instruction).toBeInstanceOf(ast.Store);
+    const instruction = state.nextInstruction.instruction;
+    if (instruction instanceof ast.Store) {
+      expect(() => inst.instructionStore(instruction, state)).toThrowError(
+        RegisterError
+      );
+    }
+  }
+});
