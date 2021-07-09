@@ -3,7 +3,7 @@ import {Ok} from './status';
 import {RegisterError, RuntimeError, LabelError} from './errors';
 import {State, Environment} from './environment';
 
-const ACCUMULATOR = BigInt(0);
+export const ACCUMULATOR = BigInt(0);
 
 function getRegister(registerId: bigint, env: Environment) {
   const value = env.registers.get(registerId);
