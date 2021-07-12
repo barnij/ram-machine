@@ -1009,3 +1009,26 @@ test('instructionJzero - accumulator greater than 0, no jump', () => {
   expect(actionResult).toBeInstanceOf(Ok);
   expect(state.nextInstruction).toBe(combine.nextInstruction);
 });
+
+// instructionHalt
+test('instructionHalt', () => {
+  const program = 'halt';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Halt);
+  const actionResult = inst.instructionHalt(state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.completed).toBe(true);
+});
+
+// instructionSkip
+test('instructionSkip', () => {
+  const program = 'label: ';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Skip);
+  const actionResult = inst.instructionSkip();
+  expect(actionResult).toBeInstanceOf(Ok);
+});
