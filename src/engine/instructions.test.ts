@@ -825,3 +825,80 @@ test('instructionRead - read to empty reference from empty inputTape throws Regi
     RegisterError
   );
 });
+
+// instructionWrite
+test('instructionWrite - write constant value', () => {
+  const program = 'write =128';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Write);
+  const instruction = combine.instruction as ast.Write;
+  const actionResult = inst.instructionWrite(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.output.values).toStrictEqual([BigInt(128)]);
+});
+
+test('instructionWrite - write register', () => {
+  const program = 'write 10';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(BigInt(10), BigInt(128));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Write);
+  const instruction = combine.instruction as ast.Write;
+  const actionResult = inst.instructionWrite(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.output.values).toStrictEqual([BigInt(128)]);
+});
+
+test('instructionWrite - write reference', () => {
+  const program = 'write ^10';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(BigInt(10), BigInt(128));
+  state.environmet.registers.set(BigInt(128), BigInt(19));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Write);
+  const instruction = combine.instruction as ast.Write;
+  const actionResult = inst.instructionWrite(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.output.values).toStrictEqual([BigInt(19)]);
+});
+
+test('instructionWrite - write empty register throws RegisterError', () => {
+  const program = 'write 10';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Write);
+  const instruction = combine.instruction as ast.Write;
+  expect(() => inst.instructionWrite(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionWrite - write empty reference throws RegisterError', () => {
+  const program = 'write ^10';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Write);
+  const instruction = combine.instruction as ast.Write;
+  expect(() => inst.instructionWrite(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionWrite - write reference to empty register throws RegisterError', () => {
+  const program = 'write ^10';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(BigInt(10), BigInt(12));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Write);
+  const instruction = combine.instruction as ast.Write;
+  expect(() => inst.instructionWrite(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
