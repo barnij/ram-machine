@@ -1,6 +1,6 @@
 import * as ast from './ast';
 import * as inst from './instructions';
-import {RegisterError} from './errors';
+import {RegisterError, InputError} from './errors';
 import {Engine} from './engine';
 import {Parser} from './parser';
 import {Interpreter} from './interpreter';
@@ -747,6 +747,81 @@ test('instructionDiv - div empty accumulator by reference to empty register thro
   expect(combine.instruction).toBeInstanceOf(ast.Div);
   const instruction = combine.instruction as ast.Div;
   expect(() => inst.instructionDiv(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+// instructionRead
+test('instructionRead - read to register', () => {
+  const program = 'read 8';
+  const state = ENGINE.makeStateFromString(program, [BigInt(23)]);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Read);
+  const instruction = combine.instruction as ast.Read;
+  const actionResult = inst.instructionRead(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.registers.get(BigInt(8))).toStrictEqual(BigInt(23));
+});
+
+test('instructionRead - read to reference', () => {
+  const program = 'read ^8';
+  const state = ENGINE.makeStateFromString(program, [BigInt(23)]);
+  state.environmet.registers.set(BigInt(8), BigInt(15));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Read);
+  const instruction = combine.instruction as ast.Read;
+  const actionResult = inst.instructionRead(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.registers.get(BigInt(15))).toStrictEqual(BigInt(23));
+});
+
+test('instructionRead - read to empty reference throws RegisterError', () => {
+  const program = 'read ^8';
+  const state = ENGINE.makeStateFromString(program, [BigInt(23)]);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Read);
+  const instruction = combine.instruction as ast.Read;
+  expect(() => inst.instructionRead(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionRead - read to register from empty inputTape throws InputError', () => {
+  const program = 'read 8';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Read);
+  const instruction = combine.instruction as ast.Read;
+  expect(() => inst.instructionRead(instruction, state)).toThrowError(
+    InputError
+  );
+});
+
+test('instructionRead - read to reference from empty inputTape throws InputError', () => {
+  const program = 'read ^10';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(BigInt(10), BigInt(15));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Read);
+  const instruction = combine.instruction as ast.Read;
+  expect(() => inst.instructionRead(instruction, state)).toThrowError(
+    InputError
+  );
+});
+
+test('instructionRead - read to empty reference from empty inputTape throws RegisterError', () => {
+  const program = 'read ^10';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Read);
+  const instruction = combine.instruction as ast.Read;
+  expect(() => inst.instructionRead(instruction, state)).toThrowError(
     RegisterError
   );
 });
