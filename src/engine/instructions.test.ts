@@ -1,6 +1,6 @@
 import * as ast from './ast';
 import * as inst from './instructions';
-import {RegisterError, RuntimeError, LabelError} from './errors';
+import {RegisterError} from './errors';
 import {Engine} from './engine';
 import {Parser} from './parser';
 import {Interpreter} from './interpreter';
@@ -246,7 +246,7 @@ test('instructionAdd - add empty register to empty accumulator throws RegisterEr
   );
 });
 
-test('instructionAdd - add value from empty reference to accumulator throws RegisterError', () => {
+test('instructionAdd - add empty reference to accumulator throws RegisterError', () => {
   const program = 'add ^23';
   const state = ENGINE.makeStateFromString(program, []);
   state.environmet.registers.set(inst.ACCUMULATOR, BigInt(12));
@@ -273,7 +273,7 @@ test('instructionAdd - add value from reference to empty register to accumulator
   );
 });
 
-test('instructionAdd - add value from empty reference to empty accumulator throws RegisterError', () => {
+test('instructionAdd - add empty reference to empty accumulator throws RegisterError', () => {
   const program = 'add ^23';
   const state = ENGINE.makeStateFromString(program, []);
   expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
@@ -285,7 +285,7 @@ test('instructionAdd - add value from empty reference to empty accumulator throw
   );
 });
 
-test('instructionAdd - add value from reference to empty register to empty accumulator throws RegisterError', () => {
+test('instructionAdd - add reference to empty register to empty accumulator throws RegisterError', () => {
   const program = 'add ^23';
   const state = ENGINE.makeStateFromString(program, []);
   state.environmet.registers.set(BigInt(23), BigInt(16));
@@ -294,6 +294,157 @@ test('instructionAdd - add value from reference to empty register to empty accum
   expect(combine.instruction).toBeInstanceOf(ast.Add);
   const instruction = combine.instruction as ast.Add;
   expect(() => inst.instructionAdd(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+// instructionSub
+test('instructionSub - sub constant value', () => {
+  const program = 'sub =23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(8));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Sub);
+  const instruction = combine.instruction as ast.Sub;
+  const actionResult = inst.instructionSub(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.registers.get(inst.ACCUMULATOR)).toStrictEqual(
+    BigInt(-15)
+  );
+});
+
+test('instructionSub - sub value from register', () => {
+  const program = 'sub 24';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(8));
+  state.environmet.registers.set(BigInt(24), BigInt(23));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Sub);
+  const instruction = combine.instruction as ast.Sub;
+  const actionResult = inst.instructionSub(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.registers.get(inst.ACCUMULATOR)).toStrictEqual(
+    BigInt(-15)
+  );
+});
+
+test('instructionSub - sub value from refrerence', () => {
+  const program = 'sub ^25';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(8));
+  state.environmet.registers.set(BigInt(25), BigInt(30));
+  state.environmet.registers.set(BigInt(30), BigInt(23));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Sub);
+  const instruction = combine.instruction as ast.Sub;
+  const actionResult = inst.instructionSub(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.registers.get(inst.ACCUMULATOR)).toStrictEqual(
+    BigInt(-15)
+  );
+});
+
+test('instructionSub - sub constant value from empty accumulator throws RegisterError', () => {
+  const program = 'sub =23';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Sub);
+  const instruction = combine.instruction as ast.Sub;
+  expect(() => inst.instructionSub(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionSub - sub value from register from empty accumulator throws RegisterError', () => {
+  const program = 'sub 23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(BigInt(23), BigInt(17));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Sub);
+  const instruction = combine.instruction as ast.Sub;
+  expect(() => inst.instructionSub(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionSub - sub empty register throws RegisterError', () => {
+  const program = 'sub 23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(17));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Sub);
+  const instruction = combine.instruction as ast.Sub;
+  expect(() => inst.instructionSub(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionSub - sub empty register from empty accumulator throws RegisterError', () => {
+  const program = 'sub 23';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Sub);
+  const instruction = combine.instruction as ast.Sub;
+  expect(() => inst.instructionSub(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionSub - sub empty reference from accumulator throws RegisterError', () => {
+  const program = 'sub ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(12));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Sub);
+  const instruction = combine.instruction as ast.Sub;
+  expect(() => inst.instructionSub(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionSub - sub value from reference from empty register to accumulator throws RegisterError', () => {
+  const program = 'sub ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(12));
+  state.environmet.registers.set(BigInt(23), BigInt(16));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Sub);
+  const instruction = combine.instruction as ast.Sub;
+  expect(() => inst.instructionSub(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionSub - sub empty reference from empty accumulator throws RegisterError', () => {
+  const program = 'sub ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Sub);
+  const instruction = combine.instruction as ast.Sub;
+  expect(() => inst.instructionSub(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionSub - sub reference to empty register from empty accumulator throws RegisterError', () => {
+  const program = 'sub ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(BigInt(23), BigInt(16));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Sub);
+  const instruction = combine.instruction as ast.Sub;
+  expect(() => inst.instructionSub(instruction, state)).toThrowError(
     RegisterError
   );
 });
