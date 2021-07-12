@@ -32,7 +32,7 @@ class InputTape {
 }
 
 class OutputTape {
-  private values: bigint[] = [];
+  values: bigint[] = [];
 
   write(value: bigint) {
     this.values.push(value);
