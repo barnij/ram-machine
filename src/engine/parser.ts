@@ -248,7 +248,10 @@ export class Parser {
     return new ast.Program(labels, programTree);
   }
   parseProgramFile(pathToFile: string): ast.Program {
-    const data = fs.readFileSync(path.resolve(__dirname, pathToFile), 'utf-8');
+    const data = fs.readFileSync(
+      path.resolve(process.cwd(), pathToFile),
+      'utf-8'
+    );
     return this.parseProgram(data);
   }
 }

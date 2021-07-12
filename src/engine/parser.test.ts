@@ -305,7 +305,7 @@ test('Parser: parseProgram - program with jumps', () => {
 // parseProgramFile
 test('Parser: parseProgramFile - test1.ramcode', () => {
   const parser = new Parser();
-  const path = '../../test_programs/test1.ramcode';
+  const path = 'test_programs/test1.ramcode';
   const line1 = new ast.Jump(new ast.Label('jump2'));
   const line2 = new ast.Jump(new ast.Label('jump3'));
   const line3 = new ast.Jump(new ast.Label('jump4'));
