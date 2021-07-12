@@ -187,7 +187,10 @@ export class Parser {
     const labels = new Map<string, ast.Instruction>();
     let programTree = new ast.Halt();
     let errorCaught = false;
-    const instructions: (ast.Instruction | null)[] = [];
+    const instructions: {
+      label: ast.Label | null;
+      instruction: ast.Instruction;
+    }[] = [];
     const parserErrors = new Map<number, ParserError>();
 
     if (string.match(EMPTY_LINE)) return new ast.Program(labels, programTree);
@@ -205,7 +208,7 @@ export class Parser {
         parserErrors.set(i, error);
       }
       if (parsedLine !== null) {
-        instructions.push(parsedLine.instruction);
+        instructions.push(parsedLine);
         if (parsedLine.label !== null) {
           if (labels.get(parsedLine.label.value) !== undefined) {
             errorCaught = true;
@@ -218,7 +221,11 @@ export class Parser {
     }
 
     for (let i = instructions.length - 1; i >= 0; i--) {
-      const instruction = instructions[i];
+      const parsedLine: {
+        label: ast.Label | null;
+        instruction: ast.Instruction;
+      } = instructions[i];
+      const instruction = parsedLine.instruction;
       if (instruction !== null) {
         if (
           instruction instanceof ast.Jump ||
@@ -231,6 +238,9 @@ export class Parser {
         }
         if (!errorCaught) {
           programTree = new ast.Combine(instruction, programTree);
+          if (parsedLine.label !== null) {
+            labels.set(parsedLine.label.value, programTree);
+          }
         }
       }
     }

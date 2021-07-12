@@ -279,20 +279,25 @@ test('Parser: parseProgram - program with jumps', () => {
   const line2 = new ast.Jump(new ast.Label('jump3'));
   const line3 = new ast.Jump(new ast.Label('jump4'));
   const line4 = new ast.Jump(new ast.Label('jump1'));
+  const program = new ast.Combine(
+    line1,
+    new ast.Combine(
+      line2,
+      new ast.Combine(line3, new ast.Combine(line4, new ast.Halt()))
+    )
+  );
+  const label1 = program as ast.Combine;
+  const label2 = label1.nextInstruction as ast.Combine;
+  const label3 = label2.nextInstruction as ast.Combine;
+  const label4 = label3.nextInstruction as ast.Combine;
   const parsedProgram = new ast.Program(
     new Map<string, ast.Instruction>([
-      ['jump1', line1],
-      ['jump2', line2],
-      ['jump3', line3],
-      ['jump4', line4],
+      ['jump1', label1],
+      ['jump2', label2],
+      ['jump3', label3],
+      ['jump4', label4],
     ]),
-    new ast.Combine(
-      line1,
-      new ast.Combine(
-        line2,
-        new ast.Combine(line3, new ast.Combine(line4, new ast.Halt()))
-      )
-    )
+    program
   );
   expect(parser.parseProgram(programString)).toStrictEqual(parsedProgram);
 });
@@ -305,20 +310,25 @@ test('Parser: parseProgramFile - test1.ramcode', () => {
   const line2 = new ast.Jump(new ast.Label('jump3'));
   const line3 = new ast.Jump(new ast.Label('jump4'));
   const line4 = new ast.Jump(new ast.Label('jump1'));
+  const program = new ast.Combine(
+    line1,
+    new ast.Combine(
+      line2,
+      new ast.Combine(line3, new ast.Combine(line4, new ast.Halt()))
+    )
+  );
+  const label1 = program as ast.Combine;
+  const label2 = label1.nextInstruction as ast.Combine;
+  const label3 = label2.nextInstruction as ast.Combine;
+  const label4 = label3.nextInstruction as ast.Combine;
   const parsedProgram = new ast.Program(
     new Map<string, ast.Instruction>([
-      ['jump1', line1],
-      ['jump2', line2],
-      ['jump3', line3],
-      ['jump4', line4],
+      ['jump1', label1],
+      ['jump2', label2],
+      ['jump3', label3],
+      ['jump4', label4],
     ]),
-    new ast.Combine(
-      line1,
-      new ast.Combine(
-        line2,
-        new ast.Combine(line3, new ast.Combine(line4, new ast.Halt()))
-      )
-    )
+    program
   );
   expect(parser.parseProgramFile(path)).toStrictEqual(parsedProgram);
 });
