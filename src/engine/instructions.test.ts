@@ -448,3 +448,154 @@ test('instructionSub - sub reference to empty register from empty accumulator th
     RegisterError
   );
 });
+
+// instructionMult
+test('instructionMult - mult constant value', () => {
+  const program = 'mult =23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(8));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Mult);
+  const instruction = combine.instruction as ast.Mult;
+  const actionResult = inst.instructionMult(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.registers.get(inst.ACCUMULATOR)).toStrictEqual(
+    BigInt(184)
+  );
+});
+
+test('instructionMult - mult value from register', () => {
+  const program = 'mult 24';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(8));
+  state.environmet.registers.set(BigInt(24), BigInt(23));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Mult);
+  const instruction = combine.instruction as ast.Mult;
+  const actionResult = inst.instructionMult(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.registers.get(inst.ACCUMULATOR)).toStrictEqual(
+    BigInt(184)
+  );
+});
+
+test('instructionMult - mult value from refrerence', () => {
+  const program = 'mult ^25';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(8));
+  state.environmet.registers.set(BigInt(25), BigInt(30));
+  state.environmet.registers.set(BigInt(30), BigInt(23));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Mult);
+  const instruction = combine.instruction as ast.Mult;
+  const actionResult = inst.instructionMult(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.registers.get(inst.ACCUMULATOR)).toStrictEqual(
+    BigInt(184)
+  );
+});
+
+test('instructionMult - mult constant value by empty accumulator throws RegisterError', () => {
+  const program = 'mult =23';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Mult);
+  const instruction = combine.instruction as ast.Mult;
+  expect(() => inst.instructionMult(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionMult - mult value from register by empty accumulator throws RegisterError', () => {
+  const program = 'mult 23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(BigInt(23), BigInt(17));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Mult);
+  const instruction = combine.instruction as ast.Mult;
+  expect(() => inst.instructionMult(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionMult - mult empty register throws RegisterError', () => {
+  const program = 'mult 23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(17));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Mult);
+  const instruction = combine.instruction as ast.Mult;
+  expect(() => inst.instructionMult(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionMult - mult empty register by empty accumulator throws RegisterError', () => {
+  const program = 'mult 23';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Mult);
+  const instruction = combine.instruction as ast.Mult;
+  expect(() => inst.instructionMult(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionMult - mult empty reference by accumulator throws RegisterError', () => {
+  const program = 'mult ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(12));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Mult);
+  const instruction = combine.instruction as ast.Mult;
+  expect(() => inst.instructionMult(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionMult - mult reference to empty register by accumulator throws RegisterError', () => {
+  const program = 'mult ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(12));
+  state.environmet.registers.set(BigInt(23), BigInt(16));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Mult);
+  const instruction = combine.instruction as ast.Mult;
+  expect(() => inst.instructionMult(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionMult - mult empty reference by empty accumulator throws RegisterError', () => {
+  const program = 'mult ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Mult);
+  const instruction = combine.instruction as ast.Mult;
+  expect(() => inst.instructionMult(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionMult - mult reference to empty register by empty accumulator throws RegisterError', () => {
+  const program = 'mult ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(BigInt(23), BigInt(16));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Mult);
+  const instruction = combine.instruction as ast.Mult;
+  expect(() => inst.instructionMult(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
