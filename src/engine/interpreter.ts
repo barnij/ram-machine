@@ -11,7 +11,7 @@ export class Interpreter {
     );
     if (instruction instanceof ast.Combine) {
       state.nextInstruction = instruction.nextInstruction;
-      this.interpInstruction(instruction.instruction, state);
+      actionResult = this.interpInstruction(instruction.instruction, state);
     }
     if (instruction instanceof ast.Load) {
       actionResult = inst.instructionLoad(instruction, state);
