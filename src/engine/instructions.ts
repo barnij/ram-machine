@@ -262,6 +262,7 @@ export function instructionJump(instruction: ast.Jump, state: State): Ok {
         throw new LabelError('unrecognized label ' + arg.value);
       } else {
         state.nextInstruction = jumpTarget;
+        actionResult = new Ok();
       }
       break;
     }
@@ -288,6 +289,7 @@ export function instructionJgtz(instruction: ast.Jgtz, state: State): Ok {
         if (getRegister(ACCUMULATOR, state.environmet) > BigInt(0)) {
           state.nextInstruction = jumpTarget;
         }
+        actionResult = new Ok();
       }
       break;
     }
@@ -314,6 +316,7 @@ export function instructionJzero(instruction: ast.Jzero, state: State): Ok {
         if (getRegister(ACCUMULATOR, state.environmet) === BigInt(0)) {
           state.nextInstruction = jumpTarget;
         }
+        actionResult = new Ok();
       }
       break;
     }

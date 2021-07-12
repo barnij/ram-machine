@@ -902,3 +902,110 @@ test('instructionWrite - write reference to empty register throws RegisterError'
     RegisterError
   );
 });
+
+// instructionJump
+test('instructionJump - jump to label', () => {
+  const program = 'label: jump label';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Jump);
+  const instruction = combine.instruction as ast.Jump;
+  state.nextInstruction = combine.nextInstruction;
+  const actionResult = inst.instructionJump(instruction, state);
+  expect(state.program.labels.get('label')).toBe(combine);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.nextInstruction).toBe(state.program.labels.get('label'));
+});
+
+// instructionJgtz
+test('instructionJgtz - accumulator less than 0, no jump', () => {
+  const program = 'label: jgtz label';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(-12));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Jgtz);
+  const instruction = combine.instruction as ast.Jgtz;
+  state.nextInstruction = combine.nextInstruction;
+  const actionResult = inst.instructionJgtz(instruction, state);
+  expect(state.program.labels.get('label')).toBe(combine);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.nextInstruction).toBe(combine.nextInstruction);
+});
+
+test('instructionJgtz - accumulator equals 0, no jump', () => {
+  const program = 'label: jgtz label';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(0));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Jgtz);
+  const instruction = combine.instruction as ast.Jgtz;
+  state.nextInstruction = combine.nextInstruction;
+  const actionResult = inst.instructionJgtz(instruction, state);
+  expect(state.program.labels.get('label')).toBe(combine);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.nextInstruction).toBe(combine.nextInstruction);
+});
+
+test('instructionJgtz - accumulator greater than 0, jump', () => {
+  const program = 'label: jgtz label';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(1));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Jgtz);
+  const instruction = combine.instruction as ast.Jgtz;
+  state.nextInstruction = combine.nextInstruction;
+  const actionResult = inst.instructionJgtz(instruction, state);
+  expect(state.program.labels.get('label')).toBe(combine);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.nextInstruction).toBe(state.program.labels.get('label'));
+});
+
+// instructionJzero
+test('instructionJzero - accumulator less than 0, no jump', () => {
+  const program = 'label: jzero label';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(-12));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Jzero);
+  const instruction = combine.instruction as ast.Jzero;
+  state.nextInstruction = combine.nextInstruction;
+  const actionResult = inst.instructionJzero(instruction, state);
+  expect(state.program.labels.get('label')).toBe(combine);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.nextInstruction).toBe(combine.nextInstruction);
+});
+
+test('instructionJzero - accumulator equals 0, jump', () => {
+  const program = 'label: jzero label';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(0));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Jzero);
+  const instruction = combine.instruction as ast.Jzero;
+  state.nextInstruction = combine.nextInstruction;
+  const actionResult = inst.instructionJzero(instruction, state);
+  expect(state.program.labels.get('label')).toBe(combine);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.nextInstruction).toBe(state.program.labels.get('label'));
+});
+
+test('instructionJzero - accumulator greater than 0, no jump', () => {
+  const program = 'label: jzero label';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(1));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Jzero);
+  const instruction = combine.instruction as ast.Jzero;
+  state.nextInstruction = combine.nextInstruction;
+  const actionResult = inst.instructionJzero(instruction, state);
+  expect(state.program.labels.get('label')).toBe(combine);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.nextInstruction).toBe(combine.nextInstruction);
+});
