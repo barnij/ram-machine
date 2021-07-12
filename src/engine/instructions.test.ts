@@ -410,7 +410,7 @@ test('instructionSub - sub empty reference from accumulator throws RegisterError
   );
 });
 
-test('instructionSub - sub value from reference from empty register to accumulator throws RegisterError', () => {
+test('instructionSub - sub reference to empty register to accumulator throws RegisterError', () => {
   const program = 'sub ^23';
   const state = ENGINE.makeStateFromString(program, []);
   state.environmet.registers.set(inst.ACCUMULATOR, BigInt(12));
@@ -596,6 +596,157 @@ test('instructionMult - mult reference to empty register by empty accumulator th
   expect(combine.instruction).toBeInstanceOf(ast.Mult);
   const instruction = combine.instruction as ast.Mult;
   expect(() => inst.instructionMult(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+// instructionDiv
+test('instructionDiv - div constant value', () => {
+  const program = 'div =8';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(23));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Div);
+  const instruction = combine.instruction as ast.Div;
+  const actionResult = inst.instructionDiv(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.registers.get(inst.ACCUMULATOR)).toStrictEqual(
+    BigInt(2)
+  );
+});
+
+test('instructionDiv - div value from register', () => {
+  const program = 'div 24';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(23));
+  state.environmet.registers.set(BigInt(24), BigInt(8));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Div);
+  const instruction = combine.instruction as ast.Div;
+  const actionResult = inst.instructionDiv(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.registers.get(inst.ACCUMULATOR)).toStrictEqual(
+    BigInt(2)
+  );
+});
+
+test('instructionDiv - div value from refrerence', () => {
+  const program = 'div ^25';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(23));
+  state.environmet.registers.set(BigInt(25), BigInt(30));
+  state.environmet.registers.set(BigInt(30), BigInt(8));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Div);
+  const instruction = combine.instruction as ast.Div;
+  const actionResult = inst.instructionDiv(instruction, state);
+  expect(actionResult).toBeInstanceOf(Ok);
+  expect(state.environmet.registers.get(inst.ACCUMULATOR)).toStrictEqual(
+    BigInt(2)
+  );
+});
+
+test('instructionDiv - div empty accumulator by constant value throws RegisterError', () => {
+  const program = 'div =23';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Div);
+  const instruction = combine.instruction as ast.Div;
+  expect(() => inst.instructionDiv(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionDiv - div empty accumulator by value from register throws RegisterError', () => {
+  const program = 'div 23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(BigInt(23), BigInt(17));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Div);
+  const instruction = combine.instruction as ast.Div;
+  expect(() => inst.instructionDiv(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionDiv - div empty register throws RegisterError', () => {
+  const program = 'div 23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(17));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Div);
+  const instruction = combine.instruction as ast.Div;
+  expect(() => inst.instructionDiv(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionDiv - div empty accumulator by empty register throws RegisterError', () => {
+  const program = 'div 23';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Div);
+  const instruction = combine.instruction as ast.Div;
+  expect(() => inst.instructionDiv(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionDiv - div accumulator by empty reference throws RegisterError', () => {
+  const program = 'div ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(12));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Div);
+  const instruction = combine.instruction as ast.Div;
+  expect(() => inst.instructionDiv(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionDiv - div accumulator by reference to empty register throws RegisterError', () => {
+  const program = 'div ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(inst.ACCUMULATOR, BigInt(12));
+  state.environmet.registers.set(BigInt(23), BigInt(16));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Div);
+  const instruction = combine.instruction as ast.Div;
+  expect(() => inst.instructionDiv(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionDiv - div empty accumulator by empty reference throws RegisterError', () => {
+  const program = 'div ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Div);
+  const instruction = combine.instruction as ast.Div;
+  expect(() => inst.instructionDiv(instruction, state)).toThrowError(
+    RegisterError
+  );
+});
+
+test('instructionDiv - div empty accumulator by reference to empty register throws RegisterError', () => {
+  const program = 'div ^23';
+  const state = ENGINE.makeStateFromString(program, []);
+  state.environmet.registers.set(BigInt(23), BigInt(16));
+  expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
+  const combine = state.nextInstruction as ast.Combine;
+  expect(combine.instruction).toBeInstanceOf(ast.Div);
+  const instruction = combine.instruction as ast.Div;
+  expect(() => inst.instructionDiv(instruction, state)).toThrowError(
     RegisterError
   );
 });
