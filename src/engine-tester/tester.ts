@@ -6,6 +6,8 @@ async function delay(ms: number) {
   return new Promise(res => setTimeout(res, ms));
 }
 
+const WHITESPACE = /\s+/;
+const ALOTOFSPACES = '                                         ';
 const exluded: string[] = [];
 
 async function main() {
@@ -30,9 +32,13 @@ async function main() {
     ).map(x => path.join(programsPath, task, x));
 
     for (const test of tests) {
-      const correctOutput = (await readFile(test + '.out', 'utf-8')).trim();
+      const correctOutput = (await readFile(test + '.out', 'utf-8'))
+        .trim()
+        .split(WHITESPACE)
+        .join(' ');
 
       for (const program of programs) {
+        process.stdout.write(`\r ${program} (${test}) ${ALOTOFSPACES}`);
         let output = 'no output';
         let error: Error | null = null;
         try {
@@ -50,7 +56,7 @@ async function main() {
         }
       }
     }
-    console.info('\\___ OK');
+    process.stdout.write(`\r\\___ OK ${ALOTOFSPACES}${ALOTOFSPACES}\n`);
   }
 }
 
