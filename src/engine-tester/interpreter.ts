@@ -3,6 +3,7 @@ import {Parser} from '../engine/parser';
 import {Engine} from '../engine/engine';
 import {readFile} from 'fs/promises';
 
+// to get input from stdin:
 // import {ReadStream} from 'tty';
 // async function read(stream: ReadStream & {fd: 0}): Promise<string> {
 //   const chunks = [];
