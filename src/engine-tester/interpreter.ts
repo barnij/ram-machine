@@ -12,6 +12,8 @@ import * as path from 'path';
 //   return Buffer.concat(chunks).toString('utf-8');
 // }
 
+const WHITESPACE = /\s+/;
+
 export async function interpret(
   programPath: string,
   inputPath: string
@@ -21,7 +23,7 @@ export async function interpret(
   const engine = new Engine(new Parser(), new Interpreter());
   const state = engine.makeStateFromFile(
     programPath,
-    input.split(' ').map(x => BigInt(x))
+    input.split(WHITESPACE).map(x => BigInt(x))
   );
   engine.complete(state);
 
