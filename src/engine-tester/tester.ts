@@ -8,12 +8,15 @@ async function delay(ms: number) {
 
 const WHITESPACE = /\s+/;
 const ALOTOFSPACES = '                                         ';
-const exluded: string[] = [];
+const exluded: string[] = process.argv[4] === '--' ? [] : process.argv.slice(4);
 
 async function main() {
   const programsPath = process.argv[2];
   const tasksPath = process.argv[3];
-  const tasks = await readdir(tasksPath, 'utf-8');
+  let tasks = await readdir(tasksPath, 'utf-8');
+  if (process.argv[4] === '--') {
+    tasks = tasks.filter(x => process.argv.slice(5).includes(x));
+  }
 
   for (const task of tasks) {
     console.info(`task: ${task}`);

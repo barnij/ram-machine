@@ -6,7 +6,7 @@ import * as path from 'path';
 const EMPTY_LINE = /^\s*$/;
 const WHITESPACE = /\s+/;
 const DECIMAL_BIG_INT = /^(0|(-?[1-9]\d*))$/;
-const LABEL = /^[a-z0-9]+$/i;
+const LABEL = /^[a-z0-9_]+$/i;
 const OPERANDUM_INSTRUCTION_CODES = [
   'read',
   'write',
@@ -87,7 +87,7 @@ export class Parser {
   }
   parseLabel(string: string): ast.Label {
     if (string.match(LABEL)) {
-      return new ast.Label(string);
+      return new ast.Label(string.toLowerCase());
     }
     throw new ParserSyntaxError(
       'Label can contain only alphanumeric characters.'
@@ -171,7 +171,9 @@ export class Parser {
     if (commentEndIndex < 0) {
       label = null;
     } else {
-      const labelString = commentlessString.slice(0, commentEndIndex);
+      const labelString = commentlessString
+        .slice(0, commentEndIndex)
+        .toLowerCase();
       label = new ast.Label(labelString);
       if (!validateLabel(label))
         throw new ParserSyntaxError(
