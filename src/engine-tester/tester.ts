@@ -52,7 +52,9 @@ async function main() {
         }
 
         if (output !== correctOutput || error != null) {
-          console.error(`Incorrect output in task ${program} and test ${test}`);
+          console.error(
+            `\nIncorrect output in task ${program} and test ${test}`
+          );
           console.error('Correct output: ' + correctOutput);
           console.error('Output: ' + output);
           await delay(5000);
