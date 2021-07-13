@@ -6,7 +6,7 @@ import * as path from 'path';
 const EMPTY_LINE = /^\s*$/;
 const WHITESPACE = /\s+/;
 const DECIMAL_BIG_INT = /^(0|(-?[1-9]\d*))$/;
-const LABEL = /^[a-z0-9]+$/;
+const LABEL = /^[a-z0-9]+$/i;
 const OPERANDUM_INSTRUCTION_CODES = [
   'read',
   'write',
