@@ -15,10 +15,6 @@ export class Label {
   constructor(public value: string) {}
 }
 
-interface interpInterface {
-  interp: (state: State) => Ok;
-}
-
 export type Instruction =
   | Load
   | Store
@@ -35,7 +31,7 @@ export type Instruction =
   | Skip
   | Combine;
 
-export class Load implements interpInterface {
+export class Load {
   constructor(public argument: Operandum) {}
 
   interp!: (state: State) => Ok;
