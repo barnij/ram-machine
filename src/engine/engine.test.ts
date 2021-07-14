@@ -1,8 +1,7 @@
 import * as ast from './ast';
-import * as inst from './instructions';
 import {Engine} from './engine';
 import {Parser} from './parser';
-import {Interpreter} from './interpreter';
+import {Interpreter, ACCUMULATOR} from './interpreter';
 import {Ok} from './status';
 import {State, Environment} from './environment';
 
@@ -34,7 +33,7 @@ test('Engine: stepInstruction - step single instruction', () => {
   expect(combine.instruction).toBeInstanceOf(ast.Load);
   const actionResult = ENGINE.stepInstruction(state);
   expect(actionResult).toBeInstanceOf(Ok);
-  targetState.environment.registers.set(inst.ACCUMULATOR, BigInt(1));
+  targetState.environment.registers.set(ACCUMULATOR, BigInt(1));
   const targetCombine = targetState.nextInstruction as ast.Combine;
   targetState.nextInstruction = targetCombine.nextInstruction;
   expect(state).toStrictEqual(targetState);
@@ -56,13 +55,13 @@ test('Engine: stepInstruction - interp 2 instructions program step by step', () 
   expect(combine.instruction).toBeInstanceOf(ast.Load);
   let actionResult = ENGINE.stepInstruction(state);
   expect(actionResult).toBeInstanceOf(Ok);
-  targetState.environment.registers.set(inst.ACCUMULATOR, BigInt(1));
+  targetState.environment.registers.set(ACCUMULATOR, BigInt(1));
   let targetCombine = targetState.nextInstruction as ast.Combine;
   targetState.nextInstruction = targetCombine.nextInstruction;
   expect(state).toStrictEqual(targetState);
   actionResult = ENGINE.stepInstruction(state);
   expect(actionResult).toBeInstanceOf(Ok);
-  targetState.environment.registers.set(inst.ACCUMULATOR, BigInt(3));
+  targetState.environment.registers.set(ACCUMULATOR, BigInt(3));
   targetCombine = targetState.nextInstruction as ast.Combine;
   targetState.nextInstruction = targetCombine.nextInstruction;
   expect(state).toStrictEqual(targetState);
@@ -85,7 +84,7 @@ test('Engine: complete - interp 2 instructions', () => {
   expect(state).toStrictEqual(targetState);
   const actionResult = ENGINE.complete(state);
   expect(actionResult).toBeInstanceOf(Ok);
-  targetState.environment.registers.set(inst.ACCUMULATOR, BigInt(3));
+  targetState.environment.registers.set(ACCUMULATOR, BigInt(3));
   targetState.completed = true;
   targetState.nextInstruction = new ast.Halt();
   expect(state).toStrictEqual(targetState);

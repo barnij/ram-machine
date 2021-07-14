@@ -44,7 +44,7 @@ test('validateArgumentType - validating Const argument for store and read instru
 // parseLabel
 test('Parser: parseLabel - parsing nonalphanumeric string throws ParserSyntaxError', () => {
   const parser = new Parser();
-  expect(() => parser.parseLabel('nonalphanumeric_1')).toThrowError(
+  expect(() => parser.parseLabel('nonalphanumeric^1')).toThrowError(
     ParserSyntaxError
   );
 });
@@ -222,7 +222,7 @@ test('Parser: parseInstruction - parsing jzero returns instance of Jzero', () =>
 // parseLine
 test('Parser: parseLine - parsing line with invalid label throws ParserSyntaxError', () => {
   const parser = new Parser();
-  const invalidLabelLine = 'label_1: read ^0 #comment';
+  const invalidLabelLine = 'label^1: read ^0 #comment';
   expect(() => parser.parseLine(invalidLabelLine)).toThrowError(
     ParserSyntaxError
   );

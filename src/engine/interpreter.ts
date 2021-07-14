@@ -1,35 +1,44 @@
 import * as ast from './ast';
-import * as inst from './instructions';
 import {Ok} from './status';
-import {State} from './environment';
-import {RuntimeError, RegisterError, LabelError} from './errors';
+import {State, Environment} from './environment';
+import {RegisterError, RuntimeError, LabelError} from './errors';
 
-const ACCUMULATOR = BigInt(0);
+export class Interpreter {
+  interpInstruction(instruction: ast.Instruction, state: State): Ok {
+    return instruction.interp(state);
+  }
+}
+
+export const ACCUMULATOR = BigInt(0);
+
+function getRegister(registerId: bigint, env: Environment) {
+  const value = env.registers.get(registerId);
+  if (value == null) {
+    throw new RegisterError('empty register nr ' + registerId);
+  } else {
+    return value;
+  }
+}
+
+function setRegister(registerId: bigint, value: bigint, env: Environment) {
+  env.registers.set(registerId, value);
+}
 
 ast.Load.prototype.interp = function (state) {
   const arg: ast.Operandum = this.argument;
   switch (arg.constructor) {
     case ast.Const:
-      state.environment.registers.set(ACCUMULATOR, arg.value);
+      setRegister(ACCUMULATOR, arg.value, state.environment);
       return new Ok();
     case ast.Address: {
-      const value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      state.environment.registers.set(ACCUMULATOR, value);
+      const value = getRegister(arg.value, state.environment);
+      setRegister(ACCUMULATOR, value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      let value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      value = state.environment.registers.get(value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + value);
-      }
-      state.environment.registers.set(ACCUMULATOR, value);
+      let value = getRegister(arg.value, state.environment);
+      value = getRegister(value, state.environment);
+      setRegister(ACCUMULATOR, value, state.environment);
       return new Ok();
     }
     default:
@@ -41,27 +50,14 @@ ast.Store.prototype.interp = function (state) {
   const arg: ast.Address | ast.Reference = this.argument;
   switch (arg.constructor) {
     case ast.Address: {
-      const value = state.environment.registers.get(ACCUMULATOR);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + ACCUMULATOR);
-      }
-      state.environment.registers.set(arg.value, value);
+      const value = getRegister(ACCUMULATOR, state.environment);
+      setRegister(arg.value, value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      const accValue = state.environment.registers.get(ACCUMULATOR);
-      if (accValue == null) {
-        throw new RegisterError('empty register nr ' + ACCUMULATOR);
-      }
-      let value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      value = state.environment.registers.get(value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + value);
-      }
-      state.environment.registers.set(value, accValue);
+      const accValue = getRegister(ACCUMULATOR, state.environment);
+      const value = getRegister(arg.value, state.environment);
+      setRegister(value, accValue, state.environment);
       return new Ok();
     }
     default:
@@ -70,33 +66,21 @@ ast.Store.prototype.interp = function (state) {
 };
 
 ast.Add.prototype.interp = function (state) {
-  const accValue = state.environment.registers.get(ACCUMULATOR);
-  if (accValue == null) {
-    throw new RuntimeError('empty register nr ' + ACCUMULATOR);
-  }
+  const accValue = getRegister(ACCUMULATOR, state.environment);
   const arg: ast.Operandum = this.argument;
   switch (arg.constructor) {
     case ast.Const:
-      state.environment.registers.set(ACCUMULATOR, accValue + arg.value);
+      setRegister(ACCUMULATOR, accValue + arg.value, state.environment);
       return new Ok();
     case ast.Address: {
-      const value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      state.environment.registers.set(ACCUMULATOR, accValue + value);
+      const value = getRegister(arg.value, state.environment);
+      setRegister(ACCUMULATOR, accValue + value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      let value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      value = state.environment.registers.get(value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + value);
-      }
-      state.environment.registers.set(ACCUMULATOR, accValue + value);
+      let value = getRegister(arg.value, state.environment);
+      value = getRegister(value, state.environment);
+      setRegister(ACCUMULATOR, accValue + value, state.environment);
       return new Ok();
     }
     default:
@@ -105,33 +89,21 @@ ast.Add.prototype.interp = function (state) {
 };
 
 ast.Sub.prototype.interp = function (state) {
-  const accValue = state.environment.registers.get(ACCUMULATOR);
-  if (accValue == null) {
-    throw new RuntimeError('empty register nr ' + ACCUMULATOR);
-  }
+  const accValue = getRegister(ACCUMULATOR, state.environment);
   const arg: ast.Operandum = this.argument;
   switch (arg.constructor) {
     case ast.Const:
-      state.environment.registers.set(ACCUMULATOR, accValue - arg.value);
+      setRegister(ACCUMULATOR, accValue - arg.value, state.environment);
       return new Ok();
     case ast.Address: {
-      const value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      state.environment.registers.set(ACCUMULATOR, accValue - value);
+      const value = getRegister(arg.value, state.environment);
+      setRegister(ACCUMULATOR, accValue - value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      let value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      value = state.environment.registers.get(value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + value);
-      }
-      state.environment.registers.set(ACCUMULATOR, accValue - value);
+      let value = getRegister(arg.value, state.environment);
+      value = getRegister(value, state.environment);
+      setRegister(ACCUMULATOR, accValue - value, state.environment);
       return new Ok();
     }
     default:
@@ -140,33 +112,21 @@ ast.Sub.prototype.interp = function (state) {
 };
 
 ast.Mult.prototype.interp = function (state) {
-  const accValue = state.environment.registers.get(ACCUMULATOR);
-  if (accValue == null) {
-    throw new RuntimeError('empty register nr ' + ACCUMULATOR);
-  }
+  const accValue = getRegister(ACCUMULATOR, state.environment);
   const arg: ast.Operandum = this.argument;
   switch (arg.constructor) {
     case ast.Const:
-      state.environment.registers.set(ACCUMULATOR, accValue * arg.value);
+      setRegister(ACCUMULATOR, accValue * arg.value, state.environment);
       return new Ok();
     case ast.Address: {
-      const value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      state.environment.registers.set(ACCUMULATOR, accValue * value);
+      const value = getRegister(arg.value, state.environment);
+      setRegister(ACCUMULATOR, accValue * value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      let value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      value = state.environment.registers.get(value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + value);
-      }
-      state.environment.registers.set(ACCUMULATOR, accValue * value);
+      let value = getRegister(arg.value, state.environment);
+      value = getRegister(value, state.environment);
+      setRegister(ACCUMULATOR, accValue * value, state.environment);
       return new Ok();
     }
     default:
@@ -175,42 +135,30 @@ ast.Mult.prototype.interp = function (state) {
 };
 
 ast.Div.prototype.interp = function (state) {
-  const accValue = state.environment.registers.get(ACCUMULATOR);
-  if (accValue == null) {
-    throw new RuntimeError('empty register nr ' + ACCUMULATOR);
-  }
+  const accValue = getRegister(ACCUMULATOR, state.environment);
   const arg: ast.Operandum = this.argument;
   switch (arg.constructor) {
     case ast.Const:
       if (arg.value === BigInt(0)) {
         throw new RuntimeError('division by 0');
       }
-      state.environment.registers.set(ACCUMULATOR, accValue / arg.value);
+      setRegister(ACCUMULATOR, accValue / arg.value, state.environment);
       return new Ok();
     case ast.Address: {
-      const value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
+      const value = getRegister(arg.value, state.environment);
       if (value === BigInt(0)) {
         throw new RuntimeError('division by 0');
       }
-      state.environment.registers.set(ACCUMULATOR, accValue / value);
+      setRegister(ACCUMULATOR, accValue / value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      let value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      value = state.environment.registers.get(value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + value);
-      }
+      let value = getRegister(arg.value, state.environment);
+      value = getRegister(value, state.environment);
       if (value === BigInt(0)) {
         throw new RuntimeError('division by 0');
       }
-      state.environment.registers.set(ACCUMULATOR, accValue / value);
+      setRegister(ACCUMULATOR, accValue / value, state.environment);
       return new Ok();
     }
     default:
@@ -223,20 +171,13 @@ ast.Read.prototype.interp = function (state) {
   switch (arg.constructor) {
     case ast.Address: {
       const value = state.environment.input.read();
-      state.environment.registers.set(arg.value, value);
+      setRegister(arg.value, value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
+      const value = getRegister(arg.value, state.environment);
       const readValue = state.environment.input.read();
-      let value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      value = state.environment.registers.get(value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + value);
-      }
-      state.environment.registers.set(value, readValue);
+      setRegister(value, readValue, state.environment);
       return new Ok();
     }
     default:
@@ -251,22 +192,13 @@ ast.Write.prototype.interp = function (state) {
       state.environment.output.write(arg.value);
       return new Ok();
     case ast.Address: {
-      const value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
+      const value = getRegister(arg.value, state.environment);
       state.environment.output.write(value);
       return new Ok();
     }
     case ast.Reference: {
-      let value = state.environment.registers.get(arg.value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + arg.value);
-      }
-      value = state.environment.registers.get(value);
-      if (value == null) {
-        throw new RegisterError('empty register nr ' + value);
-      }
+      let value = getRegister(arg.value, state.environment);
+      value = getRegister(value, state.environment);
       state.environment.output.write(value);
       return new Ok();
     }
@@ -292,10 +224,8 @@ ast.Jgtz.prototype.interp = function (state) {
   if (jumpTarget == null) {
     throw new LabelError('unrecognized label ' + arg.value);
   } else {
-    const value = state.environment.registers.get(ACCUMULATOR);
-    if (value == null) {
-      throw new RegisterError('empty register nr ' + arg.value);
-    } else if (value > BigInt(0)) {
+    const value = getRegister(ACCUMULATOR, state.environment);
+    if (value > BigInt(0)) {
       state.nextInstruction = jumpTarget;
     }
     return new Ok();
@@ -308,10 +238,8 @@ ast.Jzero.prototype.interp = function (state) {
   if (jumpTarget == null) {
     throw new LabelError('unrecognized label ' + arg.value);
   } else {
-    const value = state.environment.registers.get(ACCUMULATOR);
-    if (value == null) {
-      throw new RegisterError('empty register nr ' + arg.value);
-    } else if (value === BigInt(0)) {
+    const value = getRegister(ACCUMULATOR, state.environment);
+    if (value === BigInt(0)) {
       state.nextInstruction = jumpTarget;
     }
     return new Ok();
@@ -323,7 +251,7 @@ ast.Halt.prototype.interp = function (state) {
   return new Ok();
 };
 
-ast.Skip.prototype.interp = function (state) {
+ast.Skip.prototype.interp = function () {
   return new Ok();
 };
 
@@ -331,9 +259,3 @@ ast.Combine.prototype.interp = function (state) {
   state.nextInstruction = this.nextInstruction;
   return this.instruction.interp(state);
 };
-
-export class Interpreter {
-  interpInstruction(instruction: ast.Instruction, state: State): Ok {
-    return instruction.interp(state);
-  }
-}
