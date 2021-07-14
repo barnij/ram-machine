@@ -42,7 +42,7 @@ ast.Load.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      return new RuntimeError('invalid argumetn in instruction load');
+      return new RuntimeError('invalid argument in instruction load');
   }
 };
 
@@ -61,7 +61,7 @@ ast.Store.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      return new RuntimeError('invalid argumetn in instruction load');
+      return new RuntimeError('invalid argument in instruction load');
   }
 };
 
@@ -84,7 +84,7 @@ ast.Add.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      return new RuntimeError('invalid argumetn in instruction load');
+      return new RuntimeError('invalid argument in instruction load');
   }
 };
 
@@ -107,7 +107,7 @@ ast.Sub.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      return new RuntimeError('invalid argumetn in instruction load');
+      return new RuntimeError('invalid argument in instruction load');
   }
 };
 
@@ -130,7 +130,7 @@ ast.Mult.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      return new RuntimeError('invalid argumetn in instruction load');
+      return new RuntimeError('invalid argument in instruction load');
   }
 };
 
@@ -162,7 +162,7 @@ ast.Div.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      return new RuntimeError('invalid argumetn in instruction load');
+      return new RuntimeError('invalid argument in instruction load');
   }
 };
 
@@ -181,7 +181,7 @@ ast.Read.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      return new RuntimeError('invalid argumetn in instruction load');
+      return new RuntimeError('invalid argument in instruction load');
   }
 };
 
@@ -203,7 +203,7 @@ ast.Write.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      return new RuntimeError('invalid argumetn in instruction load');
+      return new RuntimeError('invalid argument in instruction load');
   }
 };
 

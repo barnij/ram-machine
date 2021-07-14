@@ -31,80 +31,84 @@ export type Instruction =
   | Skip
   | Combine;
 
-export class Load {
+interface Interpreter {
+  interp: (state: State) => Ok;
+}
+
+export class Load implements Interpreter {
   constructor(public argument: Operandum) {}
 
   interp!: (state: State) => Ok;
 }
 
-export class Store {
+export class Store implements Interpreter {
   constructor(public argument: Address | Reference) {}
 
   interp!: (state: State) => Ok;
 }
 
-export class Add {
+export class Add implements Interpreter {
   constructor(public argument: Operandum) {}
 
   interp!: (state: State) => Ok;
 }
 
-export class Sub {
+export class Sub implements Interpreter {
   constructor(public argument: Operandum) {}
 
   interp!: (state: State) => Ok;
 }
 
-export class Mult {
+export class Mult implements Interpreter {
   constructor(public argument: Operandum) {}
 
   interp!: (state: State) => Ok;
 }
 
-export class Div {
+export class Div implements Interpreter {
   constructor(public argument: Operandum) {}
 
   interp!: (state: State) => Ok;
 }
 
-export class Read {
+export class Read implements Interpreter {
   constructor(public argument: Address | Reference) {}
 
   interp!: (state: State) => Ok;
 }
 
-export class Write {
+export class Write implements Interpreter {
   constructor(public argument: Operandum) {}
 
   interp!: (state: State) => Ok;
 }
 
-export class Jump {
+export class Jump implements Interpreter {
   constructor(public argument: Label) {}
 
   interp!: (state: State) => Ok;
 }
 
-export class Jgtz {
+export class Jgtz implements Interpreter {
   constructor(public argument: Label) {}
 
   interp!: (state: State) => Ok;
 }
 
-export class Jzero {
+export class Jzero implements Interpreter {
   constructor(public argument: Label) {}
 
   interp!: (state: State) => Ok;
 }
 
-export class Halt {
+export class Halt implements Interpreter {
   interp!: (state: State) => Ok;
 }
-export class Skip {
+export class Skip implements Interpreter {
   interp!: (state: State) => Ok;
 }
 
-export class Combine {
+export class Combine implements Interpreter {
   constructor(
     public instruction: Instruction,
     public nextInstruction: Instruction
