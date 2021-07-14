@@ -47,3 +47,9 @@ export class Interpreter {
     }
   }
 }
+
+export class InterpreterFast {
+  interpInstruction(instruction: ast.Instruction, state: State): Ok {
+    return instruction.interp(state);
+  }
+}
