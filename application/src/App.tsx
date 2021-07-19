@@ -1,13 +1,16 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import {Icon} from '@blueprintjs/core';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>Really cool.</p>
+        <div>
+          Really cool. <Icon icon="tick" color="white"></Icon>
+        </div>
         <a
           className="App-link"
           href="https://reactjs.org"
