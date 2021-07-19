@@ -144,5 +144,22 @@ build/
 
 ### Tasks and programs for tester
 tester_content.zip
-tasks/
-programs/
+engine/tasks/
+engine/programs/
+
+
+### react ###
+.DS_*
+*.log
+logs
+**/*.backup.*
+**/*.back.*
+
+node_modules
+bower_components
+
+*.sublime*
+
+psd
+thumb
+sketch

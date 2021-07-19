@@ -1,8 +1,7 @@
 {
-  "name": "engine-alpha",
+  "name": "engine",
   "version": "1.0.0",
   "description": "RAM Machine engine",
-  "main": "engine.js",
   "scripts": {
     "test": "jest",
     "lint": "gts lint",
