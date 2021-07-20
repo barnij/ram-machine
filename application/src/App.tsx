@@ -1,25 +1,43 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-import {Icon} from '@blueprintjs/core';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import {Col, Container, Row} from 'react-bootstrap';
+import {Aaa} from './components/example-aaa';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <div>
-          Really cool. <Icon icon="tick" color="white"></Icon>
-        </div>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Container fluid>
+        <Row style={{height: '100vh'}}>
+          <Col sm={3}>
+            <Row style={{height: '10%'}}>
+              <Col style={{backgroundColor: 'lightblue'}}>
+                <Aaa />
+              </Col>
+            </Row>
+            <Row style={{height: '90%'}}>
+              <Col style={{backgroundColor: 'green'}}>
+                <div>bbb</div>
+              </Col>
+            </Row>
+          </Col>
+          <Col sm={9}>
+            <Row style={{height: '10%'}}>
+              <Col>ccc</Col>
+            </Row>
+            <Row style={{height: '80%'}}>
+              <Col style={{backgroundColor: 'orange'}}>
+                <div>ddd</div>
+              </Col>
+            </Row>
+            <Row style={{height: '10%'}}>
+              <Col style={{backgroundColor: 'yellow'}}>
+                <div>eee</div>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 }
