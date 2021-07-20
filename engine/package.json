@@ -2,6 +2,7 @@
   "name": "engine",
   "version": "1.0.0",
   "description": "RAM Machine engine",
+  "main": "build/src/index.js",
   "scripts": {
     "test": "jest",
     "lint": "gts lint",

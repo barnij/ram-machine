@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Col, Container, Row} from 'react-bootstrap';
-import {Aaa} from './components/example-aaa';
+import {Ddd} from './components/example-ddd';
 
 function App() {
   return (
@@ -11,9 +11,7 @@ function App() {
         <Row style={{height: '100vh'}}>
           <Col sm={3}>
             <Row style={{height: '10%'}}>
-              <Col style={{backgroundColor: 'lightblue'}}>
-                <Aaa />
-              </Col>
+              <Col style={{backgroundColor: 'lightblue'}}>aaa</Col>
             </Row>
             <Row style={{height: '90%'}}>
               <Col style={{backgroundColor: 'green'}}>
@@ -27,7 +25,7 @@ function App() {
             </Row>
             <Row style={{height: '80%'}}>
               <Col style={{backgroundColor: 'orange'}}>
-                <div>ddd</div>
+                <Ddd />
               </Col>
             </Row>
             <Row style={{height: '10%'}}>
