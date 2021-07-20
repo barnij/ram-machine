@@ -164,4 +164,4 @@ psd
 thumb
 sketch
 
-package-lock.json
+**/package-lock.json
