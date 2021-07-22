@@ -26,6 +26,6 @@ export class Engine {
     while (!state.completed) {
       this.interpreter.interpInstruction(state.nextInstruction, state);
     }
-    return new Ok();
+    return new Ok(state);
   }
 }
