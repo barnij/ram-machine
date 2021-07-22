@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Engine, Interpreter, Parser, State} from './engine';
+import {Engine, Interpreter, Ok, Parser, State} from './engine';
 import {Ok} from './engine';
 
 const engine = new Engine(new Parser(), new Interpreter());
