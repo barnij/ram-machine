@@ -10,28 +10,34 @@ function App() {
       <Container fluid>
         <Row style={{height: '100vh'}}>
           <Col sm={3}>
-            <Row style={{height: '10%'}}>
-              <Col style={{backgroundColor: 'lightblue'}}>aaa</Col>
+            <Row style={{height: '8%'}}>
+              <Col style={{backgroundColor: 'lightgreen'}}>
+                Controls buttons
+              </Col>
             </Row>
-            <Row style={{height: '90%'}}>
+            <Row style={{height: '15%'}}>
+              <Col style={{backgroundColor: 'lightblue'}}>
+                Preview of processor
+              </Col>
+            </Row>
+            <Row style={{height: '83%'}}>
               <Col style={{backgroundColor: 'green'}}>
-                <div>bbb</div>
+                <div>Registers</div>
               </Col>
             </Row>
           </Col>
           <Col sm={9}>
             <Row style={{height: '10%'}}>
-              <Col>ccc</Col>
+              <Col>Input tape</Col>
             </Row>
             <Row style={{height: '80%'}}>
               <Col style={{backgroundColor: 'orange'}}>
+                Intructions
                 <Ddd />
               </Col>
             </Row>
             <Row style={{height: '10%'}}>
-              <Col style={{backgroundColor: 'yellow'}}>
-                <div>eee</div>
-              </Col>
+              <Col style={{backgroundColor: 'yellow'}}>Output tape</Col>
             </Row>
           </Col>
         </Row>

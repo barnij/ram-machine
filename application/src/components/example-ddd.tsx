@@ -48,9 +48,8 @@ export class Ddd extends Component<{}, RamState> {
 
     return (
       <div className="ddd-class">
-        <p>
-          Program: <pre>{program}</pre>
-        </p>
+        <p style={{marginBottom: 0}}>Program:</p>
+        <pre>{program}</pre>
         <p>Output: [{this.state.state.environment.output.values.join(' ')}]</p>
         {button}
       </div>
