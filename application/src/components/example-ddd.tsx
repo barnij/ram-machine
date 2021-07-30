@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Engine, Interpreter, Ok, Parser, State} from './engine';
+import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
 
 const engine = new Engine(new Parser(), new Interpreter());
 const program = `
