@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Engine, Interpreter, Ok, Parser, State} from './engine';
+import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
 
 const engine = new Engine(new Parser(), new Interpreter());
 const program = `
@@ -48,9 +48,8 @@ export class Ddd extends Component<{}, RamState> {
 
     return (
       <div className="ddd-class">
-        <p>
-          Program: <pre>{program}</pre>
-        </p>
+        <p style={{marginBottom: 0}}>Program:</p>
+        <pre>{program}</pre>
         <p>Output: [{this.state.state.environment.output.values.join(' ')}]</p>
         {button}
       </div>

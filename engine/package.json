@@ -1,8 +1,12 @@
 {
-  "name": "engine",
+  "name": "ram-engine",
   "version": "1.0.0",
   "description": "RAM Machine engine",
   "main": "build/src/index.js",
+  "types": "build/src/index.d.ts",
+  "files": [
+    "/build"
+  ],
   "scripts": {
     "test": "jest",
     "lint": "gts lint",
