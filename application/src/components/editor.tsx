@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import {Cell, Column, Table2} from '@blueprintjs/table';
+import {Column, EditableCell, Table} from '@blueprintjs/table';
 
 const cellRenderer = () => {
-  return <Cell></Cell>;
+  return <EditableCell></EditableCell>;
 };
 
 const docWidth = (document.getElementById('editor')?.clientWidth || 1000) - 30; // row header is 30px
@@ -13,12 +13,16 @@ export class Editor extends Component<{}, {}> {
   render() {
     return (
       <div className="editor-class" id="editor">
-        <Table2 numRows={10} columnWidths={colWidths.map(c => c * docWidth)}>
+        <Table
+          columnWidths={colWidths.map(c => c * docWidth)}
+          enableFocusedCell={true}
+          numRows={10}
+        >
           <Column name="Label" cellRenderer={cellRenderer} />
           <Column name="Instruction" cellRenderer={cellRenderer} />
           <Column name="Argument" cellRenderer={cellRenderer} />
           <Column name="Comment" cellRenderer={cellRenderer} />
-        </Table2>
+        </Table>
       </div>
     );
   }
