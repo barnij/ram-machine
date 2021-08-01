@@ -1,0 +1,11 @@
+#editor-background {
+    background-color: orange;
+    display: flex;
+    align-content: flex-end;
+    flex-direction: column;
+    padding-bottom: 10px;
+}
+
+.editor-class {
+    flex-grow: 1;
+}

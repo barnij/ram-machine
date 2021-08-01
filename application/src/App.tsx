@@ -136,6 +136,7 @@ class App extends Component<{}, IState> {
                     state={this.state.state}
                     program={program}
                   />
+                  <Editor />
                 </Col>
               </Row>
               <Row style={{height: '10%'}}>
