@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Col, Container, Row} from 'react-bootstrap';
-import {Ddd} from './components/example-ddd';
+import {Editor} from './components/editor';
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
                 Preview of processor
               </Col>
             </Row>
-            <Row style={{height: '83%'}}>
+            <Row style={{height: '77%'}}>
               <Col style={{backgroundColor: 'green'}}>
                 <div>Registers</div>
               </Col>
@@ -31,9 +31,9 @@ function App() {
               <Col>Input tape</Col>
             </Row>
             <Row style={{height: '80%'}}>
-              <Col style={{backgroundColor: 'orange'}}>
+              <Col id="editor-background">
                 Intructions
-                <Ddd />
+                <Editor />
               </Col>
             </Row>
             <Row style={{height: '10%'}}>
