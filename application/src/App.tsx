@@ -10,6 +10,22 @@ const engine = new Engine(new Parser(), new Interpreter());
 const program = `
  write =5
  write =7
+ write =5
+ write =7
+ write =5
+ write =7
+ write =5
+ write =7
+ write =5
+ write =7
+ write =5
+ write =7
+ write =5
+ write =7
+ write =5
+ write =7
+ write =5
+ write =7
 `;
 
 class App extends Component<{}, {state: State}> {
@@ -68,7 +84,10 @@ class App extends Component<{}, {state: State}> {
                 </Col>
               </Row>
               <Row style={{height: '10%'}}>
-                <Col style={{backgroundColor: 'yellow'}}>
+                <Col
+                  className="d-flex align-items-center justify-content-center"
+                  style={{backgroundColor: 'yellow'}}
+                >
                   <OutputTape
                     outs={this.state.state.environment.output.values}
                   />
