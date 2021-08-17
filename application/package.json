@@ -22,7 +22,8 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "preinstall": "cd ../engine && npm install",
+    "install-engine": "cd ../engine && npm install",
+    "full-install": "npm run install-engine && npm install",
     "start": "npm run fix && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
