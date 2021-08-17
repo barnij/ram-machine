@@ -6,6 +6,7 @@ import {Ddd} from './components/example-ddd';
 import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 
+
 const engine = new Engine(new Parser(), new Interpreter());
 const program = `
  write =5
