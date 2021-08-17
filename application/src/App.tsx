@@ -5,6 +5,7 @@ import {Col, Container, Row} from 'react-bootstrap';
 import {Ddd} from './components/example-ddd';
 import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
+import {InputTape} from './components/inputTape';
 
 const engine = new Engine(new Parser(), new Interpreter());
 const program = `
@@ -22,13 +23,23 @@ const program = `
  write =7
 `;
 
-class App extends Component<{}, {state: State}> {
+class App extends Component<
+  {},
+  {state: State; inputs: string[]; isRunning: boolean}
+> {
   constructor(props: {}) {
     super(props);
     this.onClick = this.onClick.bind(this);
     this.onClickRestart = this.onClickRestart.bind(this);
+    this.inputAdd = this.inputAdd.bind(this);
+    this.inputRemove = this.inputRemove.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
 
-    this.state = {state: engine.makeStateFromString(program, [])};
+    this.state = {
+      state: engine.makeStateFromString(program, []),
+      inputs: [''],
+      isRunning: false,
+    };
   }
 
   onClick = () => {
@@ -46,6 +57,34 @@ class App extends Component<{}, {state: State}> {
     this.setState(() => ({
       state: engine.makeStateFromString(program, []),
     }));
+  };
+
+  inputAdd = () => {
+    this.state.inputs.push('');
+
+    this.forceUpdate();
+  };
+
+  inputRemove = (id: number) => {
+    return (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
+      event.preventDefault();
+      for (let i = id; i < this.state.inputs.length - 1; i++) {
+        this.state.inputs[i] = this.state.inputs[i + 1];
+      }
+      this.state.inputs.length--;
+
+      this.forceUpdate();
+    };
+  };
+
+  handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    const target = event.target;
+    const value = target.value;
+    const id: number = +target.name;
+    this.state.inputs[id] = value;
+
+    this.forceUpdate();
   };
 
   render() {
@@ -72,7 +111,16 @@ class App extends Component<{}, {state: State}> {
             </Col>
             <Col sm={9}>
               <Row style={{height: '10%'}}>
-                <Col>Input tape</Col>
+                <Col>
+                  Input tape{' '}
+                  <InputTape
+                    inputs={this.state.inputs}
+                    disabled={this.state.isRunning}
+                    inputAdd={this.inputAdd}
+                    inputRemove={this.inputRemove}
+                    onChange={this.handleInputChange}
+                  />
+                </Col>
               </Row>
               <Row style={{height: '80%'}}>
                 <Col style={{backgroundColor: 'orange'}}>
