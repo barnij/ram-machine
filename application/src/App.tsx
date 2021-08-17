@@ -20,7 +20,7 @@ function App() {
                 Preview of processor
               </Col>
             </Row>
-            <Row style={{height: '83%'}}>
+            <Row style={{height: '77%'}}>
               <Col style={{backgroundColor: 'green'}}>
                 <div>Registers</div>
               </Col>
