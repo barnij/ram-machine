@@ -3,7 +3,7 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Col, Container, Row} from 'react-bootstrap';
 import {Ddd} from './components/example-ddd';
-import {Engine, Interpreter, Ok, Parser, State} from './components/engine';
+import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 
 const engine = new Engine(new Parser(), new Interpreter());

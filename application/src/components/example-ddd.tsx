@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {State} from './engine';
+import {State} from 'ram-engine';
 
 type dddProps = {
   onClick: () => void;
