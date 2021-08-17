@@ -16,6 +16,7 @@ function InputItem(props: {
       rightIcon="minus"
       intent="warning"
       text=""
+      disabled={props.disabled}
       onClick={props.inputRemove(props.id)}
     />
   );
@@ -70,6 +71,7 @@ export class InputTape extends Component<inputProps, {}> {
             rightIcon="plus"
             intent="success"
             text=""
+            disabled={this.props.disabled}
             onClick={this.props.inputAdd}
           />
         </div>
