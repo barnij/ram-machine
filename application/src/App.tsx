@@ -6,7 +6,7 @@ import {Ddd} from './components/example-ddd';
 import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
-
+import {ControlButtons} from './components/control-buttons';
 const engine = new Engine(new Parser(), new Interpreter());
 const program = `
  write =5
@@ -81,6 +81,13 @@ class App extends Component<{}, IState> {
     this.forceUpdate();
   };
 
+  // control-buttons section
+  onClickStop = () => {
+    this.setState(() => ({
+      isRunning: false,
+    }));
+  };
+
   render() {
     return (
       <div className="App">
@@ -90,6 +97,11 @@ class App extends Component<{}, IState> {
               <Row style={{height: '8%'}}>
                 <Col style={{backgroundColor: 'lightgreen'}}>
                   Controls buttons
+                  <ControlButtons
+                    running={this.state.isRunning}
+                    completed={this.state.state.completed}
+                    onClickStop={this.onClickStop}
+                  />
                 </Col>
               </Row>
               <Row style={{height: '15%'}}>
