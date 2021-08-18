@@ -23,26 +23,20 @@ const program = `
  write =7
 `;
 
-class App extends Component<
-  {},
-  {state: State; inputs: string[]; isRunning: boolean}
-> {
-  constructor(props: {}) {
-    super(props);
-    this.onClick = this.onClick.bind(this);
-    this.onClickRestart = this.onClickRestart.bind(this);
-    this.inputAdd = this.inputAdd.bind(this);
-    this.inputRemove = this.inputRemove.bind(this);
-    this.handleInputChange = this.handleInputChange.bind(this);
+interface IState {
+  state: State;
+  inputs: string[];
+  isRunning: boolean;
+}
 
-    this.state = {
-      state: engine.makeStateFromString(program, []),
-      inputs: [''],
-      isRunning: false,
-    };
-  }
+class App extends Component<{}, IState> {
+  state: IState = {
+    state: engine.makeStateFromString(program, []),
+    inputs: [''],
+    isRunning: false,
+  };
 
-  onClick() {
+  onClick = () => {
     try {
       const instructionResult: Ok = engine.stepInstruction(this.state.state);
       this.setState(() => ({
@@ -51,21 +45,21 @@ class App extends Component<
     } catch (err) {
       // manage runtime errors
     }
-  }
+  };
 
-  onClickRestart() {
+  onClickRestart = () => {
     this.setState(() => ({
       state: engine.makeStateFromString(program, []),
     }));
-  }
+  };
 
-  inputAdd() {
+  inputAdd = () => {
     this.state.inputs.push('');
 
     this.forceUpdate();
-  }
+  };
 
-  inputRemove(id: number) {
+  inputRemove = (id: number) => {
     return (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
       event.preventDefault();
       for (let i = id; i < this.state.inputs.length - 1; i++) {
@@ -75,9 +69,9 @@ class App extends Component<
 
       this.forceUpdate();
     };
-  }
+  };
 
-  handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
+  handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
     const target = event.target;
     const value = target.value;
@@ -85,7 +79,7 @@ class App extends Component<
     this.state.inputs[id] = value;
 
     this.forceUpdate();
-  }
+  };
 
   render() {
     return (
