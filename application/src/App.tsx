@@ -42,7 +42,7 @@ class App extends Component<
     };
   }
 
-  onClick = () => {
+  onClick() {
     try {
       const instructionResult: Ok = engine.stepInstruction(this.state.state);
       this.setState(() => ({
@@ -51,21 +51,21 @@ class App extends Component<
     } catch (err) {
       // manage runtime errors
     }
-  };
+  }
 
-  onClickRestart = () => {
+  onClickRestart() {
     this.setState(() => ({
       state: engine.makeStateFromString(program, []),
     }));
-  };
+  }
 
-  inputAdd = () => {
+  inputAdd() {
     this.state.inputs.push('');
 
     this.forceUpdate();
-  };
+  }
 
-  inputRemove = (id: number) => {
+  inputRemove(id: number) {
     return (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
       event.preventDefault();
       for (let i = id; i < this.state.inputs.length - 1; i++) {
@@ -75,9 +75,9 @@ class App extends Component<
 
       this.forceUpdate();
     };
-  };
+  }
 
-  handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     event.preventDefault();
     const target = event.target;
     const value = target.value;
@@ -85,7 +85,7 @@ class App extends Component<
     this.state.inputs[id] = value;
 
     this.forceUpdate();
-  };
+  }
 
   render() {
     return (
