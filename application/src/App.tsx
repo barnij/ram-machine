@@ -7,6 +7,7 @@ import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
 import {Processor} from './components/processor';
+import {Editor} from './components/editor';
 
 const engine = new Engine(new Parser(), new Interpreter());
 const program = `
