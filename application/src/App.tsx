@@ -6,6 +6,7 @@ import {Ddd} from './components/example-ddd';
 import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
+import {Processor} from './components/processor';
 
 const engine = new Engine(new Parser(), new Interpreter());
 const program = `
@@ -94,7 +95,17 @@ class App extends Component<{}, IState> {
               </Row>
               <Row style={{height: '15%'}}>
                 <Col style={{backgroundColor: 'lightblue'}}>
-                  Preview of processor
+                  <Row
+                    style={{height: '20%', backgroundColor: '#66b3ff'}}
+                    className="d-flex align-items-center justify-content-center"
+                  >
+                    Processor
+                  </Row>
+                  <Row style={{height: '80%'}}>
+                    <Processor
+                      instruction={this.state.state.nextInstruction.prettyPrint()}
+                    />
+                  </Row>
                 </Col>
               </Row>
               <Row style={{height: '77%'}}>
