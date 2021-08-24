@@ -23,9 +23,6 @@ export class Ddd extends Component<dddProps, {}> {
 
     return (
       <div className="ddd-class">
-        <p>
-          Program: <pre>{this.props.program}</pre>
-        </p>
         <p>Output: [{this.props.state.environment.output.values.join(' ')}]</p>
         {button}
       </div>

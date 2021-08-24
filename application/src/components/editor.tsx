@@ -1,38 +1,21 @@
 import React, {Component} from 'react';
-import {Column, EditableCell, Table} from '@blueprintjs/table';
+import {DataGrid, GridColDef, GridRowsProp} from '@material-ui/data-grid';
 
-const docWidth = () =>
-  (document.getElementById('editor')?.clientWidth || 1000) - 30; // row header is 30px
+const rows: GridRowsProp = [
+  {id: 1, col1: 'Hello', col2: 'World'},
+  {id: 2, col1: 'ABC', col2: ''},
+];
 
-const colWidths = [0.2, 0.2, 0.2, 0.4];
+const columns: GridColDef[] = [
+  {field: 'col1', headerName: 'Column 1', width: 150},
+  {field: 'col2', headerName: 'Column 2', width: 200},
+];
 
-type IEditor = {
-  widths: number[];
-};
-export class Editor extends Component<{}, IEditor> {
-  state: IEditor = {
-    widths: colWidths.map(c => c * 100),
-  };
-
-  cellRenderer = () => {
-    return <EditableCell></EditableCell>;
-  };
-
-  componentDidMount() {
-    this.setState(() => ({
-      widths: colWidths.map(c => docWidth() * c),
-    }));
-  }
-
+export class Editor extends Component<{}, {}> {
   render() {
     return (
-      <div className="editor-class" id="editor">
-        <Table columnWidths={this.state.widths} enableFocusedCell numRows={10}>
-          <Column name="Label" cellRenderer={this.cellRenderer} />
-          <Column name="Instruction" cellRenderer={this.cellRenderer} />
-          <Column name="Argument" cellRenderer={this.cellRenderer} />
-          <Column name="Comment" cellRenderer={this.cellRenderer} />
-        </Table>
+      <div style={{height: 300, width: '100%'}} className="editor_class">
+        <DataGrid rows={rows} columns={columns} />
       </div>
     );
   }
