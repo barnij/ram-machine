@@ -1,62 +1,43 @@
 import React, {Component} from 'react';
-import {Spreadsheet} from 'react-spreadsheet';
+import {CellBase, Spreadsheet} from 'react-spreadsheet';
+import type Matrix from 'react-spreadsheet/dist/matrix';
 import './editor.css';
-
-/* DataGrid
-import {DataGrid, GridColDef, GridRowsProp} from '@material-ui/data-grid';
-const rows: GridRowsProp = [
-  {id: 1, col1: 'Hello', col2: 'World', col3: ''},
-  {id: 2, col1: 'ABC', col2: '', col3: ''},
-];
-
-const columns: GridColDef[] = [
-  {
-    field: 'col1',
-    headerName: 'Column 1',
-    flex: 1,
-    minWidth: 100,
-    editable: true,
-    sortable: false,
-    filterable: false,
-    disableColumnMenu: true,
-  },
-  {
-    field: 'col2',
-    headerName: 'Column 2',
-    width: 200,
-    editable: true,
-    sortable: false,
-    filterable: false,
-    disableColumnMenu: true,
-  },
-  {
-    field: 'col3',
-    headerName: 'Column 3',
-    flex: 0.5,
-    minWidth: 50,
-    editable: true,
-    sortable: false,
-    filterable: false,
-    disableColumnMenu: true,
-  },
-];
-*/
-
-const data = [[], [], [], []];
 
 const rowCornerInd = () => (
   <th className="Spreadsheet__header row_corner_indicator"></th>
 );
-export class Editor extends Component<{}, {}> {
+
+interface IEditorState {
+  data: Matrix.Matrix<CellBase>;
+}
+
+export class Editor extends Component<{}, IEditorState> {
+  state: IEditorState = {
+    data: [
+      [{value: ''}, {value: ''}, {value: ''}, {value: ''}],
+      [{value: ''}, {value: ''}, {value: ''}, {value: ''}],
+    ],
+  };
+  pressedEnter = () => {
+    this.setState(prev => ({
+      data: prev.data.concat([
+        [{value: ''}, {value: ''}, {value: ''}, {value: ''}],
+      ]),
+    }));
+  };
   render() {
     return (
-      <div style={{height: 300, width: '100%'}} className="editor_class">
-        {/* <DataGrid rows={rows} columns={columns} /> */}
+      <div style={{width: '100%'}} className="editor_class">
         <Spreadsheet
-          data={data}
+          data={this.state.data}
           columnLabels={['Label', 'Instruction', 'Argument', 'Comment']}
           RowIndicator={rowCornerInd}
           CornerIndicator={rowCornerInd}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              this.pressedEnter();
+            }
+          }}
         />
       </div>
     );

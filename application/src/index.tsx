@@ -7,9 +7,11 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
-  <React.StrictMode>
+  // It MUST be replaced with React.StrictMode!
+  // It's temporary fix of https://github.com/iddan/react-spreadsheet/issues/142
+  <React.Fragment>
     <App />
-  </React.StrictMode>,
+  </React.Fragment>,
   document.getElementById('root')
 );
 
