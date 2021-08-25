@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Spreadsheet} from 'react-spreadsheet';
+import './editor.css';
 
 /* DataGrid
 import {DataGrid, GridColDef, GridRowsProp} from '@material-ui/data-grid';
@@ -41,12 +42,11 @@ const columns: GridColDef[] = [
 ];
 */
 
-const data = [
-  [{value: 'Flavors'}],
-  [{value: 'Vanilla'}, {value: 'Chocolate'}],
-  [{value: 'Strawberry'}, {value: 'Cookies'}],
-  [{value: 'How much do you like ice cream?'}, {value: 100}],
-];
+const data = [[], [], [], []];
+
+const rowCornerInd = () => (
+  <th className="Spreadsheet__header row_corner_indicator"></th>
+);
 export class Editor extends Component<{}, {}> {
   render() {
     return (
@@ -54,8 +54,9 @@ export class Editor extends Component<{}, {}> {
         {/* <DataGrid rows={rows} columns={columns} /> */}
         <Spreadsheet
           data={data}
-          columnLabels={['Column 1', 'Column 2']}
-          RowIndicator={() => <th className="Spreadsheet__header"></th>}
+          columnLabels={['Label', 'Instruction', 'Argument', 'Comment']}
+          RowIndicator={rowCornerInd}
+          CornerIndicator={rowCornerInd}
         />
       </div>
     );
