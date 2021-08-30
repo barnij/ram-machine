@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {CellBase, Spreadsheet} from 'react-spreadsheet';
+import {CellBase, createEmptyMatrix, Spreadsheet} from 'react-spreadsheet';
 import type Matrix from 'react-spreadsheet/dist/matrix';
 import './editor.css';
 
@@ -13,17 +13,42 @@ interface IEditorState {
 
 export class Editor extends Component<{}, IEditorState> {
   state: IEditorState = {
-    data: [
-      [{value: ''}, {value: ''}, {value: ''}, {value: ''}],
-      [{value: ''}, {value: ''}, {value: ''}, {value: ''}],
-    ],
+    data: createEmptyMatrix(2, 4),
   };
   pressedEnter = () => {
     this.setState(prev => ({
-      data: prev.data.concat([
-        [{value: ''}, {value: ''}, {value: ''}, {value: ''}],
-      ]),
+      data: prev.data.concat(createEmptyMatrix(1, 4)),
     }));
+  };
+  logText = () => {
+    let text = '';
+    for (const row of this.state.data) {
+      const label = row[0]?.value;
+      const instruction = row[1]?.value;
+      const argument = row[2]?.value;
+      const comment = row[3]?.value;
+
+      if (label) {
+        text += label + ': ';
+      }
+
+      if (instruction) {
+        text += instruction + ' ';
+      }
+
+      if (argument) {
+        text += argument + ' ';
+      }
+
+      if (comment) {
+        text += ' #' + comment;
+      }
+
+      if (label || instruction || argument || comment) {
+        text += '\n';
+      }
+    }
+    console.log(text);
   };
   render() {
     return (
@@ -33,12 +58,15 @@ export class Editor extends Component<{}, IEditorState> {
           columnLabels={['Label', 'Instruction', 'Argument', 'Comment']}
           RowIndicator={rowCornerInd}
           CornerIndicator={rowCornerInd}
-          onKeyDown={e => {
-            if (e.key === 'Enter') {
+          onChange={data => this.setState(() => ({data: data}))}
+          onKeyDown={event => {
+            if (event.key === 'Enter') {
               this.pressedEnter();
+              console.log('a');
             }
           }}
         />
+        <button onClick={this.logText}>Log text from Grid</button>
       </div>
     );
   }
