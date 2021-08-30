@@ -1,26 +1,44 @@
 import React, {Component} from 'react';
-import {CellBase, createEmptyMatrix, Spreadsheet} from 'react-spreadsheet';
-import type Matrix from 'react-spreadsheet/dist/matrix';
+import {
+  CellBase,
+  createEmptyMatrix,
+  Spreadsheet,
+  Matrix,
+} from 'react-spreadsheet';
+import type Types from 'react-spreadsheet/dist/types';
 import './editor.css';
 
 const rowCornerInd = () => (
   <th className="Spreadsheet__header row_corner_indicator"></th>
 );
 
+const DataViewer1 = (dataViewerProps: Types.DataViewerProps<CellBase>) => {
+  return (
+    <span className="Spreadsheet__data-viewer">
+      {dataViewerProps.cell?.value}
+    </span>
+  );
+};
 interface IEditorState {
-  data: Matrix.Matrix<CellBase>;
+  data: Matrix<CellBase<string>>;
+  selectedLastRow: boolean;
 }
 
-export class Editor extends Component<{}, IEditorState> {
+interface IEditorProps {
+  onClick(program: string): void;
+}
+export class Editor extends Component<IEditorProps, IEditorState> {
   state: IEditorState = {
     data: createEmptyMatrix(2, 4),
+    selectedLastRow: false,
   };
+
   pressedEnter = () => {
     this.setState(prev => ({
       data: prev.data.concat(createEmptyMatrix(1, 4)),
     }));
   };
-  logText = () => {
+  loadText = () => {
     let text = '';
     for (const row of this.state.data) {
       const label = row[0]?.value;
@@ -49,6 +67,7 @@ export class Editor extends Component<{}, IEditorState> {
       }
     }
     console.log(text);
+    this.props.onClick(text);
   };
   render() {
     return (
@@ -60,13 +79,20 @@ export class Editor extends Component<{}, IEditorState> {
           CornerIndicator={rowCornerInd}
           onChange={data => this.setState(() => ({data: data}))}
           onKeyDown={event => {
-            if (event.key === 'Enter') {
+            if (event.key === 'Enter' && this.state.selectedLastRow) {
               this.pressedEnter();
-              console.log('a');
             }
           }}
+          onSelect={(selected: Types.Point[]) => {
+            if (selected[0].row === this.state.data.length - 1) {
+              this.setState(() => ({selectedLastRow: true}));
+            } else {
+              this.setState(() => ({selectedLastRow: false}));
+            }
+          }}
+          DataViewer={DataViewer1}
         />
-        <button onClick={this.logText}>Log text from Grid</button>
+        <button onClick={this.loadText}>Load program to machine</button>
       </div>
     );
   }

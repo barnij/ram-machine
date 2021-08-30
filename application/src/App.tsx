@@ -55,6 +55,12 @@ class App extends Component<{}, IState> {
     }));
   };
 
+  loadText = (text: string) => {
+    this.setState(() => ({
+      state: engine.makeStateFromString(text, []),
+    }));
+  };
+
   inputAdd = () => {
     this.state.inputs.push('');
 
@@ -130,21 +136,18 @@ class App extends Component<{}, IState> {
               </Row>
               <Row style={{height: '80%'}}>
                 <Col style={{backgroundColor: 'orange'}}>
-                  Intructions
+                  Editor
                   <Ddd
                     onClick={this.onClick}
                     onClickRestart={this.onClickRestart}
                     state={this.state.state}
                     program={program}
                   />
-                  <Editor />
+                  <Editor onClick={this.loadText} />
                 </Col>
               </Row>
               <Row style={{height: '10%'}}>
-                <Col
-                  className="d-flex align-items-center justify-content-center"
-                  style={{backgroundColor: 'yellow'}}
-                >
+                <Col style={{backgroundColor: 'yellow'}}>
                   Output tape
                   <OutputTape
                     outs={this.state.state.environment.output.values}
