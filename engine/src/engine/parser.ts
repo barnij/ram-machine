@@ -1,5 +1,5 @@
 import * as ast from './ast';
-import {ParserSyntaxError, ParserTypeError, ParserError} from './errors';
+import { ParserSyntaxError, ParserTypeError, ParserError } from './errors';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -182,7 +182,7 @@ export class Parser {
       instructionString = commentlessString.slice(commentEndIndex + 1).trim();
     }
     const instruction = this.parseInstruction(instructionString);
-    return {label: label, instruction: instruction};
+    return { label: label, instruction: instruction };
   }
   parseProgram(string: string): ast.Program {
     const lines = string.trim().split(/\r\n|\n\r|\n|\r/);
@@ -205,9 +205,14 @@ export class Parser {
       parsedLine = null;
       try {
         parsedLine = this.parseLine(lines[i]);
-      } catch (error) {
-        errorCaught = true;
-        parserErrors.set(i, error);
+      } catch (error: unknown) {
+        if (error instanceof ParserError) {
+          errorCaught = true;
+          parserErrors.set(i, error);
+        } else {
+          console.error(error);
+          throw new ParserError();
+        }
       }
       if (parsedLine !== null) {
         instructions.push(parsedLine);
