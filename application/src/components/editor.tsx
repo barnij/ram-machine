@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {
+  Point,
   CellBase,
   createEmptyMatrix,
   Spreadsheet,
@@ -83,7 +84,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
               this.pressedEnter();
             }
           }}
-          onSelect={(selected: Types.Point[]) => {
+          onSelect={(selected: Point[]) => {
             if (selected[0].row === this.state.data.length - 1) {
               this.setState(() => ({selectedLastRow: true}));
             } else {
