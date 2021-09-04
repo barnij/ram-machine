@@ -1,12 +1,16 @@
 .row_corner_indicator {
-    min-width: 30px !important;
+    width: 30px !important;
 }
 
 .Spreadsheet {
-    display: grid;
+    width: 100%;
+}
+
+.Spreadsheet__table {
+    width: 100%;
 }
 
 .editor_class {
-    height: calc(100% - 100px);
+    height: 400px;
     overflow-y: scroll;
 }

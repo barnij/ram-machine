@@ -22,7 +22,8 @@ const DataViewer1 = (dataViewerProps: Types.DataViewerProps<CellBase>) => {
 };
 interface IEditorState {
   data: Matrix<CellBase<string>>;
-  selectedLastRow: boolean;
+  selectedPoint: Point | null;
+  editMode: boolean;
 }
 
 interface IEditorProps {
@@ -30,15 +31,41 @@ interface IEditorProps {
 }
 export class Editor extends Component<IEditorProps, IEditorState> {
   state: IEditorState = {
-    data: createEmptyMatrix(2, 4),
-    selectedLastRow: false,
+    data: createEmptyMatrix<CellBase<string>>(2, 4),
+    selectedPoint: null,
+    editMode: false,
   };
 
-  pressedEnter = () => {
-    this.setState(prev => ({
-      data: prev.data.concat(createEmptyMatrix(1, 4)),
-    }));
+  addRow = () => {
+    this.setState(prev => {
+      if (!prev.selectedPoint) {
+        return null;
+      }
+      const dataFirst = prev.data.slice(0, prev.selectedPoint.row + 1);
+      const newData = createEmptyMatrix<CellBase<string>>(1, 4);
+      const dataSecond = prev.data.slice(prev.selectedPoint.row + 1);
+      return {
+        data: dataFirst.concat(newData, dataSecond),
+      };
+    });
   };
+
+  deleteRow = () => {
+    this.setState(prev => {
+      if (
+        !prev.selectedPoint ||
+        prev.selectedPoint.row === this.state.data.length - 1
+      ) {
+        return null;
+      }
+      const dataFirst = prev.data.slice(0, prev.selectedPoint.row);
+      const dataSecond = prev.data.slice(prev.selectedPoint.row + 1);
+      return {
+        data: dataFirst.concat(dataSecond),
+      };
+    });
+  };
+
   loadText = () => {
     let text = '';
     for (const row of this.state.data) {
@@ -80,18 +107,33 @@ export class Editor extends Component<IEditorProps, IEditorState> {
           CornerIndicator={rowCornerInd}
           onChange={data => this.setState(() => ({data: data}))}
           onKeyDown={event => {
-            if (event.key === 'Enter' && this.state.selectedLastRow) {
-              this.pressedEnter();
+            if (
+              event.key === 'Enter' &&
+              !event.shiftKey &&
+              !this.state.editMode
+            ) {
+              this.addRow();
+            }
+            if (event.key === 'Escape') {
+              this.setState(() => ({
+                selectedPoint: null,
+              }));
+            }
+            if (event.key === 'Delete' && event.shiftKey) {
+              this.deleteRow();
             }
           }}
-          onSelect={(selected: Point[]) => {
-            if (selected[0].row === this.state.data.length - 1) {
-              this.setState(() => ({selectedLastRow: true}));
-            } else {
-              this.setState(() => ({selectedLastRow: false}));
-            }
+          onActivate={(selected: Point) => {
+            this.setState(() => ({selectedPoint: selected}));
           }}
           DataViewer={DataViewer1}
+          onModeChange={(mode: Types.Mode) => {
+            if (mode === 'edit') {
+              this.setState(() => ({editMode: true}));
+            } else {
+              this.setState(() => ({editMode: false}));
+            }
+          }}
         />
         <button onClick={this.loadText}>Load program to machine</button>
       </div>
