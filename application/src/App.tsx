@@ -83,9 +83,33 @@ class App extends Component<{}, IState> {
 
   // control-buttons section
   onClickStop = () => {
-    this.setState(() => ({
-      isRunning: false,
-    }));
+    //TODO
+  };
+  onClickStep = () => {
+    //TEMPORARY
+    try {
+      const instructionResult: Ok = engine.stepInstruction(this.state.state);
+      this.setState(() => ({
+        state: instructionResult.state,
+      }));
+    } catch (err) {
+      // manage runtime errors
+    }
+  };
+  onClickRun = () => {
+    //TODO
+  };
+  onClickRunTillBreakpoint = () => {
+    //TODO
+  };
+  onClickPause = () => {
+    //TODO
+  };
+  onClickDownload = () => {
+    //TODO
+  };
+  onClickUpload = () => {
+    //TODO
   };
 
   render() {
@@ -101,6 +125,12 @@ class App extends Component<{}, IState> {
                     running={this.state.isRunning}
                     completed={this.state.state.completed}
                     onClickStop={this.onClickStop}
+                    onClickRun={this.onClickRun}
+                    onClickPause={this.onClickPause}
+                    onClickStep={this.onClickStep}
+                    onClickDownload={this.onClickDownload}
+                    onClickUpload={this.onClickUpload}
+                    onClickRunTillBreakpoint={this.onClickRunTillBreakpoint}
                   />
                 </Col>
               </Row>
