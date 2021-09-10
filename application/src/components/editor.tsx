@@ -62,17 +62,36 @@ const DataEditor: React.FC<Types.DataEditorProps<Cell>> = ({
 
   const value = cell?.value || '';
 
+  if (column === 0) {
+    return (
+      <div className="Spreadsheet__data-editor">
+        <input list="commands" autoFocus type="text" onChange={handleChange} />
+        <datalist id="commands">
+          <option value="add" />
+          <option value="sub" />
+        </datalist>
+      </div>
+    );
+  }
+
   if (column === 1) {
     return (
       <div className="Spreadsheet__data-editor">
         <Autocomplete
           options={commands}
           getOptionLabel={option => option}
+          autoHighlight
           onChange={(event, value) =>
             onChange({...cell, value: value ? value : ''})
           }
           renderInput={params => (
-            <TextField {...params} variant="standard" margin="none" fullWidth />
+            <TextField
+              {...params}
+              autoFocus
+              variant="standard"
+              margin="none"
+              fullWidth
+            />
           )}
         />
       </div>
