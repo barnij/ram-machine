@@ -8,6 +8,7 @@ import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
 import {Processor} from './components/processor';
 import {Editor} from './components/editor';
+import {ControlButtons} from './components/control-buttons';
 
 const engine = new Engine(new Parser(), new Interpreter());
 const program = `
@@ -89,6 +90,37 @@ class App extends Component<{}, IState> {
     this.forceUpdate();
   };
 
+  // control-buttons section
+  onClickStop = () => {
+    //TODO
+  };
+  onClickStep = () => {
+    //TEMPORARY
+    try {
+      const instructionResult: Ok = engine.stepInstruction(this.state.state);
+      this.setState(() => ({
+        state: instructionResult.state,
+      }));
+    } catch (err) {
+      // manage runtime errors
+    }
+  };
+  onClickRun = () => {
+    //TODO
+  };
+  onClickRunTillBreakpoint = () => {
+    //TODO
+  };
+  onClickPause = () => {
+    //TODO
+  };
+  onClickDownload = () => {
+    //TODO
+  };
+  onClickUpload = () => {
+    //TODO
+  };
+
   render() {
     return (
       <div className="App">
@@ -98,6 +130,17 @@ class App extends Component<{}, IState> {
               <Row style={{height: '8%'}}>
                 <Col style={{backgroundColor: 'lightgreen'}}>
                   Controls buttons
+                  <ControlButtons
+                    running={this.state.isRunning}
+                    completed={this.state.state.completed}
+                    onClickStop={this.onClickStop}
+                    onClickRun={this.onClickRun}
+                    onClickPause={this.onClickPause}
+                    onClickStep={this.onClickStep}
+                    onClickDownload={this.onClickDownload}
+                    onClickUpload={this.onClickUpload}
+                    onClickRunTillBreakpoint={this.onClickRunTillBreakpoint}
+                  />
                 </Col>
               </Row>
               <Row style={{height: '15%'}}>
