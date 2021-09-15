@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
 import {Button, ButtonGroup} from '@blueprintjs/core';
 
-import '@blueprintjs/core/lib/css/blueprint.css';
-
 interface IStopButtonProps {
   running: boolean;
   onClick: () => void;
