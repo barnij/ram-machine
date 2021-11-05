@@ -210,6 +210,7 @@ export class Parser {
         parserErrors.set(i, error);
       }
       if (parsedLine !== null) {
+        parsedLine.instruction.line = i;
         instructions.push(parsedLine);
         if (parsedLine.label !== null) {
           if (labels.get(parsedLine.label.value) !== undefined) {
