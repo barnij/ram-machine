@@ -43,15 +43,15 @@ async function main() {
       for (const program of programs) {
         process.stdout.write(`\r ${program} (${test}) ${ALOTOFSPACES}`);
         let output = 'no output';
-        let error: Error | null = null;
+        let error = false;
         try {
           output = await interpret(program, test + '.in');
-        } catch (err) {
+        } catch (err: unknown) {
           console.error(err);
-          error = err;
+          error = true;
         }
 
-        if (output !== correctOutput || error != null) {
+        if (output !== correctOutput || error) {
           console.error(
             `\nIncorrect output in task ${program} and test ${test}`
           );

@@ -205,9 +205,14 @@ export class Parser {
       parsedLine = null;
       try {
         parsedLine = this.parseLine(lines[i]);
-      } catch (error) {
-        errorCaught = true;
-        parserErrors.set(i, error);
+      } catch (error: unknown) {
+        if (error instanceof ParserError) {
+          errorCaught = true;
+          parserErrors.set(i, error);
+        } else {
+          console.error(error);
+          throw new ParserError();
+        }
       }
       if (parsedLine !== null) {
         parsedLine.instruction.line = i;
