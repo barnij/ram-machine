@@ -9,21 +9,24 @@ const ENGINE = new Engine(new Parser(), new Interpreter());
 
 // Engine class
 test('Engine: makeStateFromString', () => {
+  const line1 = new ast.Halt();
+  line1.line = 0;
   const program = new ast.Program(
     new Map<string, ast.Instruction>(),
-    new ast.Combine(new ast.Halt(), new ast.Halt())
+    new ast.Combine(line1, new ast.Halt())
   );
   const state = new State(program, new Environment([]));
   expect(ENGINE.makeStateFromString('halt', [])).toStrictEqual(state);
 });
 
 test('Engine: stepInstruction - step single instruction', () => {
+  const line1 = new ast.Load(new ast.Const(BigInt(1)));
+  line1.line = 0;
+  const line2 = new ast.Add(new ast.Const(BigInt(2)));
+  line2.line = 1;
   const program = new ast.Program(
     new Map<string, ast.Instruction>(),
-    new ast.Combine(
-      new ast.Load(new ast.Const(BigInt(1))),
-      new ast.Combine(new ast.Add(new ast.Const(BigInt(2))), new ast.Halt())
-    )
+    new ast.Combine(line1, new ast.Combine(line2, new ast.Halt()))
   );
   const targetState = new State(program, new Environment([]));
   const state = ENGINE.makeStateFromString('load =1\nadd =2', []);
@@ -40,12 +43,13 @@ test('Engine: stepInstruction - step single instruction', () => {
 });
 
 test('Engine: stepInstruction - interp 2 instructions program step by step', () => {
+  const line1 = new ast.Load(new ast.Const(BigInt(1)));
+  line1.line = 0;
+  const line2 = new ast.Add(new ast.Const(BigInt(2)));
+  line2.line = 1;
   const program = new ast.Program(
     new Map<string, ast.Instruction>(),
-    new ast.Combine(
-      new ast.Load(new ast.Const(BigInt(1))),
-      new ast.Combine(new ast.Add(new ast.Const(BigInt(2))), new ast.Halt())
-    )
+    new ast.Combine(line1, new ast.Combine(line2, new ast.Halt()))
   );
   const targetState = new State(program, new Environment([]));
   const state = ENGINE.makeStateFromString('load =1\nadd =2', []);
@@ -72,12 +76,13 @@ test('Engine: stepInstruction - interp 2 instructions program step by step', () 
 });
 
 test('Engine: complete - interp 2 instructions', () => {
+  const line1 = new ast.Load(new ast.Const(BigInt(1)));
+  line1.line = 0;
+  const line2 = new ast.Add(new ast.Const(BigInt(2)));
+  line2.line = 1;
   const program = new ast.Program(
     new Map<string, ast.Instruction>(),
-    new ast.Combine(
-      new ast.Load(new ast.Const(BigInt(1))),
-      new ast.Combine(new ast.Add(new ast.Const(BigInt(2))), new ast.Halt())
-    )
+    new ast.Combine(line1, new ast.Combine(line2, new ast.Halt()))
   );
   const targetState = new State(program, new Environment([]));
   const state = ENGINE.makeStateFromString('load =1\nadd =2', []);
