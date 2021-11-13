@@ -276,9 +276,13 @@ test('Parser: parseProgram - program with jumps', () => {
     'jump3: jump jump4\n' +
     'jump4: jump jump1\n';
   const line1 = new ast.Jump(new ast.Label('jump2'));
+  line1.line = 0;
   const line2 = new ast.Jump(new ast.Label('jump3'));
+  line2.line = 1;
   const line3 = new ast.Jump(new ast.Label('jump4'));
+  line3.line = 2;
   const line4 = new ast.Jump(new ast.Label('jump1'));
+  line4.line = 3;
   const program = new ast.Combine(
     line1,
     new ast.Combine(
@@ -307,9 +311,13 @@ test('Parser: parseProgramFile - test1.ramcode', () => {
   const parser = new Parser();
   const path = 'test_programs/test1.ramcode';
   const line1 = new ast.Jump(new ast.Label('jump2'));
+  line1.line = 0;
   const line2 = new ast.Jump(new ast.Label('jump3'));
+  line2.line = 1;
   const line3 = new ast.Jump(new ast.Label('jump4'));
+  line3.line = 2;
   const line4 = new ast.Jump(new ast.Label('jump1'));
+  line4.line = 3;
   const program = new ast.Combine(
     line1,
     new ast.Combine(
