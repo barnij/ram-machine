@@ -1,5 +1,3 @@
-import {TextField} from '@material-ui/core';
-import {Autocomplete} from '@material-ui/lab';
 import React, {Component} from 'react';
 import {
   Point,
@@ -15,100 +13,11 @@ const rowCornerInd = () => (
   <th className="Spreadsheet__header row_corner_indicator"></th>
 );
 
-const DataViewer = (dataViewerProps: Types.DataViewerProps<CellBase>) => {
-  return (
-    <span className="Spreadsheet__data-viewer">
-      {dataViewerProps.cell?.value}
-    </span>
-  );
-};
-
 interface IEditorState {
   data: Matrix<CellBase<string>>;
   selectedPoint: Point | null;
   editMode: boolean;
 }
-
-type Cell = Types.CellBase<string>;
-
-function selectInputValue(el: HTMLInputElement): void {
-  el.selectionStart = 0;
-  el.selectionEnd = el.value.length;
-}
-
-const commands = ['add', 'sub', 'mult'];
-
-const DataEditor: React.FC<Types.DataEditorProps<Cell>> = ({
-  column,
-  onChange,
-  cell = {
-    value: '',
-  },
-}) => {
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
-
-  const handleChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange({...cell, value: e.target.value});
-    },
-    [onChange, cell]
-  );
-
-  React.useEffect(() => {
-    if (inputRef.current) {
-      selectInputValue(inputRef.current);
-    }
-  }, [inputRef]);
-
-  const value = cell?.value || '';
-
-  if (column === 0) {
-    return (
-      <div className="Spreadsheet__data-editor">
-        <input list="commands" autoFocus type="text" onChange={handleChange} />
-        <datalist id="commands">
-          <option value="add" />
-          <option value="sub" />
-        </datalist>
-      </div>
-    );
-  }
-
-  if (column === 1) {
-    return (
-      <div className="Spreadsheet__data-editor">
-        <Autocomplete
-          options={commands}
-          getOptionLabel={option => option}
-          autoHighlight
-          onChange={(event, value) =>
-            onChange({...cell, value: value ? value : ''})
-          }
-          renderInput={params => (
-            <TextField
-              {...params}
-              autoFocus
-              variant="standard"
-              margin="none"
-              fullWidth
-            />
-          )}
-        />
-      </div>
-    );
-  }
-  return (
-    <div className="Spreadsheet__data-editor">
-      <input
-        ref={inputRef}
-        type="text"
-        onChange={handleChange}
-        value={value}
-        autoFocus
-      />
-    </div>
-  );
-};
 
 interface IEditorProps {
   onClick(program: string): void;
@@ -211,8 +120,6 @@ export class Editor extends Component<IEditorProps, IEditorState> {
             this.setState(() => ({selectedPoint: selected}));
             console.log(selected);
           }}
-          DataViewer={DataViewer}
-          DataEditor={DataEditor}
           onModeChange={(mode: Types.Mode) => {
             if (mode === 'edit') {
               this.setState(() => ({editMode: true}));
