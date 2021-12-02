@@ -90,6 +90,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
     console.log(text);
     this.props.onClick(text);
   };
+
   render() {
     return (
       <div style={{width: '100%'}} className="editor_class" id="editor">
