@@ -92,7 +92,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
   };
   render() {
     return (
-      <div style={{width: '100%'}} className="editor_class">
+      <div style={{width: '100%'}} className="editor_class" id="editor">
         <Spreadsheet
           data={this.state.data}
           columnLabels={['Label', 'Instruction', 'Argument', 'Comment']}

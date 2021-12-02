@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Col, Container, Row} from 'react-bootstrap';
-import {Ddd} from './components/example-ddd';
 import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
@@ -121,6 +120,21 @@ class App extends Component<{}, IState> {
     //TODO
   };
 
+  componentDidMount = () => {
+    const heightOfWrapper = document.getElementById(
+      'spreadsheet_wrapper'
+    )?.clientHeight;
+
+    const paddingBottomOfWrapper = 2 * 5; //5px
+
+    const h = (
+      (heightOfWrapper ?? paddingBottomOfWrapper) - paddingBottomOfWrapper
+    ).toString();
+
+    const edi = document.getElementById('editor')!;
+    if (edi !== null && edi?.style) edi.style.height = h + 'px';
+  };
+
   render() {
     return (
       <div className="App">
@@ -178,14 +192,13 @@ class App extends Component<{}, IState> {
                 </Col>
               </Row>
               <Row style={{height: '80%'}}>
-                <Col style={{backgroundColor: 'orange'}}>
-                  Editor
-                  <Ddd
-                    onClick={this.onClick}
-                    onClickRestart={this.onClickRestart}
-                    state={this.state.state}
-                    program={program}
-                  />
+                <Col
+                  id="spreadsheet_wrapper"
+                  style={{
+                    backgroundColor: 'orange',
+                    paddingTop: '5px',
+                  }}
+                >
                   <Editor onClick={this.loadText} />
                 </Col>
               </Row>
