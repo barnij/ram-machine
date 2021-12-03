@@ -5,8 +5,8 @@ import {
   createEmptyMatrix,
   Spreadsheet,
   Matrix,
-} from 'react-spreadsheet';
-import type Types from 'react-spreadsheet/dist/types';
+  Mode,
+} from '@barnij/react-spreadsheet';
 import './editor.css';
 
 const rowCornerInd = () => (
@@ -121,7 +121,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
             this.setState(() => ({selectedPoint: selected}));
             console.log(selected);
           }}
-          onModeChange={(mode: Types.Mode) => {
+          onModeChange={(mode: Mode) => {
             if (mode === 'edit') {
               this.setState(() => ({editMode: true}));
             } else {
