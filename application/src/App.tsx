@@ -2,11 +2,12 @@ import React, {Component} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Col, Container, Row} from 'react-bootstrap';
-import {Ddd} from './components/example-ddd';
 import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
 import {Processor} from './components/processor';
+import {Editor} from './components/editor';
+import {ControlButtons} from './components/control-buttons';
 
 const engine = new Engine(new Parser(), new Interpreter());
 const program = `
@@ -54,6 +55,12 @@ class App extends Component<{}, IState> {
     }));
   };
 
+  loadText = (text: string) => {
+    this.setState(() => ({
+      state: engine.makeStateFromString(text, []),
+    }));
+  };
+
   inputAdd = () => {
     this.state.inputs.push('');
 
@@ -82,6 +89,52 @@ class App extends Component<{}, IState> {
     this.forceUpdate();
   };
 
+  // control-buttons section
+  onClickStop = () => {
+    //TODO
+  };
+  onClickStep = () => {
+    //TEMPORARY
+    try {
+      const instructionResult: Ok = engine.stepInstruction(this.state.state);
+      this.setState(() => ({
+        state: instructionResult.state,
+      }));
+    } catch (err) {
+      // manage runtime errors
+    }
+  };
+  onClickRun = () => {
+    //TODO
+  };
+  onClickRunTillBreakpoint = () => {
+    //TODO
+  };
+  onClickPause = () => {
+    //TODO
+  };
+  onClickDownload = () => {
+    //TODO
+  };
+  onClickUpload = () => {
+    //TODO
+  };
+
+  componentDidMount = () => {
+    const heightOfWrapper = document.getElementById(
+      'spreadsheet_wrapper'
+    )?.clientHeight;
+
+    const paddingBottomOfWrapper = 2 * 5; //5px
+
+    const h = (
+      (heightOfWrapper ?? paddingBottomOfWrapper) - paddingBottomOfWrapper
+    ).toString();
+
+    const edi = document.getElementById('editor')!;
+    if (edi !== null && edi?.style) edi.style.height = h + 'px';
+  };
+
   render() {
     return (
       <div className="App">
@@ -91,6 +144,17 @@ class App extends Component<{}, IState> {
               <Row style={{height: '8%'}}>
                 <Col style={{backgroundColor: 'lightgreen'}}>
                   Controls buttons
+                  <ControlButtons
+                    running={this.state.isRunning}
+                    completed={this.state.state.completed}
+                    onClickStop={this.onClickStop}
+                    onClickRun={this.onClickRun}
+                    onClickPause={this.onClickPause}
+                    onClickStep={this.onClickStep}
+                    onClickDownload={this.onClickDownload}
+                    onClickUpload={this.onClickUpload}
+                    onClickRunTillBreakpoint={this.onClickRunTillBreakpoint}
+                  />
                 </Col>
               </Row>
               <Row style={{height: '15%'}}>
@@ -128,21 +192,18 @@ class App extends Component<{}, IState> {
                 </Col>
               </Row>
               <Row style={{height: '80%'}}>
-                <Col style={{backgroundColor: 'orange'}}>
-                  Intructions
-                  <Ddd
-                    onClick={this.onClick}
-                    onClickRestart={this.onClickRestart}
-                    state={this.state.state}
-                    program={program}
-                  />
+                <Col
+                  id="spreadsheet_wrapper"
+                  style={{
+                    backgroundColor: 'orange',
+                    paddingTop: '5px',
+                  }}
+                >
+                  <Editor onClick={this.loadText} />
                 </Col>
               </Row>
               <Row style={{height: '10%'}}>
-                <Col
-                  className="d-flex align-items-center justify-content-center"
-                  style={{backgroundColor: 'yellow'}}
-                >
+                <Col style={{backgroundColor: 'yellow'}}>
                   Output tape
                   <OutputTape
                     outs={this.state.state.environment.output.values}

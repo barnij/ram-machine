@@ -1,0 +1,16 @@
+.row_corner_indicator {
+    width: 30px !important;
+}
+
+.Spreadsheet {
+    width: 100%;
+}
+
+.Spreadsheet__table {
+    width: 100%;
+}
+
+.editor_class {
+    height: 400px;
+    overflow-y: scroll;
+}

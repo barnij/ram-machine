@@ -1,5 +1,5 @@
-import {interpret} from './interpreter';
-import {readdir, readFile} from 'fs/promises';
+import { interpret } from './interpreter';
+import { readdir, readFile } from 'fs/promises';
 import * as path from 'path';
 
 async function delay(ms: number) {
