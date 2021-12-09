@@ -129,12 +129,6 @@ export class ControlButtons extends Component<IControlButtonsProps, {}> {
     return (
       <div>
         <ButtonGroup>
-          {/* <PlayPauseButton
-            running={this.state.running}
-            complete={this.state.complete}
-            onClickPlay={() => this.onClickPlay()}
-            onClickPause={() => this.onClickPause()}
-          /> */}
           <RunPauseButton
             running={this.props.running}
             onClickRun={this.props.onClickRun}
