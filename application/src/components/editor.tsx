@@ -6,27 +6,31 @@ import {
   Spreadsheet,
   Matrix,
   Mode,
-} from '@barnij/react-spreadsheet';
+} from 'react-spreadsheet';
+import {Icon} from '@blueprintjs/core';
+declare type RowIndicatorProps = {
+  row: number;
+  label?: React.ReactNode | null;
+};
 import './editor.css';
-
-const rowCornerInd = () => (
-  <th className="Spreadsheet__header row_corner_indicator"></th>
-);
 
 interface IEditorState {
   data: Matrix<CellBase<string>>;
   selectedPoint: Point | null;
   editMode: boolean;
+  offset: number;
 }
 
 interface IEditorProps {
   onClick(program: string): void;
+  curRow: number;
 }
 export class Editor extends Component<IEditorProps, IEditorState> {
   state: IEditorState = {
-    data: createEmptyMatrix<CellBase<string>>(2, 4),
+    data: createEmptyMatrix<CellBase<string>>(10, 4),
     selectedPoint: null,
     editMode: false,
+    offset: 0,
   };
 
   addRow = () => {
@@ -61,6 +65,8 @@ export class Editor extends Component<IEditorProps, IEditorState> {
 
   loadText = () => {
     let text = '';
+    let start = true;
+    let offset = 0;
     for (const row of this.state.data) {
       const label = row[0]?.value;
       const instruction = row[1]?.value;
@@ -72,6 +78,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
       }
 
       if (instruction) {
+        start = false;
         text += instruction + ' ';
       }
 
@@ -83,12 +90,29 @@ export class Editor extends Component<IEditorProps, IEditorState> {
         text += ' #' + comment;
       }
 
-      if (label || instruction || argument || comment) {
-        text += '\n';
+      text += '\n';
+
+      if (start) {
+        offset += 1;
       }
     }
     console.log(text);
+    this.setState({
+      offset,
+    });
     this.props.onClick(text);
+  };
+
+  rowCornerInd = ({row}: RowIndicatorProps) => {
+    let value = null;
+    if (
+      this.props.curRow !== -1 &&
+      row === this.props.curRow + this.state.offset
+    )
+      value = <Icon icon="chevron-right" />;
+    return (
+      <th className="Spreadsheet__header row_corner_indicator">{value}</th>
+    );
   };
 
   render() {
@@ -97,8 +121,10 @@ export class Editor extends Component<IEditorProps, IEditorState> {
         <Spreadsheet
           data={this.state.data}
           columnLabels={['Label', 'Instruction', 'Argument', 'Comment']}
-          RowIndicator={rowCornerInd}
-          CornerIndicator={rowCornerInd}
+          RowIndicator={this.rowCornerInd}
+          CornerIndicator={() => (
+            <th className="Spreadsheet__header row_corner_indicator"></th>
+          )}
           onChange={data => this.setState(() => ({data: data}))}
           onKeyDown={event => {
             if (
@@ -119,7 +145,6 @@ export class Editor extends Component<IEditorProps, IEditorState> {
           }}
           onActivate={(selected: Point) => {
             this.setState(() => ({selectedPoint: selected}));
-            console.log(selected);
           }}
           onModeChange={(mode: Mode) => {
             if (mode === 'edit') {
