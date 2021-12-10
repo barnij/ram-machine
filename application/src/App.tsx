@@ -33,7 +33,7 @@ interface IState {
 
 class App extends Component<{}, IState> {
   state: IState = {
-    state: engine.makeStateFromString(program, []),
+    state: engine.makeStateFromString('', []),
     inputs: [''],
     isRunning: false,
   };
@@ -95,6 +95,7 @@ class App extends Component<{}, IState> {
   };
   onClickStep = () => {
     //TEMPORARY
+    console.log(this.state);
     try {
       const instructionResult: Ok = engine.stepInstruction(this.state.state);
       this.setState(() => ({
@@ -199,7 +200,10 @@ class App extends Component<{}, IState> {
                     paddingTop: '5px',
                   }}
                 >
-                  <Editor onClick={this.loadText} />
+                  <Editor
+                    onClick={this.loadText}
+                    curRow={this.state.state.nextInstruction.getLineNumber()}
+                  />
                 </Col>
               </Row>
               <Row style={{height: '10%'}}>
