@@ -274,7 +274,7 @@ test('Parser: parseProgram - program with jumps', () => {
     'jump1: jump jump2\n' +
     'jump2: jump jump3\n' +
     'jump3: jump jump4\n' +
-    'jump4: jump jump1\n';
+    'jump4: jump jump1';
   const line1 = new ast.Jump(new ast.Label('jump2'));
   line1.line = 0;
   const line2 = new ast.Jump(new ast.Label('jump3'));
@@ -301,6 +301,66 @@ test('Parser: parseProgram - program with jumps', () => {
       ['jump3', label3],
       ['jump4', label4],
     ]),
+    program
+  );
+  expect(parser.parseProgram(programString)).toStrictEqual(parsedProgram);
+});
+
+test('Parser: parseProgram - leading empty lines', () => {
+  const parser = new Parser();
+  const programString = '\n' + ' \n' + 'read 0';
+  const line1 = new ast.Skip();
+  line1.line = 0;
+  const line2 = new ast.Skip();
+  line2.line = 1;
+  const line3 = new ast.Read(new ast.Address(BigInt(0)));
+  line3.line = 2;
+  const program = new ast.Combine(
+    line1,
+    new ast.Combine(line2, new ast.Combine(line3, new ast.Halt()))
+  );
+  const parsedProgram = new ast.Program(
+    new Map<string, ast.Instruction>([]),
+    program
+  );
+  expect(parser.parseProgram(programString)).toStrictEqual(parsedProgram);
+});
+
+test('Parser: parseProgram - trailing empty lines', () => {
+  const parser = new Parser();
+  const programString = 'read 0\n' + '\n' + ' ';
+  const line1 = new ast.Read(new ast.Address(BigInt(0)));
+  line1.line = 0;
+  const line2 = new ast.Skip();
+  line2.line = 1;
+  const line3 = new ast.Skip();
+  line3.line = 2;
+  const program = new ast.Combine(
+    line1,
+    new ast.Combine(line2, new ast.Combine(line3, new ast.Halt()))
+  );
+  const parsedProgram = new ast.Program(
+    new Map<string, ast.Instruction>([]),
+    program
+  );
+  expect(parser.parseProgram(programString)).toStrictEqual(parsedProgram);
+});
+
+test('Parser: parseProgram - trailing and leading empty lines', () => {
+  const parser = new Parser();
+  const programString = '\n' + 'read 0\n' + ' ';
+  const line1 = new ast.Skip();
+  line1.line = 0;
+  const line2 = new ast.Read(new ast.Address(BigInt(0)));
+  line2.line = 1;
+  const line3 = new ast.Skip();
+  line3.line = 2;
+  const program = new ast.Combine(
+    line1,
+    new ast.Combine(line2, new ast.Combine(line3, new ast.Halt()))
+  );
+  const parsedProgram = new ast.Program(
+    new Map<string, ast.Instruction>([]),
     program
   );
   expect(parser.parseProgram(programString)).toStrictEqual(parsedProgram);
@@ -338,6 +398,15 @@ test('Parser: parseProgramFile - test1.ramcode', () => {
     ]),
     program
   );
+  expect(parser.parseProgramFile(path)).toStrictEqual(parsedProgram);
+});
+test('Parser: parseProgramFile - empty.ramcode', () => {
+  const parser = new Parser();
+  const parsedProgram = new ast.Program(
+    new Map<string, ast.Instruction>(),
+    new ast.Halt()
+  );
+  const path = 'test_programs/empty.ramcode';
   expect(parser.parseProgramFile(path)).toStrictEqual(parsedProgram);
 });
 //#endregion
