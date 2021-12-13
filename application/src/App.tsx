@@ -60,41 +60,58 @@ class App extends Component<{}, IState> {
   };
 
   loadProgram = () => {
-    this.setState(() => ({
-      state: engine.makeStateFromString(
+    try {
+      const newState: State = engine.makeStateFromString(
         program,
         this.state.inputs.map<bigint>(x => {
           // eslint-disable-next-line node/no-unsupported-features/es-builtins
           return BigInt(x);
         })
-      ),
-    }));
+      );
+
+      this.setState({
+        state: newState,
+      });
+    } catch (err) {
+      //todo handle errors
+      if (err instanceof Error) console.log(err.name + '  ' + err.message);
+      else console.log('ram machine encountered unknown problem');
+    }
   };
 
   sleep = (milliseconds: number) => {
-    return new Promise(resolve => setTimeout(resolve, milliseconds));
+    return new Promise(resolve =>
+      setTimeout(resolve, milliseconds === Infinity ? 0 : milliseconds)
+    );
   };
 
   runProgram = () => {
-    if (this.state.state.completed === true || this.state.isRunning === false)
-      return;
+    if (this.state.state.completed || !this.state.isRunning) return;
 
     this.onClickStep();
-    this.sleep(maxSpeed / this.state.programSpeed).then(this.runProgram); // prayage for tail recursion
+    this.sleep(maxSpeed / this.state.programSpeed).then(this.runProgram);
   };
 
   runProgramTillBP = () => {
     if (
-      this.state.state.completed === true ||
-      this.state.isRunning === false ||
+      !this.state.state.completed ||
+      !this.state.isRunning ||
       this.state.breakpoints.has(
         this.state.state.nextInstruction.getLineNumber()
-      ) === true
+      )
     )
       return;
 
     this.onClickStep();
-    this.sleep(maxSpeed / this.state.programSpeed).then(this.runProgram); // prayage for tail recursion
+    this.sleep(maxSpeed / this.state.programSpeed).then(this.runProgram);
+  };
+
+  maybeFinish = () => {
+    if (this.state.state.completed)
+      this.setState({
+        started: false,
+        isRunning: false,
+      });
   };
 
   inputAdd = () => {
@@ -127,26 +144,29 @@ class App extends Component<{}, IState> {
 
   // control-buttons section
   onClickStop = () => {
-    this.setState(
-      {
-        started: false,
-        isRunning: false,
-      },
-      this.loadProgram
-    );
+    this.setState({
+      started: false,
+      isRunning: false,
+    });
   };
   onClickStep = () => {
-    //TEMPORARY
     try {
       const instructionResult: Ok = engine.stepInstruction(this.state.state);
-      this.setState(() => ({
-        state: instructionResult.state,
-      }));
+      this.setState(
+        {
+          state: instructionResult.state,
+        },
+        this.maybeFinish
+      );
     } catch (err) {
       // manage runtime errors
+      if (err instanceof Error) console.log(err.name + '  ' + err.message);
+      else console.log('ram machine encountered unknown problem');
     }
   };
   onClickRun = () => {
+    if (this.state.started === false) this.loadProgram();
+
     this.setState(
       {
         started: true,
@@ -156,6 +176,8 @@ class App extends Component<{}, IState> {
     );
   };
   onClickRunTillBreakpoint = () => {
+    if (!this.state.started) this.loadProgram();
+
     this.setState(
       {
         started: true,
