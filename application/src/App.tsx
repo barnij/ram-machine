@@ -25,10 +25,15 @@ const program = `
  write =7
 `;
 
+const defaultSpeed = 1;
+const maxSpeed = 1000;
+
 interface IState {
   state: State;
   inputs: string[];
   isRunning: boolean;
+  breakpoints: Set<number>;
+  programSpeed: number;
 }
 
 class App extends Component<{}, IState> {
@@ -36,29 +41,54 @@ class App extends Component<{}, IState> {
     state: engine.makeStateFromString(program, []),
     inputs: [''],
     isRunning: false,
-  };
-
-  onClick = () => {
-    try {
-      const instructionResult: Ok = engine.stepInstruction(this.state.state);
-      this.setState(() => ({
-        state: instructionResult.state,
-      }));
-    } catch (err) {
-      // manage runtime errors
-    }
-  };
-
-  onClickRestart = () => {
-    this.setState(() => ({
-      state: engine.makeStateFromString(program, []),
-    }));
+    breakpoints: new Set(),
+    programSpeed: defaultSpeed,
   };
 
   loadText = (text: string) => {
     this.setState(() => ({
-      state: engine.makeStateFromString(text, []),
+      state: engine.makeStateFromString(
+        text,
+        this.state.inputs.map<bigint>(x => {
+          // eslint-disable-next-line node/no-unsupported-features/es-builtins
+          return BigInt(x);
+        })
+      ),
     }));
+  };
+
+  runProgram = () => {
+    console.log('akukkku' + this.state.isRunning);
+    while (this.state.state.completed === false && this.state.isRunning) {
+      console.log('akuku');
+      this.onClickStep();
+      (async () => {
+        await new Promise(f => {
+          console.log(maxSpeed / this.state.programSpeed);
+          setTimeout(f, maxSpeed / this.state.programSpeed);
+        });
+      })();
+    }
+  };
+
+  runProgramTillBP = () => {
+    console.log('akukkku' + this.state.isRunning);
+    while (
+      this.state.breakpoints.has(
+        this.state.state.nextInstruction.getLineNumber()
+      ) === false &&
+      this.state.state.completed === false &&
+      this.state.isRunning
+    ) {
+      console.log('akuku');
+      this.onClickStep();
+      (async () => {
+        await new Promise(f => {
+          console.log(maxSpeed / this.state.programSpeed);
+          setTimeout(f, maxSpeed / this.state.programSpeed);
+        });
+      })();
+    }
   };
 
   inputAdd = () => {
@@ -91,7 +121,16 @@ class App extends Component<{}, IState> {
 
   // control-buttons section
   onClickStop = () => {
-    //TODO
+    this.setState(() => ({
+      isRunning: false,
+      state: engine.makeStateFromString(
+        program,
+        this.state.inputs.map<bigint>(x => {
+          // eslint-disable-next-line node/no-unsupported-features/es-builtins
+          return BigInt(x);
+        })
+      ),
+    }));
   };
   onClickStep = () => {
     //TEMPORARY
@@ -105,13 +144,25 @@ class App extends Component<{}, IState> {
     }
   };
   onClickRun = () => {
-    //TODO
+    this.setState(
+      {
+        isRunning: true,
+      },
+      this.runProgram
+    );
   };
   onClickRunTillBreakpoint = () => {
-    //TODO
+    this.setState(
+      {
+        isRunning: true,
+      },
+      this.runProgramTillBP
+    );
   };
   onClickPause = () => {
-    //TODO
+    this.setState(() => ({
+      isRunning: false,
+    }));
   };
   onClickDownload = () => {
     //TODO
