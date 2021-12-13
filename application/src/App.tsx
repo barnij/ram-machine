@@ -32,6 +32,7 @@ interface IState {
   state: State;
   inputs: string[];
   isRunning: boolean;
+  started: boolean;
   breakpoints: Set<number>;
   programSpeed: number;
 }
@@ -41,6 +42,7 @@ class App extends Component<{}, IState> {
     state: engine.makeStateFromString('', []),
     inputs: [''],
     isRunning: false,
+    started: false,
     breakpoints: new Set(),
     programSpeed: defaultSpeed,
   };
@@ -57,38 +59,42 @@ class App extends Component<{}, IState> {
     }));
   };
 
+  loadProgram = () => {
+    this.setState(() => ({
+      state: engine.makeStateFromString(
+        program,
+        this.state.inputs.map<bigint>(x => {
+          // eslint-disable-next-line node/no-unsupported-features/es-builtins
+          return BigInt(x);
+        })
+      ),
+    }));
+  };
+
+  sleep = (milliseconds: number) => {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+  };
+
   runProgram = () => {
-    console.log('akukkku' + this.state.isRunning);
-    while (this.state.state.completed === false && this.state.isRunning) {
-      console.log('akuku');
-      this.onClickStep();
-      (async () => {
-        await new Promise(f => {
-          console.log(maxSpeed / this.state.programSpeed);
-          setTimeout(f, maxSpeed / this.state.programSpeed);
-        });
-      })();
-    }
+    if (this.state.state.completed === true || this.state.isRunning === false)
+      return;
+
+    this.onClickStep();
+    this.sleep(maxSpeed / this.state.programSpeed).then(this.runProgram); // prayage for tail recursion
   };
 
   runProgramTillBP = () => {
-    console.log('akukkku' + this.state.isRunning);
-    while (
+    if (
+      this.state.state.completed === true ||
+      this.state.isRunning === false ||
       this.state.breakpoints.has(
         this.state.state.nextInstruction.getLineNumber()
-      ) === false &&
-      this.state.state.completed === false &&
-      this.state.isRunning
-    ) {
-      console.log('akuku');
-      this.onClickStep();
-      (async () => {
-        await new Promise(f => {
-          console.log(maxSpeed / this.state.programSpeed);
-          setTimeout(f, maxSpeed / this.state.programSpeed);
-        });
-      })();
-    }
+      ) === true
+    )
+      return;
+
+    this.onClickStep();
+    this.sleep(maxSpeed / this.state.programSpeed).then(this.runProgram); // prayage for tail recursion
   };
 
   inputAdd = () => {
@@ -121,16 +127,13 @@ class App extends Component<{}, IState> {
 
   // control-buttons section
   onClickStop = () => {
-    this.setState(() => ({
-      isRunning: false,
-      state: engine.makeStateFromString(
-        program,
-        this.state.inputs.map<bigint>(x => {
-          // eslint-disable-next-line node/no-unsupported-features/es-builtins
-          return BigInt(x);
-        })
-      ),
-    }));
+    this.setState(
+      {
+        started: false,
+        isRunning: false,
+      },
+      this.loadProgram
+    );
   };
   onClickStep = () => {
     //TEMPORARY
@@ -146,6 +149,7 @@ class App extends Component<{}, IState> {
   onClickRun = () => {
     this.setState(
       {
+        started: true,
         isRunning: true,
       },
       this.runProgram
@@ -154,6 +158,7 @@ class App extends Component<{}, IState> {
   onClickRunTillBreakpoint = () => {
     this.setState(
       {
+        started: true,
         isRunning: true,
       },
       this.runProgramTillBP
@@ -196,6 +201,7 @@ class App extends Component<{}, IState> {
                 <Col style={{backgroundColor: 'lightgreen'}}>
                   Controls buttons
                   <ControlButtons
+                    started={this.state.started}
                     running={this.state.isRunning}
                     completed={this.state.state.completed}
                     onClickStop={this.onClickStop}
