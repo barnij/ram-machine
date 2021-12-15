@@ -9,6 +9,7 @@ import {Processor} from './components/processor';
 import {Editor} from './components/editor';
 import {ControlButtons} from './components/control-buttons';
 import {EditorAlert} from './components/alert';
+import {Slider} from '@blueprintjs/core';
 
 const engine = new Engine(new Parser(), new Interpreter());
 const program = `
@@ -40,6 +41,7 @@ interface IState {
   errorMessage: string;
   errorLine: number;
   errorType: string;
+  sliderLabelRenderer: () => string;
 }
 
 class App extends Component<{}, IState> {
@@ -54,6 +56,7 @@ class App extends Component<{}, IState> {
     errorMessage: '',
     errorLine: 0,
     errorType: '',
+    sliderLabelRenderer: () => '',
   };
 
   loadText = (text: string) => {
@@ -113,21 +116,19 @@ class App extends Component<{}, IState> {
   };
 
   sleep = (milliseconds: number) => {
-    return new Promise(resolve =>
-      setTimeout(resolve, milliseconds === Infinity ? 0 : milliseconds)
-    );
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
   };
 
   runProgram = () => {
     if (this.state.state.completed || !this.state.isRunning) return;
 
     this.onClickStep();
-    this.sleep(maxSpeed / this.state.programSpeed).then(this.runProgram);
+    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
   };
 
   runProgramTillBP = () => {
     if (
-      !this.state.state.completed ||
+      this.state.state.completed ||
       !this.state.isRunning ||
       this.state.breakpoints.has(
         this.state.state.nextInstruction.getLineNumber()
@@ -136,7 +137,7 @@ class App extends Component<{}, IState> {
       return;
 
     this.onClickStep();
-    this.sleep(maxSpeed / this.state.programSpeed).then(this.runProgram);
+    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
   };
 
   maybeFinish = () => {
@@ -260,7 +261,7 @@ class App extends Component<{}, IState> {
         <Container fluid>
           <Row style={{height: '100vh'}}>
             <Col sm={3}>
-              <Row style={{height: '8%'}}>
+              <Row style={{height: '12%'}}>
                 <Col style={{backgroundColor: 'lightgreen'}}>
                   Controls buttons
                   <ControlButtons
@@ -274,6 +275,26 @@ class App extends Component<{}, IState> {
                     onClickDownload={this.onClickDownload}
                     onClickUpload={this.onClickUpload}
                     onClickRunTillBreakpoint={this.onClickRunTillBreakpoint}
+                  />
+                  Evaluation speed
+                  <Slider
+                    min={1}
+                    max={maxSpeed}
+                    stepSize={1}
+                    labelValues={[]}
+                    onChange={(value: number) => {
+                      this.setState({
+                        programSpeed: value,
+                        sliderLabelRenderer: () =>
+                          this.state.programSpeed.toString(),
+                      });
+                    }}
+                    onRelease={() => {
+                      this.setState({sliderLabelRenderer: () => ''});
+                    }}
+                    labelRenderer={this.state.sliderLabelRenderer}
+                    value={this.state.programSpeed}
+                    vertical={false}
                   />
                 </Col>
               </Row>
