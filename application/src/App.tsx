@@ -8,6 +8,7 @@ import {InputTape} from './components/inputTape';
 import {Processor} from './components/processor';
 import {Editor} from './components/editor';
 import {ControlButtons} from './components/control-buttons';
+import {EditorAlert} from './components/alert';
 
 const engine = new Engine(new Parser(), new Interpreter());
 const program = `
@@ -35,6 +36,10 @@ interface IState {
   started: boolean;
   breakpoints: Set<number>;
   programSpeed: number;
+  errorOpen: boolean;
+  errorMessage: string;
+  errorLine: number;
+  errorType: string;
 }
 
 class App extends Component<{}, IState> {
@@ -45,18 +50,38 @@ class App extends Component<{}, IState> {
     started: false,
     breakpoints: new Set(),
     programSpeed: defaultSpeed,
+    errorOpen: false,
+    errorMessage: '',
+    errorLine: 0,
+    errorType: '',
   };
 
   loadText = (text: string) => {
-    this.setState(() => ({
-      state: engine.makeStateFromString(
+    try {
+      const newState: State = engine.makeStateFromString(
         text,
         this.state.inputs.map<bigint>(x => {
           // eslint-disable-next-line node/no-unsupported-features/es-builtins
           return BigInt(x);
         })
-      ),
-    }));
+      );
+
+      this.setState({
+        state: newState,
+      });
+    } catch (err) {
+      let msg = 'ram machine encountered unknown problem';
+      if (err instanceof Error) msg = err.message;
+
+      this.setState({
+        started: false,
+        isRunning: false,
+        errorMessage: msg,
+        errorOpen: true,
+        errorType: 'Parser Error',
+        errorLine: 0, // TODO in parser
+      });
+    }
   };
 
   loadProgram = () => {
@@ -73,9 +98,17 @@ class App extends Component<{}, IState> {
         state: newState,
       });
     } catch (err) {
-      //todo handle errors
-      if (err instanceof Error) console.log(err.name + '  ' + err.message);
-      else console.log('ram machine encountered unknown problem');
+      let msg = 'ram machine encountered unknown problem';
+      if (err instanceof Error) msg = err.message;
+
+      this.setState({
+        started: false,
+        isRunning: false,
+        errorMessage: msg,
+        errorOpen: true,
+        errorType: 'Parser Error',
+        errorLine: 0, // TODO in parser
+      });
     }
   };
 
@@ -159,13 +192,21 @@ class App extends Component<{}, IState> {
         this.maybeFinish
       );
     } catch (err) {
-      // manage runtime errors
-      if (err instanceof Error) console.log(err.name + '  ' + err.message);
-      else console.log('ram machine encountered unknown problem');
+      let msg = 'ram machine encountered unknown problem';
+      if (err instanceof Error) msg = err.message;
+
+      this.setState({
+        started: false,
+        isRunning: false,
+        errorMessage: msg,
+        errorOpen: true,
+        errorType: 'Run Time Error',
+        errorLine: this.state.state.nextInstruction.getLineNumber(),
+      });
     }
   };
   onClickRun = () => {
-    if (this.state.started === false) this.loadProgram();
+    // if (this.state.started === false) this.loadProgram();
 
     this.setState(
       {
@@ -282,6 +323,15 @@ class App extends Component<{}, IState> {
                     onClick={this.loadText}
                     curRow={this.state.state.nextInstruction.getLineNumber()}
                   />
+                  <EditorAlert
+                    isOpen={this.state.errorOpen}
+                    message={this.state.errorMessage}
+                    line={this.state.errorLine}
+                    errorType={this.state.errorType}
+                    handleClose={() => {
+                      this.setState({errorOpen: false});
+                    }}
+                  ></EditorAlert>
                 </Col>
               </Row>
               <Row style={{height: '10%'}}>
