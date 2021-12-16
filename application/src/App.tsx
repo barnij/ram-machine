@@ -325,7 +325,7 @@ class App extends Component<{}, IState> {
                   Input tape{' '}
                   <InputTape
                     inputs={this.state.inputs}
-                    disabled={this.state.isRunning}
+                    disabled={this.state.started}
                     inputAdd={this.inputAdd}
                     inputRemove={this.inputRemove}
                     onChange={this.handleInputChange}
