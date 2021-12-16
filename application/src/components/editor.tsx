@@ -23,6 +23,7 @@ interface IEditorState {
 interface IEditorProps {
   onClick(program: string): void;
   curRow: number;
+  handleChange: (text: string) => void;
 }
 
 export function parseMatrix(data: Matrix<CellBase<string>>) {
@@ -148,7 +149,6 @@ export class Editor extends Component<IEditorProps, IEditorState> {
             }
           }}
         />
-        <button onClick={this.loadText}>Load program to machine</button>
       </div>
     );
   }
