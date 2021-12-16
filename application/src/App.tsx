@@ -12,25 +12,12 @@ import {EditorAlert} from './components/alert';
 import {Slider} from '@blueprintjs/core';
 
 const engine = new Engine(new Parser(), new Interpreter());
-const program = `
- write =5
- write =7
- write =5
- write =7
- write =5
- write =7
- write =5
- write =7
- write =5
- write =7
- write =5
- write =7
-`;
 
 const defaultSpeed = 1;
 const maxSpeed = 1000;
 
 interface IState {
+  program: string;
   state: State;
   inputs: string[];
   isRunning: boolean;
@@ -46,7 +33,8 @@ interface IState {
 
 class App extends Component<{}, IState> {
   state: IState = {
-    state: engine.makeStateFromString(program, []),
+    program: '',
+    state: engine.makeStateFromString('', []),
     inputs: [''],
     isRunning: false,
     started: false,
@@ -60,39 +48,16 @@ class App extends Component<{}, IState> {
   };
 
   loadText = (text: string) => {
-    try {
-      const newState: State = engine.makeStateFromString(
-        text,
-        this.state.inputs.map<bigint>(x => {
-          // eslint-disable-next-line node/no-unsupported-features/es-builtins
-          return BigInt(x);
-        })
-      );
-
-      this.setState({
-        state: newState,
-      });
-    } catch (err) {
-      let msg = 'ram machine encountered unknown problem';
-      if (err instanceof Error) msg = err.message;
-
-      this.setState({
-        started: false,
-        isRunning: false,
-        errorMessage: msg,
-        errorOpen: true,
-        errorType: 'Parser Error',
-        errorLine: 0, // TODO in parser
-      });
-    }
+    this.setState({
+      program: text,
+    });
   };
 
-  loadProgram = () => {
+  initState = () => {
     try {
       const newState: State = engine.makeStateFromString(
-        program,
+        this.state.program,
         this.state.inputs.map<bigint>(x => {
-          // eslint-disable-next-line node/no-unsupported-features/es-builtins
           return BigInt(x);
         })
       );
@@ -207,7 +172,7 @@ class App extends Component<{}, IState> {
     }
   };
   onClickRun = () => {
-    // if (this.state.started === false) this.loadProgram();
+    if (!this.state.started) this.initState();
 
     this.setState(
       {
@@ -218,7 +183,7 @@ class App extends Component<{}, IState> {
     );
   };
   onClickRunTillBreakpoint = () => {
-    if (!this.state.started) this.loadProgram();
+    if (!this.state.started) this.initState();
 
     this.setState(
       {
@@ -340,7 +305,7 @@ class App extends Component<{}, IState> {
                     paddingTop: '5px',
                   }}
                 >
-                  <Editor onClick={this.loadText} />
+                  <Editor handleChange={this.loadText} />
                   <EditorAlert
                     isOpen={this.state.errorOpen}
                     message={this.state.errorMessage}

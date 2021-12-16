@@ -20,8 +20,9 @@ interface IEditorState {
 }
 
 interface IEditorProps {
-  onClick(program: string): void;
+  handleChange: (text: string) => void;
 }
+
 export class Editor extends Component<IEditorProps, IEditorState> {
   state: IEditorState = {
     data: createEmptyMatrix<CellBase<string>>(2, 4),
@@ -59,7 +60,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
     });
   };
 
-  loadText = () => {
+  public loadText = () => {
     let text = '';
     for (const row of this.state.data) {
       const label = row[0]?.value;
@@ -83,12 +84,9 @@ export class Editor extends Component<IEditorProps, IEditorState> {
         text += ' #' + comment;
       }
 
-      if (label || instruction || argument || comment) {
-        text += '\n';
-      }
+      text += '\n';
     }
-    console.log(text);
-    this.props.onClick(text);
+    return text;
   };
 
   render() {
@@ -99,7 +97,11 @@ export class Editor extends Component<IEditorProps, IEditorState> {
           columnLabels={['Label', 'Instruction', 'Argument', 'Comment']}
           RowIndicator={rowCornerInd}
           CornerIndicator={rowCornerInd}
-          onChange={data => this.setState(() => ({data: data}))}
+          onChange={data =>
+            this.setState({data: data}, () =>
+              this.props.handleChange(this.loadText())
+            )
+          }
           onKeyDown={event => {
             if (
               event.key === 'Enter' &&
@@ -129,7 +131,6 @@ export class Editor extends Component<IEditorProps, IEditorState> {
             }
           }}
         />
-        <button onClick={this.loadText}>Load program to machine</button>
       </div>
     );
   }
