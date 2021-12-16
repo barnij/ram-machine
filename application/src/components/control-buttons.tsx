@@ -123,7 +123,6 @@ interface IControlButtonsProps {
   onClickStep: () => void;
   onClickDownload: () => void;
   onClickUpload: () => void;
-  // onClickDebug: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 }
 
 export class ControlButtons extends Component<IControlButtonsProps, {}> {
@@ -151,7 +150,6 @@ export class ControlButtons extends Component<IControlButtonsProps, {}> {
           />
           <DownloadFileButton onClickDownload={this.props.onClickDownload} />
           <UploadFileButton onClickUpload={this.props.onClickUpload} />
-          {/* <DebugButton onClickDebug={() => this.onClickDebug} /> */}
         </ButtonGroup>
       </div>
     );
