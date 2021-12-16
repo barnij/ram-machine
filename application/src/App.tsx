@@ -102,7 +102,7 @@ class App extends Component<{}, IState> {
       return;
 
     this.onClickStep();
-    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
+    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgramTillBP);
   };
 
   maybeFinish = () => {
@@ -179,7 +179,9 @@ class App extends Component<{}, IState> {
         started: true,
         isRunning: true,
       },
-      this.runProgram
+      () => {
+        this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
+      }
     );
   };
   onClickRunTillBreakpoint = () => {
@@ -190,7 +192,11 @@ class App extends Component<{}, IState> {
         started: true,
         isRunning: true,
       },
-      this.runProgramTillBP
+      () => {
+        this.sleep(maxSpeed - this.state.programSpeed).then(
+          this.runProgramTillBP
+        );
+      }
     );
   };
   onClickPause = () => {
