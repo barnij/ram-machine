@@ -83,9 +83,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
         text += ' #' + comment;
       }
 
-      if (label || instruction || argument || comment) {
-        text += '\n';
-      }
+      text += '\n';
     }
     console.log(text);
     this.props.onClick(text);
