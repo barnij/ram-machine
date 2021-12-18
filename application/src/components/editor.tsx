@@ -6,7 +6,7 @@ import {
   Spreadsheet,
   Matrix,
   Mode,
-} from 'react-spreadsheet';
+} from '@barnij/react-spreadsheet';
 import {Icon} from '@blueprintjs/core';
 declare type RowIndicatorProps = {
   row: number;
