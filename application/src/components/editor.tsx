@@ -8,7 +8,7 @@ import {
   Mode,
 } from '@barnij/react-spreadsheet';
 import {Icon} from '@blueprintjs/core';
-declare type RowIndicatorProps = {
+type RowIndicatorProps = {
   row: number;
   label?: React.ReactNode | null;
 };
