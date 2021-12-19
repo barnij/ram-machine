@@ -95,7 +95,6 @@ class App extends Component<{}, IState> {
   };
   onClickStep = () => {
     //TEMPORARY
-    console.log(this.state);
     try {
       const instructionResult: Ok = engine.stepInstruction(this.state.state);
       this.setState(() => ({

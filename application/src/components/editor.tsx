@@ -18,7 +18,6 @@ interface IEditorState {
   data: Matrix<CellBase<string>>;
   selectedPoint: Point | null;
   editMode: boolean;
-  offset: number;
 }
 
 interface IEditorProps {
@@ -28,8 +27,6 @@ interface IEditorProps {
 
 export function parseMatrix(data: Matrix<CellBase<string>>) {
   let text = '';
-  let start = true;
-  let offset = 0;
 
   for (const row of data) {
     const label = row[0]?.value;
@@ -38,12 +35,10 @@ export function parseMatrix(data: Matrix<CellBase<string>>) {
     const comment = row[3]?.value;
 
     if (label) {
-      start = false;
       text += label + ': ';
     }
 
     if (instruction) {
-      start = false;
       text += instruction + ' ';
     }
 
@@ -56,13 +51,9 @@ export function parseMatrix(data: Matrix<CellBase<string>>) {
     }
 
     text += '\n';
-
-    if (start) {
-      offset += 1;
-    }
   }
 
-  return {text, offset};
+  return text;
 }
 
 const START_NUMBER_OF_ROWS = 2;
@@ -72,7 +63,6 @@ export class Editor extends Component<IEditorProps, IEditorState> {
     data: createEmptyMatrix<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
     selectedPoint: null,
     editMode: false,
-    offset: 0,
   };
 
   addRow = () => {
@@ -106,20 +96,13 @@ export class Editor extends Component<IEditorProps, IEditorState> {
   };
 
   loadText = () => {
-    const {text, offset} = parseMatrix(this.state.data);
-    console.log(text);
-    this.setState({
-      offset,
-    });
+    const text = parseMatrix(this.state.data);
     this.props.onClick(text);
   };
 
-  rowCornerInd = ({row}: RowIndicatorProps) => {
+  rowIndicator = ({row}: RowIndicatorProps) => {
     let value = null;
-    if (
-      this.props.curRow !== -1 &&
-      row === this.props.curRow + this.state.offset
-    )
+    if (this.props.curRow !== -1 && row === this.props.curRow)
       value = <Icon icon="chevron-right" />;
     return (
       <th className="Spreadsheet__header row_corner_indicator">{value}</th>
@@ -132,7 +115,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
         <Spreadsheet
           data={this.state.data}
           columnLabels={['Label', 'Instruction', 'Argument', 'Comment']}
-          RowIndicator={this.rowCornerInd}
+          RowIndicator={this.rowIndicator}
           CornerIndicator={() => (
             <th className="Spreadsheet__header row_corner_indicator"></th>
           )}
