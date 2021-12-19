@@ -312,7 +312,7 @@ class App extends Component<{}, IState> {
                   }}
                 >
                   <Editor
-                    onClick={this.loadText}
+                    handleChange={this.loadText}
                     curRow={this.state.state.nextInstruction.getLineNumber()}
                   />
                   <EditorAlert
