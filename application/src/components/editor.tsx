@@ -21,8 +21,8 @@ interface IEditorState {
 }
 
 interface IEditorProps {
-  onClick(program: string): void;
   curRow: number;
+  handleChange: (text: string) => void;
 }
 
 export function parseMatrix(data: Matrix<CellBase<string>>) {
@@ -97,7 +97,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
 
   loadText = () => {
     const text = parseMatrix(this.state.data);
-    this.props.onClick(text);
+    this.props.handleChange(text);
   };
 
   rowIndicator = ({row}: RowIndicatorProps) => {
@@ -119,7 +119,11 @@ export class Editor extends Component<IEditorProps, IEditorState> {
           CornerIndicator={() => (
             <th className="Spreadsheet__header row_corner_indicator"></th>
           )}
-          onChange={data => this.setState(() => ({data: data}))}
+          onChange={data =>
+            this.setState({data: data}, () => {
+              this.loadText();
+            })
+          }
           onKeyDown={event => {
             if (
               event.key === 'Enter' &&
@@ -148,7 +152,6 @@ export class Editor extends Component<IEditorProps, IEditorState> {
             }
           }}
         />
-        <button onClick={this.loadText}>Load program to machine</button>
       </div>
     );
   }

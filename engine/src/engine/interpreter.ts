@@ -256,6 +256,8 @@ ast.Skip.prototype.interp = function (state) {
 };
 
 ast.Combine.prototype.interp = function (state) {
+  if (this.instruction instanceof ast.Skip)
+    return this.nextInstruction.interp(state);
   state.nextInstruction = this.nextInstruction;
   return this.instruction.interp(state);
 };

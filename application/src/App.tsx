@@ -8,57 +8,109 @@ import {InputTape} from './components/inputTape';
 import {Processor} from './components/processor';
 import {Editor} from './components/editor';
 import {ControlButtons} from './components/control-buttons';
+import {EditorAlert} from './components/alert';
+import {Slider} from '@blueprintjs/core';
 
 const engine = new Engine(new Parser(), new Interpreter());
-const program = `
- write =5
- write =7
- write =5
- write =7
- write =5
- write =7
- write =5
- write =7
- write =5
- write =7
- write =5
- write =7
-`;
+
+const defaultSpeed = 1;
+const maxSpeed = 1000;
 
 interface IState {
+  program: string;
   state: State;
   inputs: string[];
   isRunning: boolean;
+  started: boolean;
+  breakpoints: Set<number>;
+  programSpeed: number;
+  errorOpen: boolean;
+  errorMessage: string;
+  errorLine: number;
+  errorType: string;
+  sliderLabelRenderer: () => string;
 }
 
 class App extends Component<{}, IState> {
   state: IState = {
+    program: '',
     state: engine.makeStateFromString('', []),
     inputs: [''],
     isRunning: false,
-  };
-
-  onClick = () => {
-    try {
-      const instructionResult: Ok = engine.stepInstruction(this.state.state);
-      this.setState(() => ({
-        state: instructionResult.state,
-      }));
-    } catch (err) {
-      // manage runtime errors
-    }
-  };
-
-  onClickRestart = () => {
-    this.setState(() => ({
-      state: engine.makeStateFromString(program, []),
-    }));
+    started: false,
+    breakpoints: new Set(),
+    programSpeed: defaultSpeed,
+    errorOpen: false,
+    errorMessage: '',
+    errorLine: 0,
+    errorType: '',
+    sliderLabelRenderer: () => '',
   };
 
   loadText = (text: string) => {
-    this.setState(() => ({
-      state: engine.makeStateFromString(text, []),
-    }));
+    this.setState({
+      program: text,
+    });
+  };
+
+  initState = () => {
+    try {
+      const newState: State = engine.makeStateFromString(
+        this.state.program,
+        this.state.inputs.map<bigint>(x => {
+          return BigInt(x);
+        })
+      );
+
+      this.setState({
+        state: newState,
+      });
+    } catch (err) {
+      let msg = 'ram machine encountered unknown problem';
+      if (err instanceof Error) msg = err.message;
+
+      this.setState({
+        started: false,
+        isRunning: false,
+        errorMessage: msg,
+        errorOpen: true,
+        errorType: 'Parser Error',
+        errorLine: 0, // TODO in parser
+      });
+    }
+  };
+
+  sleep = (milliseconds: number) => {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+  };
+
+  runProgram = () => {
+    if (this.state.state.completed || !this.state.isRunning) return;
+
+    this.onClickStep();
+    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
+  };
+
+  runProgramTillBP = () => {
+    if (
+      this.state.state.completed ||
+      !this.state.isRunning ||
+      this.state.breakpoints.has(
+        this.state.state.nextInstruction.getLineNumber()
+      )
+    )
+      return;
+
+    this.onClickStep();
+    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgramTillBP);
+  };
+
+  maybeFinish = () => {
+    if (this.state.state.completed)
+      this.setState({
+        started: false,
+        isRunning: false,
+      });
   };
 
   inputAdd = () => {
@@ -91,27 +143,66 @@ class App extends Component<{}, IState> {
 
   // control-buttons section
   onClickStop = () => {
-    //TODO
+    this.setState({
+      started: false,
+      isRunning: false,
+    });
   };
   onClickStep = () => {
-    //TEMPORARY
     try {
       const instructionResult: Ok = engine.stepInstruction(this.state.state);
-      this.setState(() => ({
-        state: instructionResult.state,
-      }));
+      this.setState(
+        {
+          state: instructionResult.state,
+        },
+        this.maybeFinish
+      );
     } catch (err) {
-      // manage runtime errors
+      let msg = 'ram machine encountered unknown problem';
+      if (err instanceof Error) msg = err.message;
+
+      this.setState({
+        started: false,
+        isRunning: false,
+        errorMessage: msg,
+        errorOpen: true,
+        errorType: 'Run Time Error',
+        errorLine: this.state.state.nextInstruction.getLineNumber(),
+      });
     }
   };
   onClickRun = () => {
-    //TODO
+    if (!this.state.started) this.initState();
+
+    this.setState(
+      {
+        started: true,
+        isRunning: true,
+      },
+      () => {
+        this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
+      }
+    );
   };
   onClickRunTillBreakpoint = () => {
-    //TODO
+    if (!this.state.started) this.initState();
+
+    this.setState(
+      {
+        started: true,
+        isRunning: true,
+      },
+      () => {
+        this.sleep(maxSpeed - this.state.programSpeed).then(
+          this.runProgramTillBP
+        );
+      }
+    );
   };
   onClickPause = () => {
-    //TODO
+    this.setState(() => ({
+      isRunning: false,
+    }));
   };
   onClickDownload = () => {
     //TODO
@@ -141,10 +232,11 @@ class App extends Component<{}, IState> {
         <Container fluid>
           <Row style={{height: '100vh'}}>
             <Col sm={3}>
-              <Row style={{height: '8%'}}>
+              <Row style={{height: '12%'}}>
                 <Col style={{backgroundColor: 'lightgreen'}}>
                   Controls buttons
                   <ControlButtons
+                    started={this.state.started}
                     running={this.state.isRunning}
                     completed={this.state.state.completed}
                     onClickStop={this.onClickStop}
@@ -154,6 +246,26 @@ class App extends Component<{}, IState> {
                     onClickDownload={this.onClickDownload}
                     onClickUpload={this.onClickUpload}
                     onClickRunTillBreakpoint={this.onClickRunTillBreakpoint}
+                  />
+                  Evaluation speed
+                  <Slider
+                    min={1}
+                    max={maxSpeed}
+                    stepSize={1}
+                    labelValues={[]}
+                    onChange={(value: number) => {
+                      this.setState({
+                        programSpeed: value,
+                        sliderLabelRenderer: () =>
+                          this.state.programSpeed.toString(),
+                      });
+                    }}
+                    onRelease={() => {
+                      this.setState({sliderLabelRenderer: () => ''});
+                    }}
+                    labelRenderer={this.state.sliderLabelRenderer}
+                    value={this.state.programSpeed}
+                    vertical={false}
                   />
                 </Col>
               </Row>
@@ -184,7 +296,7 @@ class App extends Component<{}, IState> {
                   Input tape{' '}
                   <InputTape
                     inputs={this.state.inputs}
-                    disabled={this.state.isRunning}
+                    disabled={this.state.started}
                     inputAdd={this.inputAdd}
                     inputRemove={this.inputRemove}
                     onChange={this.handleInputChange}
@@ -200,9 +312,18 @@ class App extends Component<{}, IState> {
                   }}
                 >
                   <Editor
-                    onClick={this.loadText}
+                    handleChange={this.loadText}
                     curRow={this.state.state.nextInstruction.getLineNumber()}
                   />
+                  <EditorAlert
+                    isOpen={this.state.errorOpen}
+                    message={this.state.errorMessage}
+                    line={this.state.errorLine}
+                    errorType={this.state.errorType}
+                    handleClose={() => {
+                      this.setState({errorOpen: false});
+                    }}
+                  ></EditorAlert>
                 </Col>
               </Row>
               <Row style={{height: '10%'}}>

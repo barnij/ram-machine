@@ -2,11 +2,11 @@ import React, {Component} from 'react';
 import {Button, ButtonGroup} from '@blueprintjs/core';
 
 interface IStopButtonProps {
-  running: boolean;
+  started: boolean;
   onClick: () => void;
 }
 function StopButton(props: IStopButtonProps) {
-  if (props.running) {
+  if (props.started) {
     return <Button icon="stop" onClick={props.onClick} intent="danger" />;
   } else {
     return <Button icon="stop" intent="danger" disabled={true} />;
@@ -67,11 +67,12 @@ function RunTillBreakpointButton(props: IRunTillBreakpointButton) {
 }
 
 interface IStepButtonProps {
+  started: boolean;
   running: boolean;
   onClickStep: () => void;
 }
 function StepButton(props: IStepButtonProps) {
-  if (props.running) {
+  if (!props.started || props.running) {
     return (
       <Button
         title="Step forward"
@@ -112,6 +113,7 @@ function DownloadFileButton(props: IDownloadFileButtonProps) {
   );
 }
 interface IControlButtonsProps {
+  started: boolean;
   running: boolean;
   completed: boolean;
   onClickRun: () => void;
@@ -121,7 +123,6 @@ interface IControlButtonsProps {
   onClickStep: () => void;
   onClickDownload: () => void;
   onClickUpload: () => void;
-  // onClickDebug: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 }
 
 export class ControlButtons extends Component<IControlButtonsProps, {}> {
@@ -135,7 +136,7 @@ export class ControlButtons extends Component<IControlButtonsProps, {}> {
             onClickPause={this.props.onClickPause}
           />
           <StopButton
-            running={this.props.running}
+            started={this.props.started}
             onClick={this.props.onClickStop}
           />
           <RunTillBreakpointButton
@@ -143,12 +144,12 @@ export class ControlButtons extends Component<IControlButtonsProps, {}> {
             onClickRunTillBreakpoint={this.props.onClickRunTillBreakpoint}
           />
           <StepButton
+            started={this.props.started}
             running={this.props.running}
             onClickStep={this.props.onClickStep}
           />
           <DownloadFileButton onClickDownload={this.props.onClickDownload} />
           <UploadFileButton onClickUpload={this.props.onClickUpload} />
-          {/* <DebugButton onClickDebug={() => this.onClickDebug} /> */}
         </ButtonGroup>
       </div>
     );
