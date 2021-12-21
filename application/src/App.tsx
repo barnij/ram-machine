@@ -110,24 +110,25 @@ class App extends Component<{}, IState> {
   };
 
   runProgramTillBP = () => {
+    if (this.state.state.completed) return;
     if (this.state.programSpeed === maxSpeed) {
       engine.completeTillBreak(this.state.state);
       this.forceUpdate(this.maybeFinish);
-    } else {
-      if (
-        this.state.state.completed ||
-        !this.state.isRunning ||
-        this.state.breakpoints.has(
-          this.state.state.nextInstruction.getLineNumber()
-        )
-      )
-        return;
-
-      this.onClickStep();
-      this.sleep(maxSpeed - this.state.programSpeed).then(
-        this.runProgramTillBP
-      );
+      return;
     }
+    if (
+      this.state.breakpoints.has(
+        this.state.state.nextInstruction.getLineNumber()
+      )
+    ) {
+      if (this.state.isRunning) {
+        this.setState({isRunning: false});
+        return;
+      } else this.setState({isRunning: true});
+    }
+
+    this.onClickStep();
+    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgramTillBP);
   };
 
   maybeFinish = () => {
@@ -214,12 +215,16 @@ class App extends Component<{}, IState> {
     );
   };
   onClickRunTillBreakpoint = () => {
-    if (!this.state.started) this.initState();
+    let isRunning = this.state.isRunning;
+    if (!this.state.started) {
+      this.initState();
+      isRunning = true;
+    }
 
     this.setState(
       {
         started: true,
-        isRunning: true,
+        isRunning,
       },
       () => {
         if (this.state.state.nextInstruction.prettyPrint().name === '')
@@ -344,6 +349,7 @@ class App extends Component<{}, IState> {
                   }}
                 >
                   <Editor
+                    started={this.state.started}
                     handleChange={this.loadText}
                     toggleBreakpoint={this.toggleBreakpoint}
                     breakpoints={this.state.breakpoints}

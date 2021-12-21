@@ -8,12 +8,12 @@ import {
   Mode,
 } from '@barnij/react-spreadsheet';
 import {Icon} from '@blueprintjs/core';
+import './editor.css';
+
 type RowIndicatorProps = {
   row: number;
   label?: React.ReactNode | null;
 };
-import './editor.css';
-
 interface IEditorState {
   data: Matrix<CellBase<string>>;
   selectedPoint: Point | null;
@@ -22,6 +22,7 @@ interface IEditorState {
 
 interface IEditorProps {
   curRow: number;
+  started: boolean;
   breakpoints: Set<number>;
   handleChange: (text: string) => void;
   toggleBreakpoint: (rowNumber: number) => void;
@@ -104,7 +105,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
 
   rowIndicator = ({row}: RowIndicatorProps) => {
     let value = null;
-    if (this.props.curRow !== -1 && row === this.props.curRow)
+    if (this.props.started && row === this.props.curRow)
       value = <Icon icon="chevron-right" />;
     if (this.props.breakpoints.has(row))
       value = value ? <Icon icon="selection" /> : <Icon icon="remove" />;
