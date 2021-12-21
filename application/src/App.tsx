@@ -53,6 +53,19 @@ class App extends Component<{}, IState> {
     });
   };
 
+  toggleBreakpoint = (rowNumber: number) => {
+    this.setState(({breakpoints}) => {
+      if (!breakpoints.has(rowNumber))
+        return {breakpoints: new Set(breakpoints).add(rowNumber)};
+
+      const newBreakpoints = new Set(breakpoints);
+      newBreakpoints.delete(rowNumber);
+      return {
+        breakpoints: newBreakpoints,
+      };
+    });
+  };
+
   initState = () => {
     try {
       const newState: State = engine.makeStateFromString(
@@ -313,6 +326,8 @@ class App extends Component<{}, IState> {
                 >
                   <Editor
                     handleChange={this.loadText}
+                    toggleBreakpoint={this.toggleBreakpoint}
+                    breakpoints={this.state.breakpoints}
                     curRow={this.state.state.nextInstruction.getLineNumber()}
                   />
                   <EditorAlert

@@ -18,12 +18,13 @@ interface IEditorState {
   data: Matrix<CellBase<string>>;
   selectedPoint: Point | null;
   editMode: boolean;
-  breakpoints: Set<number>;
 }
 
 interface IEditorProps {
   curRow: number;
+  breakpoints: Set<number>;
   handleChange: (text: string) => void;
+  toggleBreakpoint: (rowNumber: number) => void;
 }
 
 export function parseMatrix(data: Matrix<CellBase<string>>) {
@@ -64,7 +65,6 @@ export class Editor extends Component<IEditorProps, IEditorState> {
     data: createEmptyMatrix<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
     selectedPoint: null,
     editMode: false,
-    breakpoints: new Set(),
   };
 
   addRow = () => {
@@ -102,28 +102,16 @@ export class Editor extends Component<IEditorProps, IEditorState> {
     this.props.handleChange(text);
   };
 
-  toggleBreakpoint = (rowNumber: number) => {
-    if (this.state.breakpoints.has(rowNumber))
-      this.setState(prev => {
-        prev.breakpoints.delete(rowNumber);
-        return prev;
-      });
-    else
-      this.setState(prev => {
-        prev.breakpoints.add(rowNumber);
-        return prev;
-      });
-  };
-
   rowIndicator = ({row}: RowIndicatorProps) => {
     let value = null;
     if (this.props.curRow !== -1 && row === this.props.curRow)
       value = <Icon icon="chevron-right" />;
-    if (this.state.breakpoints.has(row)) value = value ? 'x' : 'o';
+    if (this.props.breakpoints.has(row))
+      value = value ? <Icon icon="selection" /> : <Icon icon="remove" />;
     return (
       <th
         className="Spreadsheet__header row_corner_indicator"
-        onClick={() => this.toggleBreakpoint(row)}
+        onClick={() => this.props.toggleBreakpoint(row)}
       >
         {value}
       </th>
