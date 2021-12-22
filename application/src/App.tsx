@@ -21,6 +21,7 @@ import {Processor} from './components/processor';
 import {Editor, parseMatrix} from './components/editor';
 import {ControlButtons} from './components/control-buttons';
 import {EditorAlert} from './components/alert';
+import {Registers} from './components/registers';
 import {Slider} from '@blueprintjs/core';
 import {Matrix, CellBase} from '@barnij/react-spreadsheet';
 
@@ -499,6 +500,7 @@ class App extends Component<{}, IState> {
               <Row style={{height: '77%'}}>
                 <Col style={{backgroundColor: 'green'}}>
                   <div>Registers</div>
+                  <Registers number={10} />
                 </Col>
               </Row>
             </Col>
