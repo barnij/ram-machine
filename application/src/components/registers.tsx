@@ -17,20 +17,22 @@ export function Registers(props: IRegisterProps) {
   const sortedRegisters = [...props.registers.entries()].sort((a, b) =>
     Number((a[0] - b[0]).toString())
   );
-  for (const [reg, val] of sortedRegisters) {
-    //console.log({key, val});
+  for (let i = 0; i < sortedRegisters.length; i++) {
+    const [reg, val] = sortedRegisters[i];
     rows.push(<Row reg={reg} value={val} />);
   }
 
   return (
-    <Table bordered size="sm">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>{rows}</tbody>
-    </Table>
+    <div>
+      <Table bordered size="sm" variant="dark">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </Table>
+    </div>
   );
 }
