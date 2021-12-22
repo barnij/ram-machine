@@ -500,7 +500,9 @@ class App extends Component<{}, IState> {
               <Row style={{height: '77%'}}>
                 <Col style={{backgroundColor: 'green'}}>
                   <div>Registers</div>
-                  <Registers number={10} />
+                  <Registers
+                    registers={this.state.state.environment.registers}
+                  />
                 </Col>
               </Row>
             </Col>

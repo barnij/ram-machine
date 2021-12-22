@@ -1,23 +1,29 @@
 import React from 'react';
 import {Table} from 'react-bootstrap';
 
-const Row = () => (
+const Row = (props: {reg: bigint; value: bigint}) => (
   <tr>
-    <td>x</td>
-    <td>y</td>
+    <td>{props.reg.toString()}</td>
+    <td>{props.value.toString()}</td>
   </tr>
 );
 
 interface IRegisterProps {
-  number: number;
+  registers: Map<bigint, bigint>;
 }
 
 export function Registers(props: IRegisterProps) {
-  const rows = [];
-  for (let i = 0; i < props.number; i++) rows.push(<Row />);
+  const rows: JSX.Element[] = [];
+  const sortedRegisters = [...props.registers.entries()].sort((a, b) =>
+    Number((a[0] - b[0]).toString())
+  );
+  for (const [reg, val] of sortedRegisters) {
+    //console.log({key, val});
+    rows.push(<Row reg={reg} value={val} />);
+  }
 
   return (
-    <Table>
+    <Table bordered size="sm">
       <thead>
         <tr>
           <th>#</th>
