@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import {
   Point,
   CellBase,
-  createEmptyMatrix,
   Spreadsheet,
   Matrix,
   Mode,
@@ -15,16 +14,18 @@ type RowIndicatorProps = {
   label?: React.ReactNode | null;
 };
 interface IEditorState {
-  data: Matrix<CellBase<string>>;
   selectedPoint: Point | null;
   editMode: boolean;
 }
 
 interface IEditorProps {
+  data: Matrix<CellBase<string>>;
   curRow: number;
   started: boolean;
   breakpoints: Set<number>;
-  handleChange: (text: string) => void;
+  handleAddRow: (rowNumber: number) => void;
+  handleDeleteRow: (rowNumber: number) => void;
+  handleUpdateEditor: (data: Matrix<CellBase<string>>) => void;
   toggleBreakpoint: (rowNumber: number) => void;
 }
 
@@ -59,48 +60,25 @@ export function parseMatrix(data: Matrix<CellBase<string>>) {
   return text;
 }
 
-const START_NUMBER_OF_ROWS = 2;
-
 export class Editor extends Component<IEditorProps, IEditorState> {
   state: IEditorState = {
-    data: createEmptyMatrix<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
     selectedPoint: null,
     editMode: false,
   };
 
   addRow = () => {
-    this.setState(prev => {
-      if (!prev.selectedPoint) {
-        return null;
-      }
-      const dataFirst = prev.data.slice(0, prev.selectedPoint.row + 1);
-      const newData = createEmptyMatrix<CellBase<string>>(1, 4);
-      const dataSecond = prev.data.slice(prev.selectedPoint.row + 1);
-      return {
-        data: dataFirst.concat(newData, dataSecond),
-      };
-    });
+    if (!this.state.selectedPoint) return;
+    this.props.handleAddRow(this.state.selectedPoint.row);
   };
 
   deleteRow = () => {
-    this.setState(prev => {
-      if (
-        !prev.selectedPoint ||
-        prev.selectedPoint.row === this.state.data.length - 1
-      ) {
-        return null;
-      }
-      const dataFirst = prev.data.slice(0, prev.selectedPoint.row);
-      const dataSecond = prev.data.slice(prev.selectedPoint.row + 1);
-      return {
-        data: dataFirst.concat(dataSecond),
-      };
-    });
-  };
+    if (
+      !this.state.selectedPoint ||
+      this.state.selectedPoint.row === this.props.data.length - 1
+    )
+      return;
 
-  loadText = () => {
-    const text = parseMatrix(this.state.data);
-    this.props.handleChange(text);
+    this.props.handleDeleteRow(this.state.selectedPoint.row);
   };
 
   rowIndicator = ({row}: RowIndicatorProps) => {
@@ -123,17 +101,13 @@ export class Editor extends Component<IEditorProps, IEditorState> {
     return (
       <div style={{width: '100%'}} className="editor_class" id="editor">
         <Spreadsheet
-          data={this.state.data}
+          data={this.props.data}
           columnLabels={['Label', 'Instruction', 'Argument', 'Comment']}
           RowIndicator={this.rowIndicator}
           CornerIndicator={() => (
             <th className="Spreadsheet__header row_corner_indicator"></th>
           )}
-          onChange={data =>
-            this.setState({data: data}, () => {
-              this.loadText();
-            })
-          }
+          onChange={data => this.props.handleUpdateEditor(data)}
           onKeyDown={event => {
             if (
               event.key === 'Enter' &&
