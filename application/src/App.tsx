@@ -6,10 +6,11 @@ import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
 import {Processor} from './components/processor';
-import {Editor} from './components/editor';
+import {Editor, parseMatrix} from './components/editor';
 import {ControlButtons} from './components/control-buttons';
 import {EditorAlert} from './components/alert';
 import {Slider} from '@blueprintjs/core';
+import {Matrix, createEmptyMatrix, CellBase} from '@barnij/react-spreadsheet';
 
 const engine = new Engine(new Parser(), new Interpreter());
 
@@ -17,7 +18,6 @@ const defaultSpeed = 1;
 const maxSpeed = 1000;
 
 interface IState {
-  program: string;
   state: State;
   inputs: string[];
   isRunning: boolean;
@@ -28,12 +28,14 @@ interface IState {
   errorMessage: string;
   errorLine: number;
   errorType: string;
+  editorData: Matrix<CellBase<string>>;
   sliderLabelRenderer: () => string;
 }
 
+const START_NUMBER_OF_ROWS = 2;
+
 class App extends Component<{}, IState> {
   state: IState = {
-    program: '',
     state: engine.makeStateFromString('', []),
     inputs: [''],
     isRunning: false,
@@ -44,12 +46,63 @@ class App extends Component<{}, IState> {
     errorMessage: '',
     errorLine: 0,
     errorType: '',
+    editorData: createEmptyMatrix<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
     sliderLabelRenderer: () => '',
   };
 
-  loadText = (text: string) => {
+  updateBpAfterAddRow = (row: number) => {
+    this.setState(({breakpoints}) => {
+      const ns = new Set<number>();
+      breakpoints.forEach(val => {
+        if (val <= row) ns.add(val);
+        else ns.add(val + 1);
+      });
+      return {breakpoints: ns};
+    });
+  };
+
+  updateBpAfterDeleteRow = (row: number) => {
+    this.setState(({breakpoints}) => {
+      const ns = new Set<number>();
+      breakpoints.forEach(val => {
+        if (val <= row) ns.add(val);
+        else if (val > 0) ns.add(val - 1);
+      });
+      return {breakpoints: ns};
+    });
+  };
+
+  addRowInEditor = (row: number) => {
+    this.setState(
+      prev => {
+        const dataFirst = prev.editorData.slice(0, row + 1);
+        const newData = createEmptyMatrix<CellBase<string>>(1, 4);
+        const dataSecond = prev.editorData.slice(row + 1);
+
+        return {
+          editorData: dataFirst.concat(newData, dataSecond),
+        };
+      },
+      () => this.updateBpAfterAddRow(row)
+    );
+  };
+
+  deleteRowInEditor = (row: number) => {
+    this.setState(
+      prev => {
+        const dataFirst = prev.editorData.slice(0, row);
+        const dataSecond = prev.editorData.slice(row + 1);
+        return {
+          editorData: dataFirst.concat(dataSecond),
+        };
+      },
+      () => this.updateBpAfterDeleteRow(row - 1)
+    );
+  };
+
+  updateEditor = (data: Matrix<CellBase<string>>) => {
     this.setState({
-      program: text,
+      editorData: data,
     });
   };
 
@@ -69,7 +122,7 @@ class App extends Component<{}, IState> {
   initState = () => {
     try {
       const newState: State = engine.makeStateFromString(
-        this.state.program,
+        parseMatrix(this.state.editorData),
         this.state.inputs.map<bigint>(x => {
           return BigInt(x);
         })
@@ -333,8 +386,11 @@ class App extends Component<{}, IState> {
                   }}
                 >
                   <Editor
+                    data={this.state.editorData}
                     started={this.state.started}
-                    handleChange={this.loadText}
+                    handleAddRow={this.addRowInEditor}
+                    handleDeleteRow={this.deleteRowInEditor}
+                    handleUpdateEditor={this.updateEditor}
                     toggleBreakpoint={this.toggleBreakpoint}
                     breakpoints={this.state.breakpoints}
                     curRow={this.state.state.nextInstruction.getLineNumber()}
