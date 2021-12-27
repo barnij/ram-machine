@@ -1,5 +1,7 @@
-import {State} from './environment';
-
 export class Ok {
-  constructor(public state: State) {}
+  constructor() {}
+}
+
+export class Break {
+  constructor() {}
 }
