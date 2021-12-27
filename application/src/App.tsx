@@ -311,7 +311,10 @@ class App extends Component<{}, IState> {
                     paddingTop: '5px',
                   }}
                 >
-                  <Editor handleChange={this.loadText} />
+                  <Editor
+                    handleChange={this.loadText}
+                    curRow={this.state.state.nextInstruction.getLineNumber()}
+                  />
                   <EditorAlert
                     isOpen={this.state.errorOpen}
                     message={this.state.errorMessage}
