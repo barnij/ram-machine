@@ -256,23 +256,15 @@ ast.Skip.prototype.interp = function () {
 };
 
 ast.Combine.prototype.interp = function (state) {
-  if (
-    this.instruction instanceof ast.Skip &&
-    !state.breakpoints.has(this.nextInstruction.getLineNumber())
-  ) {
-    while (
-      state.nextInstruction instanceof ast.Combine &&
-      state.nextInstruction.instruction instanceof ast.Skip &&
-      !state.breakpoints.has(
-        state.nextInstruction.nextInstruction.getLineNumber()
-      )
-    ) {
-      state.nextInstruction = state.nextInstruction.nextInstruction;
-    }
-    return state.nextInstruction.interp(state);
-  }
   state.nextInstruction = this.nextInstruction;
   const res = this.instruction.interp(state);
+  while (
+    state.nextInstruction instanceof ast.Combine &&
+    state.nextInstruction.instruction instanceof ast.Skip &&
+    !state.breakpoints.has(state.nextInstruction.getLineNumber())
+  ) {
+    state.nextInstruction = state.nextInstruction.nextInstruction;
+  }
   if (state.breakpoints.has(state.nextInstruction.getLineNumber()))
     return new Break();
   else return res;
