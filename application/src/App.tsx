@@ -193,7 +193,10 @@ class App extends Component<{}, IState> {
         isRunning: true,
       },
       () => {
-        this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
+        if (this.state.state.nextInstruction.prettyPrint().name === '')
+          this.runProgram();
+        else
+          this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
       }
     );
   };
@@ -206,9 +209,12 @@ class App extends Component<{}, IState> {
         isRunning: true,
       },
       () => {
-        this.sleep(maxSpeed - this.state.programSpeed).then(
-          this.runProgramTillBP
-        );
+        if (this.state.state.nextInstruction.prettyPrint().name === '')
+          this.runProgramTillBP();
+        else
+          this.sleep(maxSpeed - this.state.programSpeed).then(
+            this.runProgramTillBP
+          );
       }
     );
   };
