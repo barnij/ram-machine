@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Col, Container, Row} from 'react-bootstrap';
-import {Engine, Interpreter, Ok, Parser, State} from 'ram-engine';
+import {Engine, Interpreter, Ok, Break, Parser, State} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
 import {Processor} from './components/processor';
@@ -85,24 +85,36 @@ class App extends Component<{}, IState> {
   };
 
   runProgram = () => {
-    if (this.state.state.completed || !this.state.isRunning) return;
+    if (this.state.programSpeed === maxSpeed) {
+      engine.complete(this.state.state);
+      this.forceUpdate(this.maybeFinish);
+    } else {
+      if (this.state.state.completed || !this.state.isRunning) return;
 
-    this.onClickStep();
-    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
+      this.onClickStep();
+      this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
+    }
   };
 
   runProgramTillBP = () => {
-    if (
-      this.state.state.completed ||
-      !this.state.isRunning ||
-      this.state.breakpoints.has(
-        this.state.state.nextInstruction.getLineNumber()
+    if (this.state.programSpeed === maxSpeed) {
+      engine.completeTillBreak(this.state.state);
+      this.forceUpdate(this.maybeFinish);
+    } else {
+      if (
+        this.state.state.completed ||
+        !this.state.isRunning ||
+        this.state.breakpoints.has(
+          this.state.state.nextInstruction.getLineNumber()
+        )
       )
-    )
-      return;
+        return;
 
-    this.onClickStep();
-    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgramTillBP);
+      this.onClickStep();
+      this.sleep(maxSpeed - this.state.programSpeed).then(
+        this.runProgramTillBP
+      );
+    }
   };
 
   maybeFinish = () => {
@@ -150,13 +162,14 @@ class App extends Component<{}, IState> {
   };
   onClickStep = () => {
     try {
-      const instructionResult: Ok = engine.stepInstruction(this.state.state);
-      this.setState(
-        {
-          state: instructionResult.state,
-        },
-        this.maybeFinish
+      const instructionResult: Ok | Break = engine.stepInstruction(
+        this.state.state
       );
+      if (instructionResult instanceof Break)
+        this.setState({isRunning: false}, this.maybeFinish);
+      else {
+        this.forceUpdate(this.maybeFinish);
+      }
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
       if (err instanceof Error) msg = err.message;
