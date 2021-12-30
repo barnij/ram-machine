@@ -179,8 +179,6 @@ export class Combine extends Instruction {
     super();
   }
   prettyPrint(): {name: string; argument: string} {
-    if (this.instruction instanceof Skip)
-      return this.nextInstruction.prettyPrint();
     return this.instruction.prettyPrint();
   }
   getLineNumber(): number {

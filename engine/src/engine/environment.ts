@@ -4,7 +4,11 @@ import {Instruction, Program} from './ast';
 export class State {
   nextInstruction: Instruction;
   completed = false;
-  constructor(public program: Program, public environment: Environment) {
+  constructor(
+    public program: Program,
+    public environment: Environment,
+    public breakpoints: Set<number>
+  ) {
     this.nextInstruction = program.programTree;
   }
 }

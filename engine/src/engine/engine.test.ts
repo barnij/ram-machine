@@ -15,7 +15,7 @@ test('Engine: makeStateFromString', () => {
     new Map<string, ast.Instruction>(),
     new ast.Combine(line1, new ast.Halt())
   );
-  const state = new State(program, new Environment([]));
+  const state = new State(program, new Environment([]), new Set());
   expect(ENGINE.makeStateFromString('halt', [])).toStrictEqual(state);
 });
 
@@ -28,7 +28,7 @@ test('Engine: stepInstruction - step single instruction', () => {
     new Map<string, ast.Instruction>(),
     new ast.Combine(line1, new ast.Combine(line2, new ast.Halt()))
   );
-  const targetState = new State(program, new Environment([]));
+  const targetState = new State(program, new Environment([]), new Set());
   const state = ENGINE.makeStateFromString('load =1\nadd =2', []);
   expect(state).toStrictEqual(targetState);
   expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
@@ -51,7 +51,7 @@ test('Engine: stepInstruction - interp 2 instructions program step by step', () 
     new Map<string, ast.Instruction>(),
     new ast.Combine(line1, new ast.Combine(line2, new ast.Halt()))
   );
-  const targetState = new State(program, new Environment([]));
+  const targetState = new State(program, new Environment([]), new Set());
   const state = ENGINE.makeStateFromString('load =1\nadd =2', []);
   expect(state).toStrictEqual(targetState);
   expect(state.nextInstruction).toBeInstanceOf(ast.Combine);
@@ -84,7 +84,7 @@ test('Engine: complete - interp 2 instructions', () => {
     new Map<string, ast.Instruction>(),
     new ast.Combine(line1, new ast.Combine(line2, new ast.Halt()))
   );
-  const targetState = new State(program, new Environment([]));
+  const targetState = new State(program, new Environment([]), new Set());
   const state = ENGINE.makeStateFromString('load =1\nadd =2', []);
   expect(state).toStrictEqual(targetState);
   const actionResult = ENGINE.complete(state);
