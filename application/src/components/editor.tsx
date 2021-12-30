@@ -60,6 +60,16 @@ export function parseMatrix(data: Matrix.Matrix<CellBase<string>>) {
   return text;
 }
 
+export type RowProps = React.PropsWithChildren<{
+  /** The row index of the table */
+  row: number;
+}>;
+
+const Row: React.ComponentType<RowProps> = props => {
+  if (props.row === 3) return <tr {...props} id="ala" />;
+  return <tr {...props} />;
+};
+
 export class Editor extends Component<IEditorProps, IEditorState> {
   state: IEditorState = {
     selectedPoint: null,
@@ -107,6 +117,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
       <div style={{width: '100%'}} className="editor_class" id="editor">
         <Spreadsheet
           data={this.props.data}
+          Row={Row}
           columnLabels={['Label', 'Instruction', 'Argument', 'Comment']}
           RowIndicator={this.rowIndicator}
           CornerIndicator={() => (

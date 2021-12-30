@@ -15,3 +15,7 @@
     height: 400px;
     overflow-y: scroll;
 }
+
+#ala td{
+    background-color: blue;
+}
