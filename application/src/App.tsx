@@ -107,16 +107,21 @@ class App extends Component<{}, IState> {
   };
 
   toggleBreakpoint = (rowNumber: number) => {
-    this.setState(({breakpoints}) => {
-      if (!breakpoints.has(rowNumber))
-        return {breakpoints: new Set(breakpoints).add(rowNumber)};
+    this.setState(
+      ({breakpoints}) => {
+        if (!breakpoints.has(rowNumber))
+          return {breakpoints: new Set(breakpoints).add(rowNumber)};
 
-      const newBreakpoints = new Set(breakpoints);
-      newBreakpoints.delete(rowNumber);
-      return {
-        breakpoints: newBreakpoints,
-      };
-    });
+        const newBreakpoints = new Set(breakpoints);
+        newBreakpoints.delete(rowNumber);
+        return {
+          breakpoints: newBreakpoints,
+        };
+      },
+      () => {
+        engine.updateBreakpoints(this.state.state, this.state.breakpoints);
+      }
+    );
   };
 
   initState = () => {
@@ -165,7 +170,9 @@ class App extends Component<{}, IState> {
   runProgramTillBP = () => {
     if (this.state.state.completed) return;
     if (this.state.programSpeed === maxSpeed) {
+      engine.updateBreakpoints(this.state.state, this.state.breakpoints);
       engine.completeTillBreak(this.state.state);
+      this.setState({isRunning: false});
       this.forceUpdate(this.maybeFinish);
       return;
     }
