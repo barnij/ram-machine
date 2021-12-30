@@ -6,7 +6,7 @@ import {
   Matrix,
   Mode,
 } from '@barnij/react-spreadsheet';
-import {Icon} from '@blueprintjs/core';
+import {Icon, Intent} from '@blueprintjs/core';
 import './editor.css';
 
 type RowIndicatorProps = {
@@ -86,7 +86,11 @@ export class Editor extends Component<IEditorProps, IEditorState> {
     if (this.props.started && row === this.props.curRow)
       value = <Icon icon="chevron-right" />;
     if (this.props.breakpoints.has(row))
-      value = value ? <Icon icon="selection" /> : <Icon icon="remove" />;
+      value = value ? (
+        <Icon icon="selection" intent={Intent.DANGER} />
+      ) : (
+        <Icon icon="remove" intent={Intent.DANGER} />
+      );
     return (
       <th
         className="Spreadsheet__header row_corner_indicator"
