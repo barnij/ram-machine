@@ -133,6 +133,8 @@ class App extends Component<{}, IState> {
         })
       );
 
+      engine.updateBreakpoints(newState, this.state.breakpoints);
+
       this.setState({
         state: newState,
       });
@@ -168,23 +170,13 @@ class App extends Component<{}, IState> {
   };
 
   runProgramTillBP = () => {
-    if (this.state.state.completed) return;
+    if (this.state.state.completed || !this.state.isRunning) return;
+
     if (this.state.programSpeed === maxSpeed) {
-      engine.updateBreakpoints(this.state.state, this.state.breakpoints);
       engine.completeTillBreak(this.state.state);
       this.setState({isRunning: false});
       this.forceUpdate(this.maybeFinish);
       return;
-    }
-    if (
-      this.state.breakpoints.has(
-        this.state.state.nextInstruction.getLineNumber()
-      )
-    ) {
-      if (this.state.isRunning) {
-        this.setState({isRunning: false});
-        return;
-      } else this.setState({isRunning: true});
     }
 
     this.onClickStep();
@@ -241,9 +233,7 @@ class App extends Component<{}, IState> {
       );
       if (instructionResult instanceof Break)
         this.setState({isRunning: false}, this.maybeFinish);
-      else {
-        this.forceUpdate(this.maybeFinish);
-      }
+      else this.forceUpdate(this.maybeFinish);
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
       if (err instanceof Error) msg = err.message;
@@ -275,16 +265,12 @@ class App extends Component<{}, IState> {
     );
   };
   onClickRunTillBreakpoint = () => {
-    let isRunning = this.state.isRunning;
-    if (!this.state.started) {
-      this.initState();
-      isRunning = true;
-    }
+    if (!this.state.started) this.initState();
 
     this.setState(
       {
         started: true,
-        isRunning,
+        isRunning: true,
       },
       () => {
         if (this.state.state.nextInstruction.prettyPrint().name === '')
