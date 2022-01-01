@@ -6,10 +6,11 @@ import {Engine, Interpreter, Ok, Break, Parser, State} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
 import {Processor} from './components/processor';
-import {Editor} from './components/editor';
+import {Editor, parseMatrix} from './components/editor';
 import {ControlButtons} from './components/control-buttons';
 import {EditorAlert} from './components/alert';
 import {Slider} from '@blueprintjs/core';
+import {Matrix, createEmptyMatrix, CellBase} from '@barnij/react-spreadsheet';
 
 const engine = new Engine(new Parser(), new Interpreter());
 
@@ -17,7 +18,6 @@ const defaultSpeed = 1;
 const maxSpeed = 1000;
 
 interface IState {
-  program: string;
   state: State;
   inputs: string[];
   isRunning: boolean;
@@ -28,12 +28,14 @@ interface IState {
   errorMessage: string;
   errorLine: number;
   errorType: string;
+  editorData: Matrix<CellBase<string>>;
   sliderLabelRenderer: () => string;
 }
 
+const START_NUMBER_OF_ROWS = 2;
+
 class App extends Component<{}, IState> {
   state: IState = {
-    program: '',
     state: engine.makeStateFromString('', []),
     inputs: [''],
     isRunning: false,
@@ -44,23 +46,94 @@ class App extends Component<{}, IState> {
     errorMessage: '',
     errorLine: 0,
     errorType: '',
+    editorData: createEmptyMatrix<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
     sliderLabelRenderer: () => '',
   };
 
-  loadText = (text: string) => {
-    this.setState({
-      program: text,
+  updateBpAfterAddRow = (row: number) => {
+    this.setState(({breakpoints}) => {
+      const ns = new Set<number>();
+      breakpoints.forEach(val => {
+        if (val <= row) ns.add(val);
+        else ns.add(val + 1);
+      });
+      return {breakpoints: ns};
     });
+  };
+
+  updateBpAfterDeleteRow = (row: number) => {
+    this.setState(({breakpoints}) => {
+      const ns = new Set<number>();
+      breakpoints.forEach(val => {
+        if (val <= row) ns.add(val);
+        else if (val > 0) ns.add(val - 1);
+      });
+      return {breakpoints: ns};
+    });
+  };
+
+  addRowInEditor = (row: number) => {
+    this.setState(
+      prev => {
+        const dataFirst = prev.editorData.slice(0, row + 1);
+        const newData = createEmptyMatrix<CellBase<string>>(1, 4);
+        const dataSecond = prev.editorData.slice(row + 1);
+
+        return {
+          editorData: dataFirst.concat(newData, dataSecond),
+        };
+      },
+      () => this.updateBpAfterAddRow(row)
+    );
+  };
+
+  deleteRowInEditor = (row: number) => {
+    this.setState(
+      prev => {
+        const dataFirst = prev.editorData.slice(0, row);
+        const dataSecond = prev.editorData.slice(row + 1);
+        return {
+          editorData: dataFirst.concat(dataSecond),
+        };
+      },
+      () => this.updateBpAfterDeleteRow(row - 1)
+    );
+  };
+
+  updateEditor = (data: Matrix<CellBase<string>>) => {
+    this.setState({
+      editorData: data,
+    });
+  };
+
+  toggleBreakpoint = (rowNumber: number) => {
+    this.setState(
+      ({breakpoints}) => {
+        if (!breakpoints.has(rowNumber))
+          return {breakpoints: new Set(breakpoints).add(rowNumber)};
+
+        const newBreakpoints = new Set(breakpoints);
+        newBreakpoints.delete(rowNumber);
+        return {
+          breakpoints: newBreakpoints,
+        };
+      },
+      () => {
+        engine.updateBreakpoints(this.state.state, this.state.breakpoints);
+      }
+    );
   };
 
   initState = () => {
     try {
       const newState: State = engine.makeStateFromString(
-        this.state.program,
+        parseMatrix(this.state.editorData),
         this.state.inputs.map<bigint>(x => {
           return BigInt(x);
         })
       );
+
+      engine.updateBreakpoints(newState, this.state.breakpoints);
 
       this.setState({
         state: newState,
@@ -97,24 +170,17 @@ class App extends Component<{}, IState> {
   };
 
   runProgramTillBP = () => {
+    if (this.state.state.completed || !this.state.isRunning) return;
+
     if (this.state.programSpeed === maxSpeed) {
       engine.completeTillBreak(this.state.state);
+      this.setState({isRunning: false});
       this.forceUpdate(this.maybeFinish);
-    } else {
-      if (
-        this.state.state.completed ||
-        !this.state.isRunning ||
-        this.state.breakpoints.has(
-          this.state.state.nextInstruction.getLineNumber()
-        )
-      )
-        return;
-
-      this.onClickStep();
-      this.sleep(maxSpeed - this.state.programSpeed).then(
-        this.runProgramTillBP
-      );
+      return;
     }
+
+    this.onClickStep();
+    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgramTillBP);
   };
 
   maybeFinish = () => {
@@ -167,9 +233,7 @@ class App extends Component<{}, IState> {
       );
       if (instructionResult instanceof Break)
         this.setState({isRunning: false}, this.maybeFinish);
-      else {
-        this.forceUpdate(this.maybeFinish);
-      }
+      else this.forceUpdate(this.maybeFinish);
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
       if (err instanceof Error) msg = err.message;
@@ -331,7 +395,13 @@ class App extends Component<{}, IState> {
                   }}
                 >
                   <Editor
-                    handleChange={this.loadText}
+                    data={this.state.editorData}
+                    started={this.state.started}
+                    handleAddRow={this.addRowInEditor}
+                    handleDeleteRow={this.deleteRowInEditor}
+                    handleUpdateEditor={this.updateEditor}
+                    toggleBreakpoint={this.toggleBreakpoint}
+                    breakpoints={this.state.breakpoints}
                     curRow={this.state.state.nextInstruction.getLineNumber()}
                   />
                   <EditorAlert

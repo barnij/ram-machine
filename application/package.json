@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@barnij/react-spreadsheet": "^0.6.0",
+    "@barnij/react-spreadsheet": "^0.6.1",
     "@blueprintjs/core": "^3.47.0",
     "bootstrap": "^5.0.2",
     "ram-engine": "file:../engine",

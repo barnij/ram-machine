@@ -18,7 +18,7 @@ export class Engine {
     return new State(parsedProgram, env, new Set());
   }
 
-  stepInstruction(state: State): Ok {
+  stepInstruction(state: State) {
     return this.interpreter.interpInstruction(state.nextInstruction, state);
   }
 
