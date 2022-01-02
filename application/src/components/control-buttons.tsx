@@ -97,6 +97,22 @@ function DownloadFileButton(props: IDownloadFileButtonProps) {
     />
   );
 }
+
+interface IResetButtonProps {
+  started: boolean;
+  onClickReset: () => void;
+}
+function ResetButton(props: IResetButtonProps) {
+  return (
+    <Button
+      title="Reset editor"
+      icon="reset"
+      onClick={props.onClickReset}
+      disabled={props.started}
+    />
+  );
+}
+
 interface IControlButtonsProps {
   started: boolean;
   running: boolean;
@@ -108,6 +124,7 @@ interface IControlButtonsProps {
   onClickStep: () => void;
   onClickDownload: () => void;
   onClickUpload: () => void;
+  onClickReset: () => void;
 }
 
 export class ControlButtons extends Component<IControlButtonsProps, {}> {
@@ -135,8 +152,12 @@ export class ControlButtons extends Component<IControlButtonsProps, {}> {
           />
           <DownloadFileButton onClickDownload={this.props.onClickDownload} />
           <UploadFileButton
-            onClickUpload={this.props.onClickUpload}
             started={this.props.started}
+            onClickUpload={this.props.onClickUpload}
+          />
+          <ResetButton
+            started={this.props.started}
+            onClickReset={this.props.onClickReset}
           />
         </ButtonGroup>
       </div>
