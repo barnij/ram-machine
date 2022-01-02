@@ -280,7 +280,7 @@ class App extends Component<{}, IState> {
     }
   };
   onClickRun = () => {
-    if (!this.state.started) if (!this.initState()) return;
+    if (!this.state.started && !this.initState()) return;
 
     this.setState(
       {
