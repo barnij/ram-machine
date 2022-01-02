@@ -406,6 +406,15 @@ class App extends Component<{}, IState> {
     this.updateEditor(newData);
   };
 
+  saveCode = (ev: Event) => {
+    ev.preventDefault();
+    localStorage.setItem('savedCode', parseMatrix(this.state.editorData));
+  };
+  restoreCode = () => {
+    const savedCode = localStorage.getItem('savedCode');
+    if (savedCode) this.loadFile(savedCode);
+  };
+
   componentDidMount = () => {
     const heightOfWrapper = document.getElementById(
       'spreadsheet_wrapper'
@@ -420,13 +429,11 @@ class App extends Component<{}, IState> {
     const edi = document.getElementById('editor')!;
     if (edi !== null && edi?.style) edi.style.height = h + 'px';
 
-    const savedCode = localStorage.getItem('savedCode');
-    if (savedCode) this.loadFile(savedCode);
-
-    window.addEventListener('beforeunload', ev => {
-      ev.preventDefault();
-      localStorage.setItem('savedCode', parseMatrix(this.state.editorData));
-    });
+    this.restoreCode();
+    window.addEventListener('beforeunload', this.saveCode);
+  };
+  componentWillUnmount = () => {
+    window.removeEventListener('beforeunload', this.saveCode);
   };
 
   render() {
