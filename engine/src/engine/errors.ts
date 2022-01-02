@@ -8,7 +8,11 @@ export class ParserError extends Error {
     super(message);
   }
 }
-export class InputError extends InterpreterError {}
+export class InputError extends InterpreterError {
+  constructor(public line: number, message: string, public inputId: number) {
+    super(line, message);
+  }
+}
 export class RegisterError extends InterpreterError {
   constructor(public line: number, message: string, public regId: bigint) {
     super(line, message);

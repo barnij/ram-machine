@@ -135,8 +135,6 @@ class App extends Component<{}, IState> {
   };
 
   initState = () => {
-    console.log(this.state.editorData);
-    console.log(this.state.state);
     try {
       const newState: State = engine.makeStateFromString(
         parseMatrix(this.state.editorData),
@@ -250,7 +248,6 @@ class App extends Component<{}, IState> {
     });
   };
   onClickStep = () => {
-    const lineId = this.state.state.nextInstruction.getLineNumber();
     try {
       const instructionResult: Ok | Break = engine.stepInstruction(
         this.state.state
@@ -261,13 +258,13 @@ class App extends Component<{}, IState> {
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
       if (err instanceof InterpreterError) {
-        msg = 'line ' + (lineId + 1) + ': ';
+        msg = 'line ' + (err.line + 1) + ': ';
         if (err instanceof RegisterError) {
           msg += err.message + '\n';
-          msg += 'register nr ' + err.regId;
+          msg += '    register nr ' + err.regId;
         } else if (err instanceof InputError) {
           msg += err.message + '\n';
-          msg += 'input nr ' + err.line;
+          msg += '    input nr ' + err.inputId;
         } else {
           msg += err.message;
         }
@@ -278,7 +275,7 @@ class App extends Component<{}, IState> {
         isRunning: false,
         errorMessage: msg,
         errorOpen: true,
-        errorType: 'Run Time Error',
+        errorType: 'Runtime Error',
       });
     }
   };
