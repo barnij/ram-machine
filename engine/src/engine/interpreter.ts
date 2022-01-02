@@ -11,10 +11,10 @@ export class Interpreter {
 
 export const ACCUMULATOR = BigInt(0);
 
-function getRegister(registerId: bigint, env: Environment) {
+function getRegister(registerId: bigint, env: Environment, line: number) {
   const value = env.registers.get(registerId);
   if (value == null) {
-    throw new RegisterError('empty register nr ' + registerId);
+    throw new RegisterError(line, 'empty register', registerId);
   } else {
     return value;
   }
@@ -31,18 +31,29 @@ ast.Load.prototype.interp = function (state) {
       setRegister(ACCUMULATOR, arg.value, state.environment);
       return new Ok();
     case ast.Address: {
-      const value = getRegister(arg.value, state.environment);
+      const value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
       setRegister(ACCUMULATOR, value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      let value = getRegister(arg.value, state.environment);
-      value = getRegister(value, state.environment);
+      let value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
+      value = getRegister(value, state.environment, this.getLineNumber());
       setRegister(ACCUMULATOR, value, state.environment);
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -50,119 +61,194 @@ ast.Store.prototype.interp = function (state) {
   const arg: ast.Address | ast.Reference = this.argument;
   switch (arg.constructor) {
     case ast.Address: {
-      const value = getRegister(ACCUMULATOR, state.environment);
+      const value = getRegister(
+        ACCUMULATOR,
+        state.environment,
+        this.getLineNumber()
+      );
       setRegister(arg.value, value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      const accValue = getRegister(ACCUMULATOR, state.environment);
-      const value = getRegister(arg.value, state.environment);
+      const accValue = getRegister(
+        ACCUMULATOR,
+        state.environment,
+        this.getLineNumber()
+      );
+      const value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
       setRegister(value, accValue, state.environment);
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
 ast.Add.prototype.interp = function (state) {
-  const accValue = getRegister(ACCUMULATOR, state.environment);
+  const accValue = getRegister(
+    ACCUMULATOR,
+    state.environment,
+    this.getLineNumber()
+  );
   const arg: ast.Operandum = this.argument;
   switch (arg.constructor) {
     case ast.Const:
       setRegister(ACCUMULATOR, accValue + arg.value, state.environment);
       return new Ok();
     case ast.Address: {
-      const value = getRegister(arg.value, state.environment);
+      const value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
       setRegister(ACCUMULATOR, accValue + value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      let value = getRegister(arg.value, state.environment);
-      value = getRegister(value, state.environment);
+      let value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
+      value = getRegister(value, state.environment, this.getLineNumber());
       setRegister(ACCUMULATOR, accValue + value, state.environment);
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
 ast.Sub.prototype.interp = function (state) {
-  const accValue = getRegister(ACCUMULATOR, state.environment);
+  const accValue = getRegister(
+    ACCUMULATOR,
+    state.environment,
+    this.getLineNumber()
+  );
   const arg: ast.Operandum = this.argument;
   switch (arg.constructor) {
     case ast.Const:
       setRegister(ACCUMULATOR, accValue - arg.value, state.environment);
       return new Ok();
     case ast.Address: {
-      const value = getRegister(arg.value, state.environment);
+      const value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
       setRegister(ACCUMULATOR, accValue - value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      let value = getRegister(arg.value, state.environment);
-      value = getRegister(value, state.environment);
+      let value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
+      value = getRegister(value, state.environment, this.getLineNumber());
       setRegister(ACCUMULATOR, accValue - value, state.environment);
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
 ast.Mult.prototype.interp = function (state) {
-  const accValue = getRegister(ACCUMULATOR, state.environment);
+  const accValue = getRegister(
+    ACCUMULATOR,
+    state.environment,
+    this.getLineNumber()
+  );
   const arg: ast.Operandum = this.argument;
   switch (arg.constructor) {
     case ast.Const:
       setRegister(ACCUMULATOR, accValue * arg.value, state.environment);
       return new Ok();
     case ast.Address: {
-      const value = getRegister(arg.value, state.environment);
+      const value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
       setRegister(ACCUMULATOR, accValue * value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      let value = getRegister(arg.value, state.environment);
-      value = getRegister(value, state.environment);
+      let value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
+      value = getRegister(value, state.environment, this.getLineNumber());
       setRegister(ACCUMULATOR, accValue * value, state.environment);
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
 ast.Div.prototype.interp = function (state) {
-  const accValue = getRegister(ACCUMULATOR, state.environment);
+  const accValue = getRegister(
+    ACCUMULATOR,
+    state.environment,
+    this.getLineNumber()
+  );
   const arg: ast.Operandum = this.argument;
   switch (arg.constructor) {
     case ast.Const:
       if (arg.value === BigInt(0)) {
-        throw new RuntimeError('division by 0');
+        throw new RuntimeError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / arg.value, state.environment);
       return new Ok();
     case ast.Address: {
-      const value = getRegister(arg.value, state.environment);
+      const value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
       if (value === BigInt(0)) {
-        throw new RuntimeError('division by 0');
+        throw new RuntimeError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      let value = getRegister(arg.value, state.environment);
-      value = getRegister(value, state.environment);
+      let value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
+      value = getRegister(value, state.environment, this.getLineNumber());
       if (value === BigInt(0)) {
-        throw new RuntimeError('division by 0');
+        throw new RuntimeError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / value, state.environment);
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -170,18 +256,25 @@ ast.Read.prototype.interp = function (state) {
   const arg: ast.Address | ast.Reference = this.argument;
   switch (arg.constructor) {
     case ast.Address: {
-      const value = state.environment.input.read();
-      setRegister(arg.value, value, state.environment);
+      const value = state.environment.input.read(this.getLineNumber());
+      if (value) setRegister(arg.value, value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
-      const value = getRegister(arg.value, state.environment);
-      const readValue = state.environment.input.read();
-      setRegister(value, readValue, state.environment);
+      const value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
+      const readValue = state.environment.input.read(this.getLineNumber());
+      if (readValue) setRegister(value, readValue, state.environment);
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -192,18 +285,29 @@ ast.Write.prototype.interp = function (state) {
       state.environment.output.write(arg.value);
       return new Ok();
     case ast.Address: {
-      const value = getRegister(arg.value, state.environment);
+      const value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
       state.environment.output.write(value);
       return new Ok();
     }
     case ast.Reference: {
-      let value = getRegister(arg.value, state.environment);
-      value = getRegister(value, state.environment);
+      let value = getRegister(
+        arg.value,
+        state.environment,
+        this.getLineNumber()
+      );
+      value = getRegister(value, state.environment, this.getLineNumber());
       state.environment.output.write(value);
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -211,7 +315,7 @@ ast.Jump.prototype.interp = function (state) {
   const arg: ast.Label = this.argument;
   const jumpTarget = state.program.labels.get(arg.value);
   if (jumpTarget == null) {
-    throw new LabelError('unrecognized label ' + arg.value);
+    throw new LabelError(this.getLineNumber(), 'unrecognized label', arg.value);
   } else {
     state.nextInstruction = jumpTarget;
     return new Ok();
@@ -222,9 +326,13 @@ ast.Jgtz.prototype.interp = function (state) {
   const arg: ast.Label = this.argument;
   const jumpTarget = state.program.labels.get(arg.value);
   if (jumpTarget == null) {
-    throw new LabelError('unrecognized label ' + arg.value);
+    throw new LabelError(this.getLineNumber(), 'unrecognized label', arg.value);
   } else {
-    const value = getRegister(ACCUMULATOR, state.environment);
+    const value = getRegister(
+      ACCUMULATOR,
+      state.environment,
+      this.getLineNumber()
+    );
     if (value > BigInt(0)) {
       state.nextInstruction = jumpTarget;
     }
@@ -236,9 +344,13 @@ ast.Jzero.prototype.interp = function (state) {
   const arg: ast.Label = this.argument;
   const jumpTarget = state.program.labels.get(arg.value);
   if (jumpTarget == null) {
-    throw new LabelError('unrecognized label ' + arg.value);
+    throw new LabelError(this.getLineNumber(), 'unrecognized label', arg.value);
   } else {
-    const value = getRegister(ACCUMULATOR, state.environment);
+    const value = getRegister(
+      ACCUMULATOR,
+      state.environment,
+      this.getLineNumber()
+    );
     if (value === BigInt(0)) {
       state.nextInstruction = jumpTarget;
     }

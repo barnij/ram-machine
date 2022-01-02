@@ -2,7 +2,19 @@ import React, {Component} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Col, Container, Row} from 'react-bootstrap';
-import {Engine, Interpreter, Ok, Break, Parser, State} from 'ram-engine';
+import {
+  Engine,
+  Interpreter,
+  Ok,
+  Break,
+  Parser,
+  State,
+  ParserError,
+  ParserGeneralError,
+  InterpreterError,
+  RegisterError,
+  InputError,
+} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
 import {Processor} from './components/processor';
@@ -26,7 +38,6 @@ interface IState {
   programSpeed: number;
   errorOpen: boolean;
   errorMessage: string;
-  errorLine: number;
   errorType: string;
   fileDownloadUrl: string | undefined;
   editorData: Matrix.Matrix<CellBase<string>>;
@@ -45,7 +56,6 @@ class App extends Component<{}, IState> {
     programSpeed: defaultSpeed,
     errorOpen: false,
     errorMessage: '',
-    errorLine: 0,
     errorType: '',
     editorData: Matrix.createEmpty<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
     fileDownloadUrl: undefined,
@@ -133,7 +143,8 @@ class App extends Component<{}, IState> {
     try {
       const newState: State = engine.makeStateFromString(
         parseMatrix(this.state.editorData),
-        this.state.inputs.map<bigint>(x => {
+        this.state.inputs.map<bigint | null>(x => {
+          if (x.match(/^\s*$/)) return null;
           return BigInt(x);
         })
       );
@@ -143,9 +154,19 @@ class App extends Component<{}, IState> {
       this.setState({
         state: newState,
       });
+
+      return true;
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
-      if (err instanceof Error) msg = err.message;
+      if (err instanceof ParserGeneralError) {
+        msg = '';
+        err.errors.forEach((error: ParserError, line: number) => {
+          msg += 'line ' + (line + 1) + ': ';
+          msg += error.message + '\n';
+        });
+      } else if (err instanceof ParserError)
+        msg = 'line ' + (err.line + 1) + ': ' + err.message;
+      else if (err instanceof Error) msg = err.message;
 
       this.setState({
         started: false,
@@ -153,8 +174,9 @@ class App extends Component<{}, IState> {
         errorMessage: msg,
         errorOpen: true,
         errorType: 'Parser Error',
-        errorLine: 0, // TODO in parser
       });
+
+      return false;
     }
   };
 
@@ -241,20 +263,26 @@ class App extends Component<{}, IState> {
       else this.forceUpdate(this.maybeFinish);
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
-      if (err instanceof Error) msg = err.message;
+      if (err instanceof InterpreterError) {
+        msg = 'line ' + (err.line + 1) + ': ';
+        if (err instanceof InputError)
+          msg += err.message + ' ' + err.inputId + '\n';
+        else if (err instanceof RegisterError)
+          msg += err.message + ' ' + err.regId + '\n';
+        else msg += err.message;
+      }
 
       this.setState({
         started: false,
         isRunning: false,
         errorMessage: msg,
         errorOpen: true,
-        errorType: 'Run Time Error',
-        errorLine: this.state.state.nextInstruction.getLineNumber(),
+        errorType: 'Runtime Error',
       });
     }
   };
   onClickRun = () => {
-    if (!this.state.started) this.initState();
+    if (!this.state.started && !this.initState()) return;
 
     this.setState(
       {
@@ -270,7 +298,7 @@ class App extends Component<{}, IState> {
     );
   };
   onClickRunTillBreakpoint = () => {
-    if (!this.state.started) this.initState();
+    if (!this.state.started) if (!this.initState()) return;
 
     this.setState(
       {
@@ -508,7 +536,6 @@ class App extends Component<{}, IState> {
                   <EditorAlert
                     isOpen={this.state.errorOpen}
                     message={this.state.errorMessage}
-                    line={this.state.errorLine}
                     errorType={this.state.errorType}
                     handleClose={() => {
                       this.setState({errorOpen: false});

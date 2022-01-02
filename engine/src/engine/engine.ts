@@ -6,7 +6,7 @@ import {Ok, Break} from './status';
 export class Engine {
   constructor(private parser: Parser, private interpreter: Interpreter) {}
 
-  makeStateFromString(program: string, input: bigint[]): State {
+  makeStateFromString(program: string, input: (bigint | null)[]): State {
     const env = new Environment(input);
     const parsedProgram = this.parser.parseProgram(program);
     return new State(parsedProgram, env, new Set());
