@@ -417,7 +417,7 @@ class App extends Component<{}, IState> {
                     type="file"
                     style={{display: 'none'}}
                     multiple={false}
-                    accept=".ram"
+                    accept=".ram,.RAMCode"
                     onChange={evt => this.openFile(evt)}
                     ref={e => (this.dofileUpload = e)}
                   />
