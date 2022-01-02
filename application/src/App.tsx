@@ -2,7 +2,19 @@ import React, {Component} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Col, Container, Row} from 'react-bootstrap';
-import {Engine, Interpreter, Ok, Break, Parser, State} from 'ram-engine';
+import {
+  Engine,
+  Interpreter,
+  Ok,
+  Break,
+  Parser,
+  State,
+  ParserError,
+  ParserGeneralError,
+  InterpreterError,
+  RegisterError,
+  InputError,
+} from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
 import {Processor} from './components/processor';
@@ -26,7 +38,6 @@ interface IState {
   programSpeed: number;
   errorOpen: boolean;
   errorMessage: string;
-  errorLine: number;
   errorType: string;
   editorData: Matrix.Matrix<CellBase<string>>;
   sliderLabelRenderer: () => string;
@@ -44,7 +55,6 @@ class App extends Component<{}, IState> {
     programSpeed: defaultSpeed,
     errorOpen: false,
     errorMessage: '',
-    errorLine: 0,
     errorType: '',
     editorData: Matrix.createEmpty<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
     sliderLabelRenderer: () => '',
@@ -125,6 +135,8 @@ class App extends Component<{}, IState> {
   };
 
   initState = () => {
+    console.log(this.state.editorData);
+    console.log(this.state.state);
     try {
       const newState: State = engine.makeStateFromString(
         parseMatrix(this.state.editorData),
@@ -138,9 +150,19 @@ class App extends Component<{}, IState> {
       this.setState({
         state: newState,
       });
+
+      return true;
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
-      if (err instanceof Error) msg = err.message;
+      if (err instanceof ParserGeneralError) {
+        msg = '';
+        err.errors.forEach((error: ParserError, line: number) => {
+          msg += 'line ' + (line + 1) + ': ';
+          msg += error.message + '\n';
+        });
+      } else if (err instanceof ParserError)
+        msg = 'line ' + (err.line + 1) + ': ' + err.message;
+      else if (err instanceof Error) msg = err.message;
 
       this.setState({
         started: false,
@@ -148,8 +170,9 @@ class App extends Component<{}, IState> {
         errorMessage: msg,
         errorOpen: true,
         errorType: 'Parser Error',
-        errorLine: 0, // TODO in parser
       });
+
+      return false;
     }
   };
 
@@ -227,6 +250,7 @@ class App extends Component<{}, IState> {
     });
   };
   onClickStep = () => {
+    const lineId = this.state.state.nextInstruction.getLineNumber();
     try {
       const instructionResult: Ok | Break = engine.stepInstruction(
         this.state.state
@@ -236,7 +260,18 @@ class App extends Component<{}, IState> {
       else this.forceUpdate(this.maybeFinish);
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
-      if (err instanceof Error) msg = err.message;
+      if (err instanceof InterpreterError) {
+        msg = 'line ' + (lineId + 1) + ': ';
+        if (err instanceof RegisterError) {
+          msg += err.message + '\n';
+          msg += 'register nr ' + err.regId;
+        } else if (err instanceof InputError) {
+          msg += err.message + '\n';
+          msg += 'input nr ' + err.line;
+        } else {
+          msg += err.message;
+        }
+      }
 
       this.setState({
         started: false,
@@ -244,12 +279,11 @@ class App extends Component<{}, IState> {
         errorMessage: msg,
         errorOpen: true,
         errorType: 'Run Time Error',
-        errorLine: this.state.state.nextInstruction.getLineNumber(),
       });
     }
   };
   onClickRun = () => {
-    if (!this.state.started) this.initState();
+    if (!this.state.started) if (!this.initState()) return;
 
     this.setState(
       {
@@ -265,7 +299,7 @@ class App extends Component<{}, IState> {
     );
   };
   onClickRunTillBreakpoint = () => {
-    if (!this.state.started) this.initState();
+    if (!this.state.started) if (!this.initState()) return;
 
     this.setState(
       {
@@ -407,7 +441,6 @@ class App extends Component<{}, IState> {
                   <EditorAlert
                     isOpen={this.state.errorOpen}
                     message={this.state.errorMessage}
-                    line={this.state.errorLine}
                     errorType={this.state.errorType}
                     handleClose={() => {
                       this.setState({errorOpen: false});

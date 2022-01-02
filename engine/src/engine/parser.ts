@@ -1,5 +1,10 @@
 import * as ast from './ast';
-import {ParserSyntaxError, ParserTypeError, ParserError} from './errors';
+import {
+  ParserSyntaxError,
+  ParserTypeError,
+  ParserError,
+  ParserGeneralError,
+} from './errors';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -51,7 +56,7 @@ export function validateArgumentType(
 
 export class Parser {
   parseOperandum(string: string): ast.Operandum {
-    if (string === '') throw new ParserSyntaxError('Empty operandum.');
+    if (string === '') throw new ParserSyntaxError(-1, 'Empty operandum');
     const operator = string[0];
     let valueString: string;
     if (operator === '=' || operator === '^') {
@@ -61,7 +66,7 @@ export class Parser {
     }
     const value = parseBigInt(valueString);
     if (value === null) {
-      throw new ParserSyntaxError('Operandum value must be an integer.');
+      throw new ParserSyntaxError(-1, 'Operandum value must be an integer');
     }
     switch (operator) {
       case '=': {
@@ -72,7 +77,8 @@ export class Parser {
           return new ast.Reference(value);
         }
         throw new ParserTypeError(
-          'Reference operandum expects nonnegative integer.'
+          -1,
+          'Reference operandum expects nonnegative integer'
         );
       }
       default: {
@@ -80,7 +86,8 @@ export class Parser {
           return new ast.Address(value);
         }
         throw new ParserTypeError(
-          'Address operandum expects nonnegative integer.'
+          -1,
+          'Address operandum expects nonnegative integer'
         );
       }
     }
@@ -90,7 +97,8 @@ export class Parser {
       return new ast.Label(string.toLowerCase());
     }
     throw new ParserSyntaxError(
-      'Label can contain only alphanumeric characters.'
+      -1,
+      'Label can contain only alphanumeric characters'
     );
   }
   parseInstruction(string: string): ast.Instruction {
@@ -100,7 +108,10 @@ export class Parser {
     const [instructionCode, ...instructionArguments] = string.split(WHITESPACE);
     if (instructionCode === 'halt') {
       if (instructionArguments.length !== 0) {
-        throw new ParserSyntaxError();
+        throw new ParserSyntaxError(
+          -1,
+          'Instruction halt does not take any argument'
+        );
       }
       return new ast.Halt();
     }
@@ -109,11 +120,13 @@ export class Parser {
       !LABEL_INSTRUCION_CODES.includes(instructionCode)
     ) {
       throw new ParserSyntaxError(
-        instructionCode + 'is not a valid instruction code.'
+        -1,
+        instructionCode + 'is not a valid instruction code'
       );
     }
     if (instructionArguments.length !== 1) {
       throw new ParserSyntaxError(
+        -1,
         'Instruction ' + instructionCode + 'expects exactly one argument'
       );
     }
@@ -121,7 +134,12 @@ export class Parser {
     if (OPERANDUM_INSTRUCTION_CODES.includes(instructionCode)) {
       const operandumArgument = this.parseOperandum(instructionArgument);
       if (!validateArgumentType(instructionCode, operandumArgument)) {
-        throw new ParserTypeError();
+        throw new ParserTypeError(
+          -1,
+          operandumArgument +
+            ' is not a valid argument for instruction ' +
+            instructionCode
+        );
       }
       switch (instructionCode) {
         case 'load':
@@ -141,12 +159,20 @@ export class Parser {
         case 'write':
           return new ast.Write(operandumArgument);
         default:
-          throw new ParserSyntaxError();
+          throw new ParserSyntaxError(
+            -1,
+            'unrecognized instruction ' + instructionCode
+          );
       }
     } else {
       const labelArgument = this.parseLabel(instructionArgument);
       if (!validateArgumentType(instructionCode, labelArgument)) {
-        throw new ParserTypeError();
+        throw new ParserTypeError(
+          -1,
+          labelArgument +
+            ' is not a valid argument for instruction ' +
+            instructionCode
+        );
       }
       switch (instructionCode) {
         case 'jump':
@@ -156,7 +182,10 @@ export class Parser {
         case 'jzero':
           return new ast.Jzero(labelArgument);
         default:
-          throw new ParserSyntaxError();
+          throw new ParserSyntaxError(
+            -1,
+            'unrecognized instruction ' + instructionCode
+          );
       }
     }
   }
@@ -177,7 +206,8 @@ export class Parser {
       label = new ast.Label(labelString);
       if (!validateLabel(label))
         throw new ParserSyntaxError(
-          'Label can contain only alphanumeric characters.'
+          -1,
+          'Label can contain only alphanumeric characters'
         );
       instructionString = commentlessString.slice(commentEndIndex + 1).trim();
     }
@@ -208,10 +238,11 @@ export class Parser {
       } catch (error: unknown) {
         if (error instanceof ParserError) {
           errorCaught = true;
+          error.line = i;
           parserErrors.set(i, error);
         } else {
           console.error(error);
-          throw new ParserError();
+          throw new ParserError(i, 'parser encountered unknown problem');
         }
       }
       if (parsedLine !== null) {
@@ -220,7 +251,7 @@ export class Parser {
         if (parsedLine.label !== null) {
           if (labels.get(parsedLine.label.value) !== undefined) {
             errorCaught = true;
-            parserErrors.set(i, new ParserSyntaxError('Repeated label.'));
+            parserErrors.set(i, new ParserSyntaxError(i, 'Repeated label'));
           } else {
             labels.set(parsedLine.label.value, parsedLine.instruction);
           }
@@ -241,7 +272,7 @@ export class Parser {
           instruction instanceof ast.Jzero
         ) {
           if (![...labels.keys()].includes(instruction.argument.value)) {
-            throw new ParserSyntaxError('No matching label.');
+            throw new ParserSyntaxError(i, 'No matching label');
           }
         }
         if (!errorCaught) {
@@ -252,7 +283,7 @@ export class Parser {
         }
       }
     }
-    if (errorCaught) throw new ParserError();
+    if (errorCaught) throw new ParserGeneralError(parserErrors);
     return new ast.Program(labels, programTree);
   }
   parseProgramFile(pathToFile: string): ast.Program {

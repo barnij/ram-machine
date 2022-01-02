@@ -14,7 +14,7 @@ export const ACCUMULATOR = BigInt(0);
 function getRegister(registerId: bigint, env: Environment) {
   const value = env.registers.get(registerId);
   if (value == null) {
-    throw new RegisterError('empty register nr ' + registerId);
+    throw new RegisterError(-1, 'empty register', registerId);
   } else {
     return value;
   }
@@ -42,7 +42,10 @@ ast.Load.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -61,7 +64,10 @@ ast.Store.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -84,7 +90,10 @@ ast.Add.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -107,7 +116,10 @@ ast.Sub.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -130,7 +142,10 @@ ast.Mult.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -140,14 +155,14 @@ ast.Div.prototype.interp = function (state) {
   switch (arg.constructor) {
     case ast.Const:
       if (arg.value === BigInt(0)) {
-        throw new RuntimeError('division by 0');
+        throw new RuntimeError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / arg.value, state.environment);
       return new Ok();
     case ast.Address: {
       const value = getRegister(arg.value, state.environment);
       if (value === BigInt(0)) {
-        throw new RuntimeError('division by 0');
+        throw new RuntimeError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / value, state.environment);
       return new Ok();
@@ -156,13 +171,16 @@ ast.Div.prototype.interp = function (state) {
       let value = getRegister(arg.value, state.environment);
       value = getRegister(value, state.environment);
       if (value === BigInt(0)) {
-        throw new RuntimeError('division by 0');
+        throw new RuntimeError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / value, state.environment);
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -181,7 +199,10 @@ ast.Read.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -203,7 +224,10 @@ ast.Write.prototype.interp = function (state) {
       return new Ok();
     }
     default:
-      throw new RuntimeError('invalid argument in instruction load');
+      throw new RuntimeError(
+        this.getLineNumber(),
+        'invalid argument in instruction load'
+      );
   }
 };
 
@@ -211,7 +235,7 @@ ast.Jump.prototype.interp = function (state) {
   const arg: ast.Label = this.argument;
   const jumpTarget = state.program.labels.get(arg.value);
   if (jumpTarget == null) {
-    throw new LabelError('unrecognized label ' + arg.value);
+    throw new LabelError(this.getLineNumber(), 'unrecognized label', arg.value);
   } else {
     state.nextInstruction = jumpTarget;
     return new Ok();
@@ -222,7 +246,7 @@ ast.Jgtz.prototype.interp = function (state) {
   const arg: ast.Label = this.argument;
   const jumpTarget = state.program.labels.get(arg.value);
   if (jumpTarget == null) {
-    throw new LabelError('unrecognized label ' + arg.value);
+    throw new LabelError(this.getLineNumber(), 'unrecognized label', arg.value);
   } else {
     const value = getRegister(ACCUMULATOR, state.environment);
     if (value > BigInt(0)) {
@@ -236,7 +260,7 @@ ast.Jzero.prototype.interp = function (state) {
   const arg: ast.Label = this.argument;
   const jumpTarget = state.program.labels.get(arg.value);
   if (jumpTarget == null) {
-    throw new LabelError('unrecognized label ' + arg.value);
+    throw new LabelError(this.getLineNumber(), 'unrecognized label', arg.value);
   } else {
     const value = getRegister(ACCUMULATOR, state.environment);
     if (value === BigInt(0)) {
