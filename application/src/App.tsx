@@ -330,7 +330,7 @@ class App extends Component<{}, IState> {
   }
   loadFile = (text: string) => {
     const lines = text.split(/\r\n|\n\r|\n|\r/);
-    let newData = Matrix.createEmpty<CellBase<string>>(
+    const newData = Matrix.createEmpty<CellBase<string>>(
       Math.max(lines.length, START_NUMBER_OF_ROWS),
       4
     );
@@ -356,18 +356,14 @@ class App extends Component<{}, IState> {
         if (argument.length > 0) line.argument = argument[0];
       }
 
-      newData = Matrix.set({row: i, column: 0}, {value: line.label}, newData);
-      newData = Matrix.set(
+      Matrix.mutableSet({row: i, column: 0}, {value: line.label}, newData);
+      Matrix.mutableSet(
         {row: i, column: 1},
         {value: line.instruction},
         newData
       );
-      newData = Matrix.set(
-        {row: i, column: 2},
-        {value: line.argument},
-        newData
-      );
-      newData = Matrix.set({row: i, column: 3}, {value: line.comment}, newData);
+      Matrix.mutableSet({row: i, column: 2}, {value: line.argument}, newData);
+      Matrix.mutableSet({row: i, column: 3}, {value: line.comment}, newData);
     }
 
     this.updateEditor(newData);
