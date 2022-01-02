@@ -10,7 +10,7 @@ import {Editor, parseMatrix} from './components/editor';
 import {ControlButtons} from './components/control-buttons';
 import {EditorAlert} from './components/alert';
 import {Slider} from '@blueprintjs/core';
-import {Matrix, createEmptyMatrix, CellBase} from '@barnij/react-spreadsheet';
+import {Matrix, CellBase} from '@barnij/react-spreadsheet';
 
 const engine = new Engine(new Parser(), new Interpreter());
 
@@ -28,7 +28,7 @@ interface IState {
   errorMessage: string;
   errorLine: number;
   errorType: string;
-  editorData: Matrix<CellBase<string>>;
+  editorData: Matrix.Matrix<CellBase<string>>;
   sliderLabelRenderer: () => string;
 }
 
@@ -46,7 +46,7 @@ class App extends Component<{}, IState> {
     errorMessage: '',
     errorLine: 0,
     errorType: '',
-    editorData: createEmptyMatrix<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
+    editorData: Matrix.createEmpty<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
     sliderLabelRenderer: () => '',
   };
 
@@ -76,7 +76,7 @@ class App extends Component<{}, IState> {
     this.setState(
       prev => {
         const dataFirst = prev.editorData.slice(0, row + 1);
-        const newData = createEmptyMatrix<CellBase<string>>(1, 4);
+        const newData = Matrix.createEmpty<CellBase<string>>(1, 4);
         const dataSecond = prev.editorData.slice(row + 1);
 
         return {
@@ -100,7 +100,7 @@ class App extends Component<{}, IState> {
     );
   };
 
-  updateEditor = (data: Matrix<CellBase<string>>) => {
+  updateEditor = (data: Matrix.Matrix<CellBase<string>>) => {
     this.setState({
       editorData: data,
     });

@@ -19,17 +19,17 @@ interface IEditorState {
 }
 
 interface IEditorProps {
-  data: Matrix<CellBase<string>>;
+  data: Matrix.Matrix<CellBase<string>>;
   curRow: number;
   started: boolean;
   breakpoints: Set<number>;
   handleAddRow: (rowNumber: number) => void;
   handleDeleteRow: (rowNumber: number) => void;
-  handleUpdateEditor: (data: Matrix<CellBase<string>>) => void;
+  handleUpdateEditor: (data: Matrix.Matrix<CellBase<string>>) => void;
   toggleBreakpoint: (rowNumber: number) => void;
 }
 
-export function parseMatrix(data: Matrix<CellBase<string>>) {
+export function parseMatrix(data: Matrix.Matrix<CellBase<string>>) {
   let text = '';
 
   for (const row of data) {
