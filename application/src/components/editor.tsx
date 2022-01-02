@@ -97,6 +97,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
         onClick={() => this.props.toggleBreakpoint(row)}
       >
         {value}
+        <span style={{float: 'right'}}>{row + 1}.</span>
       </th>
     );
   };
