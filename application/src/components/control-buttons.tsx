@@ -150,14 +150,14 @@ export class ControlButtons extends Component<IControlButtonsProps, {}> {
             running={this.props.running}
             onClickStep={this.props.onClickStep}
           />
+          <DownloadFileButton onClickDownload={this.props.onClickDownload} />
+          <UploadFileButton
+            started={this.props.started}
+            onClickUpload={this.props.onClickUpload}
+          />
           <ResetButton
             started={this.props.started}
             onClickReset={this.props.onClickReset}
-          />
-          <DownloadFileButton onClickDownload={this.props.onClickDownload} />
-          <UploadFileButton
-            onClickUpload={this.props.onClickUpload}
-            started={this.props.started}
           />
         </ButtonGroup>
       </div>

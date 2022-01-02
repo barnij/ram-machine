@@ -293,9 +293,13 @@ class App extends Component<{}, IState> {
     }));
   };
   onClickReset = () => {
-    this.setState({
-      editorData: Matrix.createEmpty<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
-    });
+    if (confirm('Are you sure to reset editor? Your code will be deleted.'))
+      this.setState({
+        editorData: Matrix.createEmpty<CellBase<string>>(
+          START_NUMBER_OF_ROWS,
+          4
+        ),
+      });
   };
   onClickDownload = () => {
     const output = parseMatrix(this.state.editorData);
