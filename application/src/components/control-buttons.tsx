@@ -44,26 +44,15 @@ interface IRunTillBreakpointButton {
   onClickRunTillBreakpoint: () => void;
 }
 function RunTillBreakpointButton(props: IRunTillBreakpointButton) {
-  if (props.running) {
-    return (
-      <Button
-        title="Run till breakpoint"
-        icon="circle-arrow-right"
-        intent="success"
-        onClick={props.onClickRunTillBreakpoint}
-        disabled={true}
-      />
-    );
-  } else {
-    return (
-      <Button
-        title="Run till breakpoint"
-        icon="circle-arrow-right"
-        intent="success"
-        onClick={props.onClickRunTillBreakpoint}
-      />
-    );
-  }
+  return (
+    <Button
+      title="Run till breakpoint"
+      icon="circle-arrow-right"
+      intent="success"
+      onClick={props.onClickRunTillBreakpoint}
+      disabled={props.running}
+    />
+  );
 }
 
 interface IStepButtonProps {
@@ -72,32 +61,28 @@ interface IStepButtonProps {
   onClickStep: () => void;
 }
 function StepButton(props: IStepButtonProps) {
-  if (!props.started || props.running) {
-    return (
-      <Button
-        title="Step forward"
-        icon="step-forward"
-        onClick={props.onClickStep}
-        disabled={true}
-      />
-    );
-  } else {
-    return (
-      <Button
-        title="Step forward"
-        icon="step-forward"
-        onClick={props.onClickStep}
-      />
-    );
-  }
+  return (
+    <Button
+      title="Step forward"
+      icon="step-forward"
+      onClick={props.onClickStep}
+      disabled={!props.started || props.running}
+    />
+  );
 }
 
 interface IUploadFileButtonProps {
+  started: boolean;
   onClickUpload: () => void;
 }
 function UploadFileButton(props: IUploadFileButtonProps) {
   return (
-    <Button title="Upload file" icon="upload" onClick={props.onClickUpload} />
+    <Button
+      title="Upload file"
+      icon="upload"
+      onClick={props.onClickUpload}
+      disabled={props.started}
+    />
   );
 }
 interface IDownloadFileButtonProps {
@@ -149,7 +134,10 @@ export class ControlButtons extends Component<IControlButtonsProps, {}> {
             onClickStep={this.props.onClickStep}
           />
           <DownloadFileButton onClickDownload={this.props.onClickDownload} />
-          <UploadFileButton onClickUpload={this.props.onClickUpload} />
+          <UploadFileButton
+            onClickUpload={this.props.onClickUpload}
+            started={this.props.started}
+          />
         </ButtonGroup>
       </div>
     );

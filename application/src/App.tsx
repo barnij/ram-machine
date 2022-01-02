@@ -28,6 +28,7 @@ interface IState {
   errorMessage: string;
   errorLine: number;
   errorType: string;
+  fileDownloadUrl: string | undefined;
   editorData: Matrix.Matrix<CellBase<string>>;
   sliderLabelRenderer: () => string;
 }
@@ -47,8 +48,12 @@ class App extends Component<{}, IState> {
     errorLine: 0,
     errorType: '',
     editorData: Matrix.createEmpty<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
+    fileDownloadUrl: undefined,
     sliderLabelRenderer: () => '',
   };
+
+  dofileDownload: HTMLAnchorElement | null = null;
+  dofileUpload: HTMLInputElement | null = null;
 
   updateBpAfterAddRow = (row: number) => {
     this.setState(({breakpoints}) => {
@@ -288,10 +293,80 @@ class App extends Component<{}, IState> {
     }));
   };
   onClickDownload = () => {
-    //TODO
+    const output = parseMatrix(this.state.editorData);
+    const blob = new Blob([output]);
+    const fileDownloadUrl = URL.createObjectURL(blob);
+    this.setState({fileDownloadUrl: fileDownloadUrl}, () => {
+      if (this.dofileDownload !== null) this.dofileDownload.click();
+      URL.revokeObjectURL(fileDownloadUrl); // free up storage--no longer needed.
+      this.setState({fileDownloadUrl: ''});
+    });
   };
   onClickUpload = () => {
-    //TODO
+    if (this.dofileUpload !== null) this.dofileUpload.click();
+  };
+  openFile(evt: React.ChangeEvent<HTMLInputElement>) {
+    if (
+      evt.target === null ||
+      evt.target.files === null ||
+      evt.target.files.length === 0
+    )
+      return;
+
+    const fileObj = evt.target.files[0];
+    const reader = new FileReader();
+
+    let fileloaded = () => {
+      const fileContents = reader.result;
+      if (fileContents === null || fileContents instanceof ArrayBuffer) return;
+      this.loadFile(fileContents);
+    };
+
+    fileloaded = fileloaded.bind(this);
+    reader.onload = fileloaded;
+    reader.readAsText(fileObj);
+
+    if (this.dofileUpload !== null) this.dofileUpload.value = '';
+  }
+  loadFile = (text: string) => {
+    const lines = text.split(/\r\n|\n\r|\n|\r/);
+    const newData = Matrix.createEmpty<CellBase<string>>(
+      Math.max(lines.length, START_NUMBER_OF_ROWS),
+      4
+    );
+    for (let i = 0; i < lines.length; i++) {
+      const line = {label: '', instruction: '', argument: '', comment: ''};
+      const commentlessString = lines[i].split('#')[0];
+      line.comment = lines[i].substring(commentlessString.length + 1);
+
+      const labelEndIndex = commentlessString.indexOf(':');
+      let instructionString = commentlessString.trim();
+
+      if (labelEndIndex > 0) {
+        const labelString = commentlessString.slice(0, labelEndIndex);
+        line.label = labelString;
+        instructionString = commentlessString.slice(labelEndIndex + 1).trim();
+      }
+
+      const EMPTY_LINE = /^\s*$/;
+      const WHITESPACE = /\s+/;
+      if (!instructionString.match(EMPTY_LINE)) {
+        const [instruction, ...argument] = instructionString.split(WHITESPACE);
+        line.instruction = instruction;
+        if (argument.length > 0) line.argument = argument[0];
+      }
+
+      Matrix.mutableSet({row: i, column: 0}, {value: line.label}, newData);
+      Matrix.mutableSet(
+        {row: i, column: 1},
+        {value: line.instruction},
+        newData
+      );
+      Matrix.mutableSet({row: i, column: 2}, {value: line.argument}, newData);
+      Matrix.mutableSet({row: i, column: 3}, {value: line.comment}, newData);
+    }
+
+    this.updateEditor(newData);
   };
 
   componentDidMount = () => {
@@ -329,6 +404,22 @@ class App extends Component<{}, IState> {
                     onClickDownload={this.onClickDownload}
                     onClickUpload={this.onClickUpload}
                     onClickRunTillBreakpoint={this.onClickRunTillBreakpoint}
+                  />
+                  <a
+                    style={{display: 'none'}}
+                    download={'ramcode.ram'}
+                    href={this.state.fileDownloadUrl}
+                    ref={e => (this.dofileDownload = e)}
+                  >
+                    download it
+                  </a>
+                  <input
+                    type="file"
+                    style={{display: 'none'}}
+                    multiple={false}
+                    accept=".ram,.RAMCode"
+                    onChange={evt => this.openFile(evt)}
+                    ref={e => (this.dofileUpload = e)}
                   />
                   Evaluation speed
                   <Slider
