@@ -257,7 +257,7 @@ ast.Read.prototype.interp = function (state) {
   switch (arg.constructor) {
     case ast.Address: {
       const value = state.environment.input.read(this.getLineNumber());
-      setRegister(arg.value, value, state.environment);
+      if (value) setRegister(arg.value, value, state.environment);
       return new Ok();
     }
     case ast.Reference: {
@@ -267,7 +267,7 @@ ast.Read.prototype.interp = function (state) {
         this.getLineNumber()
       );
       const readValue = state.environment.input.read(this.getLineNumber());
-      setRegister(value, readValue, state.environment);
+      if (readValue) setRegister(value, readValue, state.environment);
       return new Ok();
     }
     default:

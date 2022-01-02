@@ -127,7 +127,7 @@ export class Parser {
     if (instructionArguments.length !== 1) {
       throw new ParserSyntaxError(
         -1,
-        'Instruction ' + instructionCode + 'expects exactly one argument'
+        'Instruction ' + instructionCode + ' expects exactly one argument'
       );
     }
     const instructionArgument = instructionArguments[0];

@@ -138,7 +138,8 @@ class App extends Component<{}, IState> {
     try {
       const newState: State = engine.makeStateFromString(
         parseMatrix(this.state.editorData),
-        this.state.inputs.map<bigint>(x => {
+        this.state.inputs.map<bigint | null>(x => {
+          if (x.match(/^\s*$/)) return null;
           return BigInt(x);
         })
       );
@@ -259,15 +260,11 @@ class App extends Component<{}, IState> {
       let msg = 'ram machine encountered unknown problem';
       if (err instanceof InterpreterError) {
         msg = 'line ' + (err.line + 1) + ': ';
-        if (err instanceof RegisterError) {
-          msg += err.message + '\n';
-          msg += '    register nr ' + err.regId;
-        } else if (err instanceof InputError) {
-          msg += err.message + '\n';
-          msg += '    input nr ' + err.inputId;
-        } else {
-          msg += err.message;
-        }
+        if (err instanceof InputError)
+          msg += err.message + ' ' + err.inputId + '\n';
+        else if (err instanceof RegisterError)
+          msg += err.message + ' ' + err.regId + '\n';
+        else msg += err.message;
       }
 
       this.setState({
