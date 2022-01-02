@@ -330,17 +330,14 @@ class App extends Component<{}, IState> {
   }
   loadFile = (text: string) => {
     const lines = text.split(/\r\n|\n\r|\n|\r/);
-    const newData = Matrix.createEmptyMatrix<CellBase<string>>(
+    let newData = Matrix.createEmpty<CellBase<string>>(
       Math.max(lines.length, START_NUMBER_OF_ROWS),
       4
     );
-    for (const row of newData) {
-      console.log(row[0]);
-    }
     for (let i = 0; i < lines.length; i++) {
       const line = {label: '', instruction: '', argument: '', comment: ''};
       const commentlessString = lines[i].split('#')[0];
-      line.comment = lines[i].substring(commentlessString.length);
+      line.comment = lines[i].substring(commentlessString.length + 1);
 
       const labelEndIndex = commentlessString.indexOf(':');
       let instructionString = commentlessString.trim();
@@ -359,7 +356,18 @@ class App extends Component<{}, IState> {
         if (argument.length > 0) line.argument = argument[0];
       }
 
-      console.log(line);
+      newData = Matrix.set({row: i, column: 0}, {value: line.label}, newData);
+      newData = Matrix.set(
+        {row: i, column: 1},
+        {value: line.instruction},
+        newData
+      );
+      newData = Matrix.set(
+        {row: i, column: 2},
+        {value: line.argument},
+        newData
+      );
+      newData = Matrix.set({row: i, column: 3}, {value: line.comment}, newData);
     }
 
     this.updateEditor(newData);
