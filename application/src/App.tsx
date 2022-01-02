@@ -419,6 +419,14 @@ class App extends Component<{}, IState> {
 
     const edi = document.getElementById('editor')!;
     if (edi !== null && edi?.style) edi.style.height = h + 'px';
+
+    const savedCode = localStorage.getItem('savedCode');
+    if (savedCode) this.loadFile(savedCode);
+
+    window.addEventListener('beforeunload', ev => {
+      ev.preventDefault();
+      localStorage.setItem('savedCode', parseMatrix(this.state.editorData));
+    });
   };
 
   render() {
