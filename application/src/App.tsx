@@ -292,6 +292,11 @@ class App extends Component<{}, IState> {
       isRunning: false,
     }));
   };
+  onClickReset = () => {
+    this.setState({
+      editorData: Matrix.createEmpty<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
+    });
+  };
   onClickDownload = () => {
     const output = parseMatrix(this.state.editorData);
     const blob = new Blob([output]);
@@ -404,6 +409,7 @@ class App extends Component<{}, IState> {
                     onClickDownload={this.onClickDownload}
                     onClickUpload={this.onClickUpload}
                     onClickRunTillBreakpoint={this.onClickRunTillBreakpoint}
+                    onClickReset={this.onClickReset}
                   />
                   <a
                     style={{display: 'none'}}
