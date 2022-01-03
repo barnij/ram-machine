@@ -89,13 +89,12 @@ class App extends Component<{}, IState> {
 
   addRowInEditor = (row: number) => {
     this.setState(
-      prev => {
-        const dataFirst = prev.editorData.slice(0, row + 1);
-        const newData = Matrix.createEmpty<CellBase<string>>(1, 4);
-        const dataSecond = prev.editorData.slice(row + 1);
+      ({editorData}) => {
+        const newData = editorData.slice(0);
+        newData.splice(row + 1, 0, []);
 
         return {
-          editorData: dataFirst.concat(newData, dataSecond),
+          editorData: newData,
         };
       },
       () => this.updateBpAfterAddRow(row)
