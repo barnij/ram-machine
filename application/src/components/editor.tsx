@@ -115,7 +115,6 @@ export class Editor extends Component<IEditorProps, IEditorState> {
           )}
           onChange={data => this.props.handleUpdateEditor(data)}
           onKeyDown={event => {
-            console.log(event);
             if (
               event.key === 'Enter' &&
               !event.shiftKey &&
