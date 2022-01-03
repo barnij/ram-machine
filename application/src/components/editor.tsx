@@ -107,6 +107,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
       <div style={{width: '100%'}} className="editor_class" id="editor">
         <Spreadsheet
           data={this.props.data}
+          readOnly={this.props.started}
           columnLabels={['Label', 'Instruction', 'Argument', 'Comment']}
           RowIndicator={this.rowIndicator}
           CornerIndicator={() => (
@@ -117,7 +118,8 @@ export class Editor extends Component<IEditorProps, IEditorState> {
             if (
               event.key === 'Enter' &&
               !event.shiftKey &&
-              !this.state.editMode
+              !this.state.editMode &&
+              !this.props.started
             ) {
               this.addRow();
             }
@@ -126,8 +128,15 @@ export class Editor extends Component<IEditorProps, IEditorState> {
                 selectedPoint: null,
               }));
             }
-            if (event.key === 'Delete' && event.shiftKey) {
+            if (
+              event.key === 'Delete' &&
+              event.shiftKey &&
+              !this.props.started
+            ) {
               this.deleteRow();
+            }
+            if (event.key === 'Backspace' && this.props.started) {
+              event.preventDefault();
             }
           }}
           onActivate={(selected: Point) => {

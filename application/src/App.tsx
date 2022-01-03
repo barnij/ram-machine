@@ -90,13 +90,12 @@ class App extends Component<{}, IState> {
 
   addRowInEditor = (row: number) => {
     this.setState(
-      prev => {
-        const dataFirst = prev.editorData.slice(0, row + 1);
-        const newData = Matrix.createEmpty<CellBase<string>>(1, 4);
-        const dataSecond = prev.editorData.slice(row + 1);
+      ({editorData}) => {
+        const newData = editorData.slice(0);
+        newData.splice(row + 1, 0, []);
 
         return {
-          editorData: dataFirst.concat(newData, dataSecond),
+          editorData: newData,
         };
       },
       () => this.updateBpAfterAddRow(row)
@@ -407,6 +406,15 @@ class App extends Component<{}, IState> {
     this.updateEditor(newData);
   };
 
+  saveCode = (ev: Event) => {
+    ev.preventDefault();
+    localStorage.setItem('savedCode', parseMatrix(this.state.editorData));
+  };
+  restoreCode = () => {
+    const savedCode = localStorage.getItem('savedCode');
+    if (savedCode) this.loadFile(savedCode);
+  };
+
   componentDidMount = () => {
     const heightOfWrapper = document.getElementById(
       'spreadsheet_wrapper'
@@ -420,6 +428,12 @@ class App extends Component<{}, IState> {
 
     const edi = document.getElementById('editor')!;
     if (edi !== null && edi?.style) edi.style.height = h + 'px';
+
+    this.restoreCode();
+    window.addEventListener('beforeunload', this.saveCode);
+  };
+  componentWillUnmount = () => {
+    window.removeEventListener('beforeunload', this.saveCode);
   };
 
   render() {
