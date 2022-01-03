@@ -442,7 +442,7 @@ class App extends Component<{}, IState> {
         <Container fluid>
           <Row style={{height: '100vh'}}>
             <Col sm={3}>
-              <Row style={{height: '12%'}}>
+              <Row style={{height: '13%'}}>
                 <Col style={{backgroundColor: 'lightgreen'}}>
                   Controls buttons
                   <ControlButtons
@@ -511,7 +511,7 @@ class App extends Component<{}, IState> {
                   </Row>
                 </Col>
               </Row>
-              <Row style={{height: '77%'}}>
+              <Row style={{height: '72%'}}>
                 <Col style={{backgroundColor: 'green'}}>
                   <div>Registers</div>
                   <Registers

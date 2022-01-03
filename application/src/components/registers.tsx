@@ -31,11 +31,7 @@ export function Registers(props: IRegisterProps) {
     Number(a - b)
   );
   const registers = new Set<bigint>([...Array(5).keys()].map(BigInt));
-  for (const reg of sortedRegisters) {
-    if (reg > 0n) registers.add(reg - 1n);
-    registers.add(reg);
-    registers.add(reg + 1n);
-  }
+  for (const reg of sortedRegisters) registers.add(reg);
 
   let prev = -1n;
   for (const reg of registers) {
@@ -47,8 +43,12 @@ export function Registers(props: IRegisterProps) {
   }
 
   return (
-    <div>
+    <div id="registers" style={{overflowY: 'scroll', height: '500px'}}>
       <Table bordered size="sm" variant="dark">
+        <colgroup>
+          <col span={1} style={{width: '50%'}}></col>
+          <col span={1} style={{width: '50%'}}></col>
+        </colgroup>
         <thead>
           <tr>
             <th>#</th>
