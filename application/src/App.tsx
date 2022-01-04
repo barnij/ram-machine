@@ -225,6 +225,8 @@ class App extends Component<{}, IState> {
   };
 
   runProgram = () => {
+    if (!this.state.started) return;
+
     if (this.state.skipAnimations) {
       engine.complete(this.state.state);
       this.forceUpdate(this.maybeFinish);
