@@ -377,6 +377,13 @@ ast.Combine.prototype.interp = function (state) {
   ) {
     state.nextInstruction = state.nextInstruction.nextInstruction;
   }
+
+  if (
+    state.nextInstruction instanceof ast.Halt &&
+    state.nextInstruction.getLineNumber() === ast.NODE_GENERATED
+  )
+    state.completed = true;
+
   if (state.breakpoints.has(state.nextInstruction.getLineNumber()))
     return new Break();
   else return res;
