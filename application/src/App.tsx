@@ -218,7 +218,6 @@ class App extends Component<{}, IState> {
 
       this.onClickStep();
       this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
-      this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
     }
   };
 
@@ -234,7 +233,6 @@ class App extends Component<{}, IState> {
 
     this.onClickStep();
     this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgramTillBP);
-    this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
   };
 
   maybeFinish = () => {
@@ -287,7 +285,10 @@ class App extends Component<{}, IState> {
       );
       if (instructionResult instanceof Break)
         this.setState({isRunning: false}, this.maybeFinish);
-      else this.forceUpdate(this.maybeFinish);
+      else {
+        this.forceUpdate(this.maybeFinish);
+        this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
+      }
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
       if (err instanceof InterpreterError) {
