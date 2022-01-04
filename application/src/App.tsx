@@ -23,6 +23,7 @@ import {ControlButtons} from './components/control-buttons';
 import {EditorAlert} from './components/alert';
 import {Slider} from '@blueprintjs/core';
 import {Matrix, CellBase} from '@barnij/react-spreadsheet';
+import {animateScroll} from 'react-scroll';
 
 const engine = new Engine(new Parser(), new Interpreter());
 
@@ -41,10 +42,11 @@ interface IState {
   errorType: string;
   fileDownloadUrl: string | undefined;
   editorData: Matrix.Matrix<CellBase<string>>;
+  editorRange: [number, number];
   sliderLabelRenderer: () => string;
 }
 
-const START_NUMBER_OF_ROWS = 2;
+const START_NUMBER_OF_ROWS = 50;
 
 class App extends Component<{}, IState> {
   state: IState = {
@@ -58,6 +60,7 @@ class App extends Component<{}, IState> {
     errorMessage: '',
     errorType: '',
     editorData: Matrix.createEmpty<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
+    editorRange: [0, 0],
     fileDownloadUrl: undefined,
     sliderLabelRenderer: () => '',
   };
@@ -138,6 +141,29 @@ class App extends Component<{}, IState> {
     );
   };
 
+  scrollInEditor = (row: number) => {
+    this.setState(
+      ({editorRange}) => {
+        if (row < editorRange[0]) {
+          return {editorRange: [row, editorRange[1] - editorRange[0] + row]};
+        } else if (row > editorRange[1]) {
+          return {
+            editorRange: [row - editorRange[1] + editorRange[0] + 2, row + 2],
+          };
+        }
+        return null;
+      },
+      () => {
+        console.log(this.state.editorRange);
+        animateScroll.scrollTo(this.state.editorRange[0] * 34, {
+          containerId: 'editor',
+          delay: 0,
+          duration: 10,
+        });
+      }
+    );
+  };
+
   initState = () => {
     try {
       const newState: State = engine.makeStateFromString(
@@ -192,6 +218,7 @@ class App extends Component<{}, IState> {
 
       this.onClickStep();
       this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
+      this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
     }
   };
 
@@ -207,6 +234,7 @@ class App extends Component<{}, IState> {
 
     this.onClickStep();
     this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgramTillBP);
+    this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
   };
 
   maybeFinish = () => {
@@ -421,12 +449,16 @@ class App extends Component<{}, IState> {
 
     const paddingBottomOfWrapper = 2 * 5; //5px
 
-    const h = (
-      (heightOfWrapper ?? paddingBottomOfWrapper) - paddingBottomOfWrapper
-    ).toString();
+    const h =
+      (heightOfWrapper ?? paddingBottomOfWrapper) - paddingBottomOfWrapper;
 
     const edi = document.getElementById('editor')!;
     if (edi !== null && edi?.style) edi.style.height = h + 'px';
+
+    const heightOfEditorRow = 34;
+    const nrOfRows = Math.floor(h / heightOfEditorRow);
+
+    this.setState({editorRange: [1, nrOfRows]});
 
     this.restoreCode();
     window.addEventListener('beforeunload', this.saveCode);

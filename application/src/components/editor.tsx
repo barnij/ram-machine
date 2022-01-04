@@ -115,11 +115,14 @@ export class Editor extends Component<IEditorProps, IEditorState> {
           )}
           onChange={data => this.props.handleUpdateEditor(data)}
           onKeyDown={event => {
+            if (this.props.started) {
+              event.preventDefault();
+              return;
+            }
             if (
               event.key === 'Enter' &&
               !event.shiftKey &&
-              !this.state.editMode &&
-              !this.props.started
+              !this.state.editMode
             ) {
               this.addRow();
             }
@@ -128,15 +131,8 @@ export class Editor extends Component<IEditorProps, IEditorState> {
                 selectedPoint: null,
               }));
             }
-            if (
-              event.key === 'Delete' &&
-              event.shiftKey &&
-              !this.props.started
-            ) {
+            if (event.key === 'Delete' && event.shiftKey) {
               this.deleteRow();
-            }
-            if (event.key === 'Backspace' && this.props.started) {
-              event.preventDefault();
             }
           }}
           onActivate={(selected: Point) => {
