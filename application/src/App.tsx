@@ -24,7 +24,7 @@ import {Editor, parseMatrix} from './components/editor';
 import {ControlButtons} from './components/control-buttons';
 import {EditorAlert} from './components/alert';
 import {Registers} from './components/registers';
-import {Slider} from '@blueprintjs/core';
+import {Checkbox, Slider} from '@blueprintjs/core';
 import {Matrix, CellBase} from '@barnij/react-spreadsheet';
 import {animateScroll} from 'react-scroll';
 
@@ -47,6 +47,7 @@ interface IState {
   isRunning: boolean;
   started: boolean;
   paused: boolean;
+  skipAnimations: boolean;
   breakpoints: Set<number>;
   programSpeed: number;
   errorOpen: boolean;
@@ -67,6 +68,7 @@ class App extends Component<{}, IState> {
     isRunning: false,
     started: false,
     paused: false,
+    skipAnimations: false,
     breakpoints: new Set(),
     programSpeed: defaultSpeed,
     errorOpen: false,
@@ -223,7 +225,7 @@ class App extends Component<{}, IState> {
   };
 
   runProgram = () => {
-    if (this.state.programSpeed === maxSpeed) {
+    if (this.state.skipAnimations) {
       engine.complete(this.state.state);
       this.forceUpdate(this.maybeFinish);
     } else {
@@ -243,7 +245,7 @@ class App extends Component<{}, IState> {
     )
       return;
 
-    if (this.state.programSpeed === maxSpeed) {
+    if (this.state.skipAnimations) {
       engine.completeTillBreak(this.state.state);
       this.setState({isRunning: false});
       this.forceUpdate(this.maybeFinish);
@@ -295,7 +297,7 @@ class App extends Component<{}, IState> {
     this.setState({
       started: false,
       isRunning: false,
-      paused: false,
+      paused: true,
     });
   };
   onClickStep = (noBreak = false) => {
@@ -456,6 +458,19 @@ class App extends Component<{}, IState> {
     this.updateEditor(newData);
   };
 
+  handleSkipAnimations = () => {
+    if (
+      !this.state.skipAnimations &&
+      !confirm(
+        'in this mode programs with infinite loops will crush ram machine. Are You sure to turn it on?'
+      )
+    )
+      return;
+    this.setState({
+      skipAnimations: !this.state.skipAnimations,
+    });
+  };
+
   saveCode = (ev: Event) => {
     ev.preventDefault();
     localStorage.setItem('savedCode', parseMatrix(this.state.editorData));
@@ -498,56 +513,69 @@ class App extends Component<{}, IState> {
             <Col sm={3}>
               <Row style={{height: '13%'}}>
                 <Col style={{backgroundColor: 'lightgreen'}}>
-                  Controls buttons
-                  <ControlButtons
-                    started={this.state.started}
-                    running={this.state.isRunning}
-                    completed={this.state.state.completed}
-                    onClickStop={this.onClickStop}
-                    onClickRun={this.onClickRun}
-                    onClickPause={this.onClickPause}
-                    onClickStep={this.onClickStep}
-                    onClickDownload={this.onClickDownload}
-                    onClickUpload={this.onClickUpload}
-                    onClickRunTillBreakpoint={this.onClickRunTillBreakpoint}
-                    onClickReset={this.onClickReset}
-                  />
-                  <a
-                    style={{display: 'none'}}
-                    download={'ramcode.ram'}
-                    href={this.state.fileDownloadUrl}
-                    ref={e => (this.dofileDownload = e)}
-                  >
-                    download it
-                  </a>
-                  <input
-                    type="file"
-                    style={{display: 'none'}}
-                    multiple={false}
-                    accept=".ram,.RAMCode"
-                    onChange={evt => this.openFile(evt)}
-                    ref={e => (this.dofileUpload = e)}
-                  />
-                  Evaluation speed
-                  <Slider
-                    min={1}
-                    max={maxSpeed}
-                    stepSize={1}
-                    labelValues={[]}
-                    onChange={(value: number) => {
-                      this.setState({
-                        programSpeed: value,
-                        sliderLabelRenderer: () =>
-                          this.state.programSpeed.toString(),
-                      });
-                    }}
-                    onRelease={() => {
-                      this.setState({sliderLabelRenderer: () => ''});
-                    }}
-                    labelRenderer={this.state.sliderLabelRenderer}
-                    value={this.state.programSpeed}
-                    vertical={false}
-                  />
+                  <Row>
+                    Controls buttons
+                    <ControlButtons
+                      started={this.state.started}
+                      running={this.state.isRunning}
+                      completed={this.state.state.completed}
+                      onClickStop={this.onClickStop}
+                      onClickRun={this.onClickRun}
+                      onClickPause={this.onClickPause}
+                      onClickStep={this.onClickStep}
+                      onClickDownload={this.onClickDownload}
+                      onClickUpload={this.onClickUpload}
+                      onClickRunTillBreakpoint={this.onClickRunTillBreakpoint}
+                      onClickReset={this.onClickReset}
+                    />
+                    <a
+                      style={{display: 'none'}}
+                      download={'ramcode.ram'}
+                      href={this.state.fileDownloadUrl}
+                      ref={e => (this.dofileDownload = e)}
+                    >
+                      download it
+                    </a>
+                    <input
+                      type="file"
+                      style={{display: 'none'}}
+                      multiple={false}
+                      accept=".ram,.RAMCode"
+                      onChange={evt => this.openFile(evt)}
+                      ref={e => (this.dofileUpload = e)}
+                    />
+                  </Row>
+                  <Row className="d-flex align-items-center justify-content-center">
+                    <Col>
+                      Evaluation speed
+                      <Slider
+                        min={1}
+                        max={maxSpeed}
+                        stepSize={1}
+                        labelValues={[]}
+                        onChange={(value: number) => {
+                          this.setState({
+                            programSpeed: value,
+                            sliderLabelRenderer: () =>
+                              this.state.programSpeed.toString(),
+                          });
+                        }}
+                        onRelease={() => {
+                          this.setState({sliderLabelRenderer: () => ''});
+                        }}
+                        labelRenderer={this.state.sliderLabelRenderer}
+                        value={this.state.programSpeed}
+                        vertical={false}
+                      />
+                    </Col>
+                    <Col>
+                      <Checkbox
+                        onChange={this.handleSkipAnimations}
+                        label="skip animations"
+                        checked={this.state.skipAnimations}
+                      />
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
               <Row style={{height: '15%'}}>
