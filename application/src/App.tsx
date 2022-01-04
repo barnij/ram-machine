@@ -14,6 +14,8 @@ import {
   InterpreterError,
   RegisterError,
   InputError,
+  Combine,
+  Skip,
 } from 'ram-engine';
 import {OutputTape} from './components/outputTape';
 import {InputTape} from './components/inputTape';
@@ -34,6 +36,7 @@ interface IState {
   inputs: string[];
   isRunning: boolean;
   started: boolean;
+  paused: boolean;
   breakpoints: Set<number>;
   programSpeed: number;
   errorOpen: boolean;
@@ -52,6 +55,7 @@ class App extends Component<{}, IState> {
     inputs: [''],
     isRunning: false,
     started: false,
+    paused: false,
     breakpoints: new Set(),
     programSpeed: defaultSpeed,
     errorOpen: false,
@@ -188,15 +192,21 @@ class App extends Component<{}, IState> {
       engine.complete(this.state.state);
       this.forceUpdate(this.maybeFinish);
     } else {
-      if (this.state.state.completed || !this.state.isRunning) return;
+      if (this.state.state.completed || this.state.paused) return;
 
-      this.onClickStep();
+      this.onClickStep(true);
+
       this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
     }
   };
 
   runProgramTillBP = () => {
-    if (this.state.state.completed || !this.state.isRunning) return;
+    if (
+      this.state.state.completed ||
+      !this.state.isRunning ||
+      this.state.paused
+    )
+      return;
 
     if (this.state.programSpeed === maxSpeed) {
       engine.completeTillBreak(this.state.state);
@@ -250,12 +260,19 @@ class App extends Component<{}, IState> {
     this.setState({
       started: false,
       isRunning: false,
+      paused: false,
     });
   };
-  onClickStep = () => {
+  onClickStep = (noBreak = false) => {
     try {
-      const instructionResult: Ok | Break = engine.stepInstruction(
-        this.state.state
+      let instructionResult: Ok | Break;
+      do {
+        instructionResult = engine.stepInstruction(this.state.state);
+      } while (
+        noBreak &&
+        (this.state.state.nextInstruction instanceof Skip ||
+          (this.state.state.nextInstruction instanceof Combine &&
+            this.state.state.nextInstruction.instruction instanceof Skip))
       );
       if (instructionResult instanceof Break)
         this.setState({isRunning: false}, this.maybeFinish);
@@ -287,9 +304,14 @@ class App extends Component<{}, IState> {
       {
         started: true,
         isRunning: true,
+        paused: false,
       },
       () => {
-        if (this.state.state.nextInstruction.prettyPrint().name === '')
+        if (
+          this.state.state.nextInstruction instanceof Skip ||
+          (this.state.state.nextInstruction instanceof Combine &&
+            this.state.state.nextInstruction.instruction instanceof Skip)
+        )
           this.runProgram();
         else
           this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
@@ -303,9 +325,14 @@ class App extends Component<{}, IState> {
       {
         started: true,
         isRunning: true,
+        paused: false,
       },
       () => {
-        if (this.state.state.nextInstruction.prettyPrint().name === '')
+        if (
+          this.state.state.nextInstruction instanceof Skip ||
+          (this.state.state.nextInstruction instanceof Combine &&
+            this.state.state.nextInstruction.instruction instanceof Skip)
+        )
           this.runProgramTillBP();
         else
           this.sleep(maxSpeed - this.state.programSpeed).then(
@@ -317,6 +344,7 @@ class App extends Component<{}, IState> {
   onClickPause = () => {
     this.setState(() => ({
       isRunning: false,
+      paused: true,
     }));
   };
   onClickReset = () => {
