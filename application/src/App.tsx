@@ -31,6 +31,14 @@ const engine = new Engine(new Parser(), new Interpreter());
 const defaultSpeed = 1;
 const maxSpeed = 1000;
 
+function isNextInstSkip(state: State): boolean {
+  return (
+    state.nextInstruction instanceof Skip ||
+    (state.nextInstruction instanceof Combine &&
+      state.nextInstruction.instruction instanceof Skip)
+  );
+}
+
 interface IState {
   state: State;
   inputs: string[];
@@ -268,12 +276,7 @@ class App extends Component<{}, IState> {
       let instructionResult: Ok | Break;
       do {
         instructionResult = engine.stepInstruction(this.state.state);
-      } while (
-        noBreak &&
-        (this.state.state.nextInstruction instanceof Skip ||
-          (this.state.state.nextInstruction instanceof Combine &&
-            this.state.state.nextInstruction.instruction instanceof Skip))
-      );
+      } while (noBreak && isNextInstSkip(this.state.state));
       if (instructionResult instanceof Break)
         this.setState({isRunning: false}, this.maybeFinish);
       else this.forceUpdate(this.maybeFinish);
@@ -307,12 +310,7 @@ class App extends Component<{}, IState> {
         paused: false,
       },
       () => {
-        if (
-          this.state.state.nextInstruction instanceof Skip ||
-          (this.state.state.nextInstruction instanceof Combine &&
-            this.state.state.nextInstruction.instruction instanceof Skip)
-        )
-          this.runProgram();
+        if (isNextInstSkip(this.state.state)) this.runProgram();
         else
           this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
       }
@@ -328,12 +326,7 @@ class App extends Component<{}, IState> {
         paused: false,
       },
       () => {
-        if (
-          this.state.state.nextInstruction instanceof Skip ||
-          (this.state.state.nextInstruction instanceof Combine &&
-            this.state.state.nextInstruction.instruction instanceof Skip)
-        )
-          this.runProgramTillBP();
+        if (isNextInstSkip(this.state.state)) this.runProgramTillBP();
         else
           this.sleep(maxSpeed - this.state.programSpeed).then(
             this.runProgramTillBP
