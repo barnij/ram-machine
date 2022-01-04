@@ -21,6 +21,7 @@ import {Processor} from './components/processor';
 import {Editor, parseMatrix} from './components/editor';
 import {ControlButtons} from './components/control-buttons';
 import {EditorAlert} from './components/alert';
+import {Registers} from './components/registers';
 import {Slider} from '@blueprintjs/core';
 import {Matrix, CellBase} from '@barnij/react-spreadsheet';
 
@@ -441,7 +442,7 @@ class App extends Component<{}, IState> {
         <Container fluid>
           <Row style={{height: '100vh'}}>
             <Col sm={3}>
-              <Row style={{height: '12%'}}>
+              <Row style={{height: '13%'}}>
                 <Col style={{backgroundColor: 'lightgreen'}}>
                   Controls buttons
                   <ControlButtons
@@ -510,9 +511,12 @@ class App extends Component<{}, IState> {
                   </Row>
                 </Col>
               </Row>
-              <Row style={{height: '77%'}}>
+              <Row style={{height: '72%'}}>
                 <Col style={{backgroundColor: 'green'}}>
                   <div>Registers</div>
+                  <Registers
+                    registers={this.state.state.environment.registers}
+                  />
                 </Col>
               </Row>
             </Col>
