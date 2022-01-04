@@ -26,7 +26,7 @@ import {EditorAlert} from './components/alert';
 import {Registers} from './components/registers';
 import {Checkbox, Slider} from '@blueprintjs/core';
 import {Matrix, CellBase} from '@barnij/react-spreadsheet';
-import {animateScroll} from 'react-scroll';
+import {animateScroll, scroller} from 'react-scroll';
 
 const engine = new Engine(new Parser(), new Interpreter());
 
@@ -179,6 +179,11 @@ class App extends Component<{}, IState> {
     );
   };
 
+  scrollInRegisters = (nr: bigint | undefined) => {
+    if (typeof nr !== 'undefined')
+      scroller.scrollTo('reg' + nr, {containerId: 'registers'});
+  };
+
   initState = () => {
     try {
       const newState: State = engine.makeStateFromString(
@@ -313,6 +318,7 @@ class App extends Component<{}, IState> {
       else {
         this.forceUpdate(this.maybeFinish);
         this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
+        this.scrollInRegisters(instructionResult.modifiedRegister);
       }
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
