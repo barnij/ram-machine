@@ -24,6 +24,7 @@ import {EditorAlert} from './components/alert';
 import {Registers} from './components/registers';
 import {Slider} from '@blueprintjs/core';
 import {Matrix, CellBase} from '@barnij/react-spreadsheet';
+import {animateScroll} from 'react-scroll';
 
 const engine = new Engine(new Parser(), new Interpreter());
 
@@ -42,6 +43,7 @@ interface IState {
   errorType: string;
   fileDownloadUrl: string | undefined;
   editorData: Matrix.Matrix<CellBase<string>>;
+  editorRange: [number, number];
   sliderLabelRenderer: () => string;
 }
 
@@ -59,6 +61,7 @@ class App extends Component<{}, IState> {
     errorMessage: '',
     errorType: '',
     editorData: Matrix.createEmpty<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
+    editorRange: [0, 0],
     fileDownloadUrl: undefined,
     sliderLabelRenderer: () => '',
   };
@@ -135,6 +138,29 @@ class App extends Component<{}, IState> {
       },
       () => {
         engine.updateBreakpoints(this.state.state, this.state.breakpoints);
+      }
+    );
+  };
+
+  scrollInEditor = (row: number) => {
+    this.setState(
+      ({editorRange}) => {
+        if (row < editorRange[0]) {
+          return {editorRange: [row, editorRange[1] - editorRange[0] + row]};
+        } else if (row > editorRange[1]) {
+          return {
+            editorRange: [row - editorRange[1] + editorRange[0] + 2, row + 2],
+          };
+        }
+        return null;
+      },
+      () => {
+        console.log(this.state.editorRange);
+        animateScroll.scrollTo(this.state.editorRange[0] * 34, {
+          containerId: 'editor',
+          delay: 0,
+          duration: 10,
+        });
       }
     );
   };
@@ -260,7 +286,10 @@ class App extends Component<{}, IState> {
       );
       if (instructionResult instanceof Break)
         this.setState({isRunning: false}, this.maybeFinish);
-      else this.forceUpdate(this.maybeFinish);
+      else {
+        this.forceUpdate(this.maybeFinish);
+        this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
+      }
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
       if (err instanceof InterpreterError) {
@@ -422,12 +451,16 @@ class App extends Component<{}, IState> {
 
     const paddingBottomOfWrapper = 2 * 5; //5px
 
-    const h = (
-      (heightOfWrapper ?? paddingBottomOfWrapper) - paddingBottomOfWrapper
-    ).toString();
+    const h =
+      (heightOfWrapper ?? paddingBottomOfWrapper) - paddingBottomOfWrapper;
 
     const edi = document.getElementById('editor')!;
     if (edi !== null && edi?.style) edi.style.height = h + 'px';
+
+    const heightOfEditorRow = 34;
+    const nrOfRows = Math.floor(h / heightOfEditorRow);
+
+    this.setState({editorRange: [1, nrOfRows]});
 
     this.restoreCode();
     window.addEventListener('beforeunload', this.saveCode);
