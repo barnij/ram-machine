@@ -35,7 +35,7 @@ export function Registers(props: IRegisterProps) {
 
   let prev = -1n;
   for (const reg of registers) {
-    if (reg - prev > 2n) rows.push(<EmptyRow key={rows.length} />);
+    if (reg - prev > 1n) rows.push(<EmptyRow key={rows.length} />);
     rows.push(
       <Row key={rows.length} reg={reg} value={props.registers.get(reg)} />
     );
