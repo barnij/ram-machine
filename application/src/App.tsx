@@ -46,7 +46,7 @@ interface IState {
   sliderLabelRenderer: () => string;
 }
 
-const START_NUMBER_OF_ROWS = 50;
+const START_NUMBER_OF_ROWS = 2;
 
 class App extends Component<{}, IState> {
   state: IState = {
