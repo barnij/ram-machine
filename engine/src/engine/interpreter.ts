@@ -3,7 +3,7 @@ import {Break, Ok} from './status';
 import {State, Environment} from './environment';
 import {
   RegisterError,
-  RuntimeError,
+  BadArgumentError,
   DivByZeroError,
   LabelError,
 } from './errors';
@@ -55,7 +55,7 @@ ast.Load.prototype.interp = function (state) {
       return new Ok(ACCUMULATOR);
     }
     default:
-      throw new RuntimeError(
+      throw new BadArgumentError(
         this.getLineNumber(),
         'invalid argument in instruction load'
       );
@@ -89,7 +89,7 @@ ast.Store.prototype.interp = function (state) {
       return new Ok(value);
     }
     default:
-      throw new RuntimeError(
+      throw new BadArgumentError(
         this.getLineNumber(),
         'invalid argument in instruction store'
       );
@@ -127,7 +127,7 @@ ast.Add.prototype.interp = function (state) {
       return new Ok(ACCUMULATOR);
     }
     default:
-      throw new RuntimeError(
+      throw new BadArgumentError(
         this.getLineNumber(),
         'invalid argument in instruction add'
       );
@@ -165,7 +165,7 @@ ast.Sub.prototype.interp = function (state) {
       return new Ok(ACCUMULATOR);
     }
     default:
-      throw new RuntimeError(
+      throw new BadArgumentError(
         this.getLineNumber(),
         'invalid argument in instruction sub'
       );
@@ -203,7 +203,7 @@ ast.Mult.prototype.interp = function (state) {
       return new Ok(ACCUMULATOR);
     }
     default:
-      throw new RuntimeError(
+      throw new BadArgumentError(
         this.getLineNumber(),
         'invalid argument in instruction mult'
       );
@@ -250,7 +250,7 @@ ast.Div.prototype.interp = function (state) {
       return new Ok(ACCUMULATOR);
     }
     default:
-      throw new RuntimeError(
+      throw new BadArgumentError(
         this.getLineNumber(),
         'invalid argument in instruction div'
       );
@@ -276,7 +276,7 @@ ast.Read.prototype.interp = function (state) {
       return new Ok(value);
     }
     default:
-      throw new RuntimeError(
+      throw new BadArgumentError(
         this.getLineNumber(),
         'invalid argument in instruction read'
       );
@@ -309,7 +309,7 @@ ast.Write.prototype.interp = function (state) {
       return new Ok(ref);
     }
     default:
-      throw new RuntimeError(
+      throw new BadArgumentError(
         this.getLineNumber(),
         'invalid argument in instruction write'
       );
