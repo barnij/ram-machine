@@ -23,9 +23,11 @@ interface IEditorProps {
   curRow: number;
   started: boolean;
   breakpoints: Set<number>;
+  redRows: Map<number, number>;
   handleAddRow: (rowNumber: number) => void;
   handleDeleteRow: (rowNumber: number) => void;
   handleUpdateEditor: (data: Matrix.Matrix<CellBase<string>>) => void;
+  resetRedRows: () => void;
   toggleBreakpoint: (rowNumber: number) => void;
 }
 
@@ -60,6 +62,8 @@ export function parseMatrix(data: Matrix.Matrix<CellBase<string>>) {
   return text;
 }
 
+type RowComponent = React.ComponentType<React.PropsWithChildren<{row: number}>>;
+
 export class Editor extends Component<IEditorProps, IEditorState> {
   state: IEditorState = {
     selectedPoint: null,
@@ -77,7 +81,6 @@ export class Editor extends Component<IEditorProps, IEditorState> {
       this.state.selectedPoint.row === this.props.data.length - 1
     )
       return;
-
     this.props.handleDeleteRow(this.state.selectedPoint.row);
   };
 
@@ -102,10 +105,20 @@ export class Editor extends Component<IEditorProps, IEditorState> {
     );
   };
 
+  row: RowComponent = props => {
+    const red = this.props.redRows.get(props.row);
+    if (red)
+      return (
+        <tr {...props} style={{backgroundColor: 'rgba(255,0,0,' + red + ')'}} />
+      );
+    else return <tr {...props} />;
+  };
+
   render() {
     return (
       <div style={{width: '100%'}} className="editor_class" id="editor">
         <Spreadsheet
+          Row={this.row}
           data={this.props.data}
           readOnly={this.props.started}
           columnLabels={['Label', 'Instruction', 'Argument', 'Comment']}
@@ -124,6 +137,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
               !event.shiftKey &&
               !this.state.editMode
             ) {
+              this.props.resetRedRows();
               this.addRow();
             }
             if (event.key === 'Escape') {
@@ -132,6 +146,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
               }));
             }
             if (event.key === 'Delete' && event.shiftKey) {
+              this.props.resetRedRows();
               this.deleteRow();
             }
           }}
@@ -141,6 +156,7 @@ export class Editor extends Component<IEditorProps, IEditorState> {
           onModeChange={(mode: Mode) => {
             if (mode === 'edit') {
               this.setState(() => ({editMode: true}));
+              this.props.resetRedRows();
             } else {
               this.setState(() => ({editMode: false}));
             }

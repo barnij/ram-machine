@@ -54,6 +54,8 @@ interface IState {
   errorMessage: string;
   errorType: string;
   fileDownloadUrl: string | undefined;
+  redRows: Map<number, number>;
+  prevInstruction: number;
   editorData: Matrix.Matrix<CellBase<string>>;
   editorRange: [number, number];
   sliderLabelRenderer: () => string;
@@ -74,6 +76,8 @@ class App extends Component<{}, IState> {
     errorOpen: false,
     errorMessage: '',
     errorType: '',
+    redRows: new Map(),
+    prevInstruction: -1,
     editorData: Matrix.createEmpty<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
     editorRange: [0, 0],
     fileDownloadUrl: undefined,
@@ -169,7 +173,6 @@ class App extends Component<{}, IState> {
         return null;
       },
       () => {
-        console.log(this.state.editorRange);
         animateScroll.scrollTo(this.state.editorRange[0] * 34, {
           containerId: 'editor',
           delay: 0,
@@ -182,6 +185,28 @@ class App extends Component<{}, IState> {
   scrollInRegisters = (nr: bigint | undefined) => {
     if (typeof nr !== 'undefined')
       scroller.scrollTo('reg' + nr, {containerId: 'registers'});
+  };
+
+  paintRow = (row: number) => {
+    this.setState(({redRows, prevInstruction}) => {
+      if (prevInstruction !== -1) {
+        const r = new Map(redRows);
+        const curRed = r.get(prevInstruction);
+        const newRed = 0.05 + (curRed ?? 0);
+        r.set(prevInstruction, newRed);
+        return {redRows: r, prevInstruction: row};
+      }
+      return {redRows, prevInstruction: row};
+    });
+  };
+
+  paintRowWithState = (state: State) => {
+    if (isNextInstSkip(state)) return this.paintRow(-1);
+    return this.paintRow(state.nextInstruction.getLineNumber());
+  };
+
+  resetRedRows = () => {
+    if (this.state.redRows.size > 0) this.setState({redRows: new Map()});
   };
 
   initState = () => {
@@ -198,6 +223,10 @@ class App extends Component<{}, IState> {
 
       this.setState({
         state: newState,
+        redRows: new Map(),
+        prevInstruction: isNextInstSkip(newState)
+          ? -1
+          : newState.nextInstruction.getLineNumber(),
       });
 
       return true;
@@ -306,6 +335,7 @@ class App extends Component<{}, IState> {
       paused: true,
     });
   };
+
   onClickStep = (noBreak = false) => {
     try {
       let instructionResult: Ok | Break;
@@ -318,6 +348,7 @@ class App extends Component<{}, IState> {
 
       this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
       this.scrollInRegisters(instructionResult.modifiedRegister);
+      this.paintRowWithState(this.state.state);
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
       if (err instanceof InterpreterError) {
@@ -339,6 +370,7 @@ class App extends Component<{}, IState> {
       });
     }
   };
+
   onClickRun = () => {
     if (!this.state.started && !this.initState()) return;
 
@@ -355,6 +387,7 @@ class App extends Component<{}, IState> {
       }
     );
   };
+
   onClickRunTillBreakpoint = () => {
     if (!this.state.started) if (!this.initState()) return;
 
@@ -373,12 +406,14 @@ class App extends Component<{}, IState> {
       }
     );
   };
+
   onClickPause = () => {
     this.setState(() => ({
       isRunning: false,
       paused: true,
     }));
   };
+
   onClickReset = () => {
     if (confirm('Are you sure to reset editor? Your code will be deleted.'))
       this.setState({
@@ -388,6 +423,7 @@ class App extends Component<{}, IState> {
         ),
       });
   };
+
   onClickDownload = () => {
     const output = parseMatrix(this.state.editorData);
     const blob = new Blob([output]);
@@ -398,9 +434,11 @@ class App extends Component<{}, IState> {
       this.setState({fileDownloadUrl: ''});
     });
   };
+
   onClickUpload = () => {
     if (this.dofileUpload !== null) this.dofileUpload.click();
   };
+
   openFile(evt: React.ChangeEvent<HTMLInputElement>) {
     if (
       evt.target === null ||
@@ -424,6 +462,7 @@ class App extends Component<{}, IState> {
 
     if (this.dofileUpload !== null) this.dofileUpload.value = '';
   }
+
   loadFile = (text: string) => {
     const lines = text.split(/\r\n|\n\r|\n|\r/);
     const newData = Matrix.createEmpty<CellBase<string>>(
@@ -469,7 +508,7 @@ class App extends Component<{}, IState> {
     if (
       !this.state.skipAnimations &&
       !confirm(
-        'in this mode programs with infinite loops will crush ram machine. Are You sure to turn it on?'
+        'In this mode programs with infinite loops may crush ram machine. Are You sure to turn it on?'
       )
     )
       return;
@@ -482,6 +521,7 @@ class App extends Component<{}, IState> {
     ev.preventDefault();
     localStorage.setItem('savedCode', parseMatrix(this.state.editorData));
   };
+
   restoreCode = () => {
     const savedCode = localStorage.getItem('savedCode');
     if (savedCode) this.loadFile(savedCode);
@@ -503,11 +543,12 @@ class App extends Component<{}, IState> {
     const heightOfEditorRow = 34;
     const nrOfRows = Math.floor(h / heightOfEditorRow);
 
-    this.setState({editorRange: [1, nrOfRows]});
+    this.setState({editorRange: [0, nrOfRows - 1]});
 
     this.restoreCode();
     window.addEventListener('beforeunload', this.saveCode);
   };
+
   componentWillUnmount = () => {
     window.removeEventListener('beforeunload', this.saveCode);
   };
@@ -637,7 +678,9 @@ class App extends Component<{}, IState> {
                     handleDeleteRow={this.deleteRowInEditor}
                     handleUpdateEditor={this.updateEditor}
                     toggleBreakpoint={this.toggleBreakpoint}
+                    redRows={this.state.redRows}
                     breakpoints={this.state.breakpoints}
+                    resetRedRows={this.resetRedRows}
                     curRow={this.state.state.nextInstruction.getLineNumber()}
                   />
                   <EditorAlert
