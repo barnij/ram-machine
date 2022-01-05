@@ -24,6 +24,7 @@ export class LabelError extends InterpreterError {
     super(line, message);
   }
 }
+export class DivByZeroError extends RuntimeError {}
 export class ParserSyntaxError extends ParserError {}
 export class ParserTypeError extends ParserError {}
 export class ParserGeneralError extends Error {

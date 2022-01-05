@@ -1,7 +1,12 @@
 import * as ast from './ast';
 import {Break, Ok} from './status';
 import {State, Environment} from './environment';
-import {RegisterError, RuntimeError, LabelError} from './errors';
+import {
+  RegisterError,
+  RuntimeError,
+  DivByZeroError,
+  LabelError,
+} from './errors';
 
 export class Interpreter {
   interpInstruction(instruction: ast.Instruction, state: State): Ok | Break {
@@ -215,7 +220,7 @@ ast.Div.prototype.interp = function (state) {
   switch (arg.constructor) {
     case ast.Const:
       if (arg.value === BigInt(0)) {
-        throw new RuntimeError(this.getLineNumber(), 'division by 0');
+        throw new DivByZeroError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / arg.value, state.environment);
       return new Ok(ACCUMULATOR);
@@ -226,7 +231,7 @@ ast.Div.prototype.interp = function (state) {
         this.getLineNumber()
       );
       if (value === BigInt(0)) {
-        throw new RuntimeError(this.getLineNumber(), 'division by 0');
+        throw new DivByZeroError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / value, state.environment);
       return new Ok(ACCUMULATOR);
@@ -239,7 +244,7 @@ ast.Div.prototype.interp = function (state) {
       );
       value = getRegister(value, state.environment, this.getLineNumber());
       if (value === BigInt(0)) {
-        throw new RuntimeError(this.getLineNumber(), 'division by 0');
+        throw new DivByZeroError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / value, state.environment);
       return new Ok(ACCUMULATOR);
