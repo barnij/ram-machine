@@ -189,12 +189,20 @@ class App extends Component<{}, IState> {
 
   paintRow = (row: number) => {
     this.setState(({redRows, prevInstruction}) => {
-      const r = new Map(redRows);
-      const curRed = r.get(prevInstruction);
-      const newRed = 0.05 + (curRed ?? 0);
-      r.set(prevInstruction, newRed);
-      return {redRows: r, prevInstruction: row};
+      if (prevInstruction !== -1) {
+        const r = new Map(redRows);
+        const curRed = r.get(prevInstruction);
+        const newRed = 0.05 + (curRed ?? 0);
+        r.set(prevInstruction, newRed);
+        return {redRows: r, prevInstruction: row};
+      }
+      return {redRows, prevInstruction: row};
     });
+  };
+
+  paintRowWithState = (state: State) => {
+    if (isNextInstSkip(state)) return this.paintRow(-1);
+    return this.paintRow(state.nextInstruction.getLineNumber());
   };
 
   resetRedRows = () => {
@@ -216,7 +224,9 @@ class App extends Component<{}, IState> {
       this.setState({
         state: newState,
         redRows: new Map(),
-        prevInstruction: newState.nextInstruction.getLineNumber(),
+        prevInstruction: isNextInstSkip(newState)
+          ? -1
+          : newState.nextInstruction.getLineNumber(),
       });
 
       return true;
@@ -338,7 +348,7 @@ class App extends Component<{}, IState> {
 
       this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
       this.scrollInRegisters(instructionResult.modifiedRegister);
-      this.paintRow(this.state.state.nextInstruction.getLineNumber());
+      this.paintRowWithState(this.state.state);
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
       if (err instanceof InterpreterError) {
@@ -533,7 +543,7 @@ class App extends Component<{}, IState> {
     const heightOfEditorRow = 34;
     const nrOfRows = Math.floor(h / heightOfEditorRow);
 
-    this.setState({editorRange: [1, nrOfRows]});
+    this.setState({editorRange: [0, nrOfRows - 1]});
 
     this.restoreCode();
     window.addEventListener('beforeunload', this.saveCode);
