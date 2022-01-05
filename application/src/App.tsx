@@ -50,6 +50,7 @@ interface IState {
   skipAnimations: boolean;
   breakpoints: Set<number>;
   programSpeed: number;
+  currentInput: number;
   errorOpen: boolean;
   errorMessage: string;
   errorType: string;
@@ -73,6 +74,7 @@ class App extends Component<{}, IState> {
     skipAnimations: false,
     breakpoints: new Set(),
     programSpeed: defaultSpeed,
+    currentInput: 0,
     errorOpen: false,
     errorMessage: '',
     errorType: '',
@@ -227,6 +229,7 @@ class App extends Component<{}, IState> {
         prevInstruction: isNextInstSkip(newState)
           ? -1
           : newState.nextInstruction.getLineNumber(),
+        currentInput: 0,
       });
 
       return true;
@@ -284,11 +287,12 @@ class App extends Component<{}, IState> {
       engine.completeTillBreak(this.state.state);
       this.setState({isRunning: false});
       this.forceUpdate(this.maybeFinish);
-      return;
+    } else {
+      this.onClickStep();
+      this.sleep(maxSpeed - this.state.programSpeed).then(
+        this.runProgramTillBP
+      );
     }
-
-    this.onClickStep();
-    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgramTillBP);
   };
 
   maybeFinish = () => {
@@ -342,9 +346,14 @@ class App extends Component<{}, IState> {
       do {
         instructionResult = engine.stepInstruction(this.state.state);
       } while (noBreak && isNextInstSkip(this.state.state));
+
+      const nextInput = this.state.state.environment.input.nextInput();
       if (instructionResult instanceof Break)
-        this.setState({isRunning: false}, this.maybeFinish);
-      else this.forceUpdate(this.maybeFinish);
+        this.setState(
+          {isRunning: false, currentInput: nextInput},
+          this.maybeFinish
+        );
+      else this.setState({currentInput: nextInput}, this.maybeFinish);
 
       this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
       this.scrollInRegisters(instructionResult.modifiedRegister);
@@ -660,6 +669,7 @@ class App extends Component<{}, IState> {
                     inputAdd={this.inputAdd}
                     inputRemove={this.inputRemove}
                     onChange={this.handleInputChange}
+                    currentInput={this.state.currentInput}
                   />
                 </Col>
               </Row>

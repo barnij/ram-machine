@@ -26,6 +26,10 @@ class InputTape {
   private nextIndex = 0;
   constructor(private values: (bigint | null)[]) {}
 
+  nextInput() {
+    return this.nextIndex;
+  }
+
   read(line: number): bigint | null {
     if (this.values[this.nextIndex] == null) {
       throw new InputError(line, 'empty input', this.nextIndex);

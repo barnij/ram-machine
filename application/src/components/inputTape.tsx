@@ -5,6 +5,7 @@ function InputItem(props: {
   value: string;
   id: number;
   disabled: boolean;
+  special: boolean;
   inputRemove: (
     id: number
   ) => (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
@@ -20,15 +21,30 @@ function InputItem(props: {
       onClick={props.inputRemove(props.id)}
     />
   );
+
+  const style: {
+    margin: string;
+    display: string;
+    border?: string;
+    borderRadius?: string;
+  } = {
+    margin: '10px',
+    display: 'inline-block',
+  };
+  if (props.special && props.disabled) {
+    style.border = 'inset green';
+    style.borderRadius = '5px';
+  }
+
   return (
-    <div style={{margin: '10px', display: 'inline-block'}}>
+    <div style={style}>
       <InputGroup
         style={{textAlign: 'center'}}
         name={props.id.toString()}
         disabled={props.disabled}
         fill={false}
         value={input}
-        rightElement={removeButton}
+        rightElement={props.disabled ? undefined : removeButton}
         onChange={props.onChange}
       />
     </div>
@@ -38,6 +54,7 @@ function InputItem(props: {
 type inputProps = {
   inputs: string[];
   disabled: boolean;
+  currentInput: number;
   inputAdd: () => void;
   inputRemove: (
     id: number
@@ -53,6 +70,7 @@ export class InputTape extends Component<inputProps, {}> {
         value={input}
         id={index}
         disabled={this.props.disabled}
+        special={this.props.currentInput === index}
         inputRemove={this.props.inputRemove}
         onChange={this.props.onChange}
       />
@@ -66,15 +84,17 @@ export class InputTape extends Component<inputProps, {}> {
         }}
       >
         {inputsList}
-        <div style={{margin: '10px', display: 'inline-block'}}>
-          <Button
-            rightIcon="plus"
-            intent="success"
-            text=""
-            disabled={this.props.disabled}
-            onClick={this.props.inputAdd}
-          />
-        </div>
+        {!this.props.disabled && (
+          <div style={{margin: '10px', display: 'inline-block'}}>
+            <Button
+              rightIcon="plus"
+              intent="success"
+              text=""
+              disabled={this.props.disabled}
+              onClick={this.props.inputAdd}
+            />
+          </div>
+        )}
       </div>
     );
   }
