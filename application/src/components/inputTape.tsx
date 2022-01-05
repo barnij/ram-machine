@@ -5,6 +5,7 @@ function InputItem(props: {
   value: string;
   id: number;
   disabled: boolean;
+  special: boolean;
   inputRemove: (
     id: number
   ) => (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
@@ -20,8 +21,14 @@ function InputItem(props: {
       onClick={props.inputRemove(props.id)}
     />
   );
+
+  let style;
+  if (props.special)
+    style = {margin: '10px', display: 'inline-block', borderStyle: 'dotted'};
+  else style = {margin: '10px', display: 'inline-block'};
+
   return (
-    <div style={{margin: '10px', display: 'inline-block'}}>
+    <div style={style}>
       <InputGroup
         style={{textAlign: 'center'}}
         name={props.id.toString()}
@@ -38,6 +45,7 @@ function InputItem(props: {
 type inputProps = {
   inputs: string[];
   disabled: boolean;
+  currentInput: number;
   inputAdd: () => void;
   inputRemove: (
     id: number
@@ -53,6 +61,7 @@ export class InputTape extends Component<inputProps, {}> {
         value={input}
         id={index}
         disabled={this.props.disabled}
+        special={this.props.currentInput === index}
         inputRemove={this.props.inputRemove}
         onChange={this.props.onChange}
       />

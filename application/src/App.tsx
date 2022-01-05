@@ -50,6 +50,7 @@ interface IState {
   skipAnimations: boolean;
   breakpoints: Set<number>;
   programSpeed: number;
+  currentInput: number;
   errorOpen: boolean;
   errorMessage: string;
   errorType: string;
@@ -73,6 +74,7 @@ class App extends Component<{}, IState> {
     skipAnimations: false,
     breakpoints: new Set(),
     programSpeed: defaultSpeed,
+    currentInput: 0,
     errorOpen: false,
     errorMessage: '',
     errorType: '',
@@ -227,6 +229,7 @@ class App extends Component<{}, IState> {
         prevInstruction: isNextInstSkip(newState)
           ? -1
           : newState.nextInstruction.getLineNumber(),
+        currentInput: 0,
       });
 
       return true;
@@ -660,6 +663,7 @@ class App extends Component<{}, IState> {
                     inputAdd={this.inputAdd}
                     inputRemove={this.inputRemove}
                     onChange={this.handleInputChange}
+                    currentInput={this.state.currentInput}
                   />
                 </Col>
               </Row>
