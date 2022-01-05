@@ -54,7 +54,7 @@ interface IState {
   errorMessage: string;
   errorType: string;
   fileDownloadUrl: string | undefined;
-  redRows: number[];
+  redRows: Map<number, number>;
   prevInstruction: number;
   editorData: Matrix.Matrix<CellBase<string>>;
   editorRange: [number, number];
@@ -76,7 +76,7 @@ class App extends Component<{}, IState> {
     errorOpen: false,
     errorMessage: '',
     errorType: '',
-    redRows: [],
+    redRows: new Map(),
     prevInstruction: -1,
     editorData: Matrix.createEmpty<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
     editorRange: [0, 0],
@@ -111,13 +111,12 @@ class App extends Component<{}, IState> {
 
   addRowInEditor = (row: number) => {
     this.setState(
-      ({editorData, redRows}) => {
+      ({editorData}) => {
         const newData = editorData.slice(0);
         newData.splice(row + 1, 0, []);
 
         return {
           editorData: newData,
-          redRows: redRows.concat(0),
         };
       },
       () => this.updateBpAfterAddRow(row)
@@ -131,7 +130,6 @@ class App extends Component<{}, IState> {
         const dataSecond = prev.editorData.slice(row + 1);
         return {
           editorData: dataFirst.concat(dataSecond),
-          redRows: prev.redRows.slice(0, -1),
         };
       },
       () => this.updateBpAfterDeleteRow(row - 1)
@@ -190,15 +188,17 @@ class App extends Component<{}, IState> {
   };
 
   paintRow = (row: number) => {
-    this.setState(({redRows}) => {
-      const r = [...redRows];
-      r[row] += 0.05;
-      return {redRows: r};
+    this.setState(({redRows, prevInstruction}) => {
+      const r = new Map(redRows);
+      const curRed = r.get(prevInstruction);
+      const newRed = 0.05 + (curRed ?? 0);
+      r.set(prevInstruction, newRed);
+      return {redRows: r, prevInstruction: row};
     });
   };
 
   resetRedRows = () => {
-    this.setState({redRows: []});
+    if (this.state.redRows.size > 0) this.setState({redRows: new Map()});
   };
 
   initState = () => {
@@ -215,7 +215,8 @@ class App extends Component<{}, IState> {
 
       this.setState({
         state: newState,
-        redRows: new Array(this.state.editorData.length).fill(0),
+        redRows: new Map(),
+        prevInstruction: newState.nextInstruction.getLineNumber(),
       });
 
       return true;

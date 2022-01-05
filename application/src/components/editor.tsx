@@ -23,7 +23,7 @@ interface IEditorProps {
   curRow: number;
   started: boolean;
   breakpoints: Set<number>;
-  redRows: number[];
+  redRows: Map<number, number>;
   handleAddRow: (rowNumber: number) => void;
   handleDeleteRow: (rowNumber: number) => void;
   handleUpdateEditor: (data: Matrix.Matrix<CellBase<string>>) => void;
@@ -106,15 +106,12 @@ export class Editor extends Component<IEditorProps, IEditorState> {
   };
 
   row: RowComponent = props => {
-    return (
-      <tr
-        {...props}
-        style={{
-          backgroundColor:
-            'rgba(255,0,0,' + this.props.redRows[props.row] + ')',
-        }}
-      />
-    );
+    const red = this.props.redRows.get(props.row);
+    if (red)
+      return (
+        <tr {...props} style={{backgroundColor: 'rgba(255,0,0,' + red + ')'}} />
+      );
+    else return <tr {...props} />;
   };
 
   render() {
