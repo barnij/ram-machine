@@ -287,11 +287,12 @@ class App extends Component<{}, IState> {
       engine.completeTillBreak(this.state.state);
       this.setState({isRunning: false});
       this.forceUpdate(this.maybeFinish);
-      return;
+    } else {
+      this.onClickStep();
+      this.sleep(maxSpeed - this.state.programSpeed).then(
+        this.runProgramTillBP
+      );
     }
-
-    this.onClickStep();
-    this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgramTillBP);
   };
 
   maybeFinish = () => {
@@ -345,9 +346,14 @@ class App extends Component<{}, IState> {
       do {
         instructionResult = engine.stepInstruction(this.state.state);
       } while (noBreak && isNextInstSkip(this.state.state));
+
+      const nextInput = this.state.state.environment.input.nextInput();
       if (instructionResult instanceof Break)
-        this.setState({isRunning: false}, this.maybeFinish);
-      else this.forceUpdate(this.maybeFinish);
+        this.setState(
+          {isRunning: false, currentInput: nextInput},
+          this.maybeFinish
+        );
+      else this.setState({currentInput: nextInput}, this.maybeFinish);
 
       this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
       this.scrollInRegisters(instructionResult.modifiedRegister);
