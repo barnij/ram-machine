@@ -8,10 +8,19 @@ function OutputItem(props: {value: bigint | null; special: boolean}) {
     out = props.value.toString();
   }
 
-  let style;
-  if (props.special)
-    style = {margin: '10px', display: 'inline-block', borderStyle: 'dotted'};
-  else style = {margin: '10px', display: 'inline-block'};
+  const style: {
+    margin: string;
+    display: string;
+    border?: string;
+    borderRadius?: string;
+  } = {
+    margin: '10px',
+    display: 'inline-block',
+  };
+  if (props.special) {
+    style.border = 'inset green';
+    style.borderRadius = '5px';
+  }
 
   return (
     <div style={style}>
