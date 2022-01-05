@@ -216,6 +216,7 @@ class App extends Component<{}, IState> {
       this.setState({
         started: false,
         isRunning: false,
+        paused: true,
         errorMessage: msg,
         errorOpen: true,
         errorType: 'Parser Error',
@@ -331,6 +332,7 @@ class App extends Component<{}, IState> {
       this.setState({
         started: false,
         isRunning: false,
+        paused: true,
         errorMessage: msg,
         errorOpen: true,
         errorType: 'Runtime Error',

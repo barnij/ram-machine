@@ -18,12 +18,13 @@ export class RegisterError extends InterpreterError {
     super(line, message);
   }
 }
-export class RuntimeError extends InterpreterError {}
+export class BadArgumentError extends InterpreterError {}
 export class LabelError extends InterpreterError {
   constructor(public line: number, message: string, public label: string) {
     super(line, message);
   }
 }
+export class DivByZeroError extends InterpreterError {}
 export class ParserSyntaxError extends ParserError {}
 export class ParserTypeError extends ParserError {}
 export class ParserGeneralError extends Error {
