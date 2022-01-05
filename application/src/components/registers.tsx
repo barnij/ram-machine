@@ -1,5 +1,6 @@
 import React from 'react';
 import {Table} from 'react-bootstrap';
+import {Element} from 'react-scroll';
 
 const Row = (props: {reg: bigint; value: bigint | undefined}) => {
   let value = '?';
@@ -8,7 +9,9 @@ const Row = (props: {reg: bigint; value: bigint | undefined}) => {
   return (
     <tr key={props.reg.toString()}>
       <td>{props.reg.toString()}</td>
-      <td>{value}</td>
+      <td>
+        <Element name={'reg' + props.reg}>{value}</Element>
+      </td>
     </tr>
   );
 };
@@ -30,7 +33,7 @@ export function Registers(props: IRegisterProps) {
   const sortedRegisters = [...props.registers.keys()].sort((a, b) =>
     Number(a - b)
   );
-  const registers = new Set<bigint>([...Array(5).keys()].map(BigInt));
+  const registers = new Set<bigint>([...Array(3).keys()].map(BigInt));
   for (const reg of sortedRegisters) registers.add(reg);
 
   let prev = -1n;

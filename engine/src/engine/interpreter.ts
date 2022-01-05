@@ -29,7 +29,7 @@ ast.Load.prototype.interp = function (state) {
   switch (arg.constructor) {
     case ast.Const:
       setRegister(ACCUMULATOR, arg.value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     case ast.Address: {
       const value = getRegister(
         arg.value,
@@ -37,7 +37,7 @@ ast.Load.prototype.interp = function (state) {
         this.getLineNumber()
       );
       setRegister(ACCUMULATOR, value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     }
     case ast.Reference: {
       let value = getRegister(
@@ -47,7 +47,7 @@ ast.Load.prototype.interp = function (state) {
       );
       value = getRegister(value, state.environment, this.getLineNumber());
       setRegister(ACCUMULATOR, value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     }
     default:
       throw new RuntimeError(
@@ -67,7 +67,7 @@ ast.Store.prototype.interp = function (state) {
         this.getLineNumber()
       );
       setRegister(arg.value, value, state.environment);
-      return new Ok();
+      return new Ok(arg.value);
     }
     case ast.Reference: {
       const accValue = getRegister(
@@ -81,12 +81,12 @@ ast.Store.prototype.interp = function (state) {
         this.getLineNumber()
       );
       setRegister(value, accValue, state.environment);
-      return new Ok();
+      return new Ok(value);
     }
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction store'
       );
   }
 };
@@ -101,7 +101,7 @@ ast.Add.prototype.interp = function (state) {
   switch (arg.constructor) {
     case ast.Const:
       setRegister(ACCUMULATOR, accValue + arg.value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     case ast.Address: {
       const value = getRegister(
         arg.value,
@@ -109,7 +109,7 @@ ast.Add.prototype.interp = function (state) {
         this.getLineNumber()
       );
       setRegister(ACCUMULATOR, accValue + value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     }
     case ast.Reference: {
       let value = getRegister(
@@ -119,12 +119,12 @@ ast.Add.prototype.interp = function (state) {
       );
       value = getRegister(value, state.environment, this.getLineNumber());
       setRegister(ACCUMULATOR, accValue + value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     }
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction add'
       );
   }
 };
@@ -139,7 +139,7 @@ ast.Sub.prototype.interp = function (state) {
   switch (arg.constructor) {
     case ast.Const:
       setRegister(ACCUMULATOR, accValue - arg.value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     case ast.Address: {
       const value = getRegister(
         arg.value,
@@ -147,7 +147,7 @@ ast.Sub.prototype.interp = function (state) {
         this.getLineNumber()
       );
       setRegister(ACCUMULATOR, accValue - value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     }
     case ast.Reference: {
       let value = getRegister(
@@ -157,12 +157,12 @@ ast.Sub.prototype.interp = function (state) {
       );
       value = getRegister(value, state.environment, this.getLineNumber());
       setRegister(ACCUMULATOR, accValue - value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     }
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction sub'
       );
   }
 };
@@ -177,7 +177,7 @@ ast.Mult.prototype.interp = function (state) {
   switch (arg.constructor) {
     case ast.Const:
       setRegister(ACCUMULATOR, accValue * arg.value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     case ast.Address: {
       const value = getRegister(
         arg.value,
@@ -185,7 +185,7 @@ ast.Mult.prototype.interp = function (state) {
         this.getLineNumber()
       );
       setRegister(ACCUMULATOR, accValue * value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     }
     case ast.Reference: {
       let value = getRegister(
@@ -195,12 +195,12 @@ ast.Mult.prototype.interp = function (state) {
       );
       value = getRegister(value, state.environment, this.getLineNumber());
       setRegister(ACCUMULATOR, accValue * value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     }
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction mult'
       );
   }
 };
@@ -218,7 +218,7 @@ ast.Div.prototype.interp = function (state) {
         throw new RuntimeError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / arg.value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     case ast.Address: {
       const value = getRegister(
         arg.value,
@@ -229,7 +229,7 @@ ast.Div.prototype.interp = function (state) {
         throw new RuntimeError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     }
     case ast.Reference: {
       let value = getRegister(
@@ -242,12 +242,12 @@ ast.Div.prototype.interp = function (state) {
         throw new RuntimeError(this.getLineNumber(), 'division by 0');
       }
       setRegister(ACCUMULATOR, accValue / value, state.environment);
-      return new Ok();
+      return new Ok(ACCUMULATOR);
     }
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction div'
       );
   }
 };
@@ -258,7 +258,7 @@ ast.Read.prototype.interp = function (state) {
     case ast.Address: {
       const value = state.environment.input.read(this.getLineNumber());
       if (value) setRegister(arg.value, value, state.environment);
-      return new Ok();
+      return new Ok(arg.value);
     }
     case ast.Reference: {
       const value = getRegister(
@@ -268,12 +268,12 @@ ast.Read.prototype.interp = function (state) {
       );
       const readValue = state.environment.input.read(this.getLineNumber());
       if (readValue) setRegister(value, readValue, state.environment);
-      return new Ok();
+      return new Ok(value);
     }
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction read'
       );
   }
 };
@@ -291,22 +291,22 @@ ast.Write.prototype.interp = function (state) {
         this.getLineNumber()
       );
       state.environment.output.write(value);
-      return new Ok();
+      return new Ok(arg.value);
     }
     case ast.Reference: {
-      let value = getRegister(
+      const ref = getRegister(
         arg.value,
         state.environment,
         this.getLineNumber()
       );
-      value = getRegister(value, state.environment, this.getLineNumber());
+      const value = getRegister(ref, state.environment, this.getLineNumber());
       state.environment.output.write(value);
-      return new Ok();
+      return new Ok(ref);
     }
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction write'
       );
   }
 };
@@ -385,6 +385,6 @@ ast.Combine.prototype.interp = function (state) {
     state.completed = true;
 
   if (state.breakpoints.has(state.nextInstruction.getLineNumber()))
-    return new Break();
+    return new Break(res.modifiedRegister);
   else return res;
 };

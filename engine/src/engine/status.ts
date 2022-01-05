@@ -1,7 +1,13 @@
 export class Ok {
-  constructor() {}
+  modifiedRegister!: bigint | undefined;
+  constructor(modifiedRegister: bigint | undefined = undefined) {
+    this.modifiedRegister = modifiedRegister;
+  }
 }
 
 export class Break {
-  constructor() {}
+  modifiedRegister!: bigint | undefined;
+  constructor(modifiedRegister: bigint | undefined = undefined) {
+    this.modifiedRegister = modifiedRegister;
+  }
 }
