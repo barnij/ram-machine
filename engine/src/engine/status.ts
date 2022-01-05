@@ -6,6 +6,8 @@ export class Ok {
 }
 
 export class Break {
-  modifiedRegister!: undefined;
-  constructor() {}
+  modifiedRegister!: bigint | undefined;
+  constructor(modifiedRegister: bigint | undefined = undefined) {
+    this.modifiedRegister = modifiedRegister;
+  }
 }

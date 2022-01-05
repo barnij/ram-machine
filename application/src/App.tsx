@@ -230,8 +230,6 @@ class App extends Component<{}, IState> {
   };
 
   runProgram = () => {
-    if (!this.state.started) return;
-
     if (this.state.skipAnimations) {
       engine.complete(this.state.state);
       this.forceUpdate(this.maybeFinish);
@@ -315,11 +313,10 @@ class App extends Component<{}, IState> {
       } while (noBreak && isNextInstSkip(this.state.state));
       if (instructionResult instanceof Break)
         this.setState({isRunning: false}, this.maybeFinish);
-      else {
-        this.forceUpdate(this.maybeFinish);
-        this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
-        this.scrollInRegisters(instructionResult.modifiedRegister);
-      }
+      else this.forceUpdate(this.maybeFinish);
+
+      this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
+      this.scrollInRegisters(instructionResult.modifiedRegister);
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
       if (err instanceof InterpreterError) {

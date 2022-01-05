@@ -86,7 +86,7 @@ ast.Store.prototype.interp = function (state) {
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction store'
       );
   }
 };
@@ -124,7 +124,7 @@ ast.Add.prototype.interp = function (state) {
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction add'
       );
   }
 };
@@ -162,7 +162,7 @@ ast.Sub.prototype.interp = function (state) {
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction sub'
       );
   }
 };
@@ -200,7 +200,7 @@ ast.Mult.prototype.interp = function (state) {
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction mult'
       );
   }
 };
@@ -247,7 +247,7 @@ ast.Div.prototype.interp = function (state) {
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction div'
       );
   }
 };
@@ -273,7 +273,7 @@ ast.Read.prototype.interp = function (state) {
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction read'
       );
   }
 };
@@ -291,22 +291,22 @@ ast.Write.prototype.interp = function (state) {
         this.getLineNumber()
       );
       state.environment.output.write(value);
-      return new Ok();
+      return new Ok(arg.value);
     }
     case ast.Reference: {
-      let value = getRegister(
+      const ref = getRegister(
         arg.value,
         state.environment,
         this.getLineNumber()
       );
-      value = getRegister(value, state.environment, this.getLineNumber());
+      const value = getRegister(ref, state.environment, this.getLineNumber());
       state.environment.output.write(value);
-      return new Ok();
+      return new Ok(ref);
     }
     default:
       throw new RuntimeError(
         this.getLineNumber(),
-        'invalid argument in instruction load'
+        'invalid argument in instruction write'
       );
   }
 };
@@ -385,6 +385,6 @@ ast.Combine.prototype.interp = function (state) {
     state.completed = true;
 
   if (state.breakpoints.has(state.nextInstruction.getLineNumber()))
-    return new Break();
+    return new Break(res.modifiedRegister);
   else return res;
 };
