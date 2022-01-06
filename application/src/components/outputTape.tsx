@@ -48,6 +48,7 @@ export class OutputTape extends Component<outputProps, {}> {
     );
     return (
       <div
+        id="outputTape"
         style={{
           overflow: 'scroll hidden',
           whiteSpace: 'nowrap',
