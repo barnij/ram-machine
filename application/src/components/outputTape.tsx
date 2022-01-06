@@ -58,6 +58,7 @@ export class OutputTape extends Component<outputProps, {}> {
           whiteSpace: 'nowrap',
           width: '98%',
         }}
+        className="moz-scroller"
       >
         {outsList}
       </div>

@@ -43,6 +43,11 @@ code {
   border-radius: 10px;
 }
 
+.moz-scroller {
+  scrollbar-color: var(--darkgray);
+  scrollbar-width: thin;
+}
+
 #controlColumn ::-webkit-scrollbar-track {
   /* background: #f1f1f1; */
   background: var(--lightgray);

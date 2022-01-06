@@ -88,6 +88,7 @@ export class InputTape extends Component<inputProps, {}> {
           whiteSpace: 'nowrap',
           width: '98%',
         }}
+        className="moz-scroller"
       >
         {inputsList}
         {!this.props.disabled && (

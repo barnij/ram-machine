@@ -116,7 +116,11 @@ export class Editor extends Component<IEditorProps, IEditorState> {
 
   render() {
     return (
-      <div style={{width: '100%'}} className="editor_class" id="editor">
+      <div
+        style={{width: '100%'}}
+        className="editor_class moz-scroller"
+        id="editor"
+      >
         <Spreadsheet
           Row={this.row}
           darkMode
