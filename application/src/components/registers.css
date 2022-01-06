@@ -1,0 +1,13 @@
+@keyframes highlight {
+    0% {
+        background: #ffffe2af;
+    }
+    100% {
+        background: var(--bs-table-bg);
+    }
+}
+
+.highlight {
+    animation: highlight;
+    animation-duration: 500ms;
+}
