@@ -295,8 +295,7 @@ class App extends Component<{}, IState> {
 
     if (this.state.skipAnimations) {
       engine.completeTillBreak(this.state.state);
-      this.setState({isRunning: false});
-      this.forceUpdate(this.maybeFinish);
+      this.setState({isRunning: false}, this.maybeFinish);
     } else {
       this.onClickStep();
       this.sleep(maxSpeed - this.state.programSpeed).then(
@@ -408,7 +407,7 @@ class App extends Component<{}, IState> {
   };
 
   onClickRunTillBreakpoint = () => {
-    if (!this.state.started) if (!this.initState()) return;
+    if (!this.state.started && !this.initState()) return;
 
     this.setState(
       {
@@ -458,15 +457,17 @@ class App extends Component<{}, IState> {
     if (this.dofileUpload !== null) this.dofileUpload.click();
   };
 
-  openFile(evt: React.ChangeEvent<HTMLInputElement>) {
+  openFile(event: React.ChangeEvent<HTMLInputElement>) {
+    event.preventDefault();
+
     if (
-      evt.target === null ||
-      evt.target.files === null ||
-      evt.target.files.length === 0
+      event.target === null ||
+      event.target.files === null ||
+      event.target.files.length === 0
     )
       return;
 
-    const fileObj = evt.target.files[0];
+    const fileObj = event.target.files[0];
     const reader = new FileReader();
 
     let fileloaded = () => {
