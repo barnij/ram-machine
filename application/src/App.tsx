@@ -185,8 +185,18 @@ class App extends Component<{}, IState> {
   };
 
   scrollInRegisters = (nr: bigint | undefined) => {
-    if (typeof nr !== 'undefined')
+    if (typeof nr !== 'undefined') {
       scroller.scrollTo('reg' + nr, {containerId: 'registers'});
+      this.highlightRegister(nr);
+    }
+  };
+
+  highlightRegister = (reg: bigint) => {
+    const register = document.getElementById('register' + reg)!;
+    register.classList.add('highlight');
+    setTimeout(() => {
+      register.classList.remove('highlight');
+    }, 600);
   };
 
   paintRow = (row: number) => {

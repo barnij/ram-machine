@@ -1,6 +1,7 @@
 import React from 'react';
 import {Table} from 'react-bootstrap';
 import {Element} from 'react-scroll';
+import './registers.css';
 
 const Row = (props: {reg: bigint; value: bigint | undefined}) => {
   let value = '?';
@@ -8,10 +9,10 @@ const Row = (props: {reg: bigint; value: bigint | undefined}) => {
 
   return (
     <tr key={props.reg.toString()}>
-      <td>{props.reg.toString()}</td>
       <td>
-        <Element name={'reg' + props.reg}>{value}</Element>
+        <Element name={'reg' + props.reg}>{props.reg.toString()}</Element>
       </td>
+      <td id={'register' + props.reg}>{value}</td>
     </tr>
   );
 };
