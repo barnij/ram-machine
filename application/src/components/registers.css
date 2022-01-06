@@ -11,3 +11,7 @@
     animation: highlight;
     animation-duration: 500ms;
 }
+
+.table-dark {
+    --bs-table-bg: #30404d;
+}

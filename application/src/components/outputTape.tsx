@@ -25,10 +25,14 @@ function OutputItem(props: {value: bigint | null; special: boolean}) {
   return (
     <div style={style}>
       <InputGroup
-        style={{textAlign: 'center'}}
+        style={{
+          textAlign: 'center',
+          color: 'white',
+          backgroundColor: 'var(--gray1BP)',
+        }}
         disabled={true}
         fill={false}
-        placeholder={out}
+        value={out}
       />
     </div>
   );

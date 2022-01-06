@@ -40,7 +40,11 @@ function InputItem(props: {
   return (
     <div style={style}>
       <InputGroup
-        style={{textAlign: 'center'}}
+        style={{
+          textAlign: 'center',
+          backgroundColor: 'var(--gray1BP)',
+          color: 'white',
+        }}
         name={props.id.toString()}
         disabled={props.disabled}
         fill={false}

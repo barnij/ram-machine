@@ -17,7 +17,7 @@ export class Processor extends Component<processorProps, {}> {
             <Col>instruction:</Col>
             <Col>
               <InputGroup
-                style={{textAlign: 'center'}}
+                style={{textAlign: 'center', color: 'white'}}
                 disabled={true}
                 fill={true}
                 value={this.props.instruction.name}
@@ -28,7 +28,7 @@ export class Processor extends Component<processorProps, {}> {
             <Col>argument:</Col>
             <Col>
               <InputGroup
-                style={{textAlign: 'center'}}
+                style={{textAlign: 'center', color: 'white'}}
                 disabled={true}
                 fill={true}
                 value={this.props.instruction.argument}

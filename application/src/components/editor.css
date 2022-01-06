@@ -15,3 +15,7 @@
     height: 400px;
     overflow-y: scroll;
 }
+
+.Spreadsheet--dark-mode {
+  background-color: var(--lightgray) !important;
+}
