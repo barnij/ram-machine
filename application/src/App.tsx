@@ -51,6 +51,7 @@ interface IState {
   breakpoints: Set<number>;
   programSpeed: number;
   currentInput: number;
+  currentOutput: number;
   errorOpen: boolean;
   errorMessage: string;
   errorType: string;
@@ -75,6 +76,7 @@ class App extends Component<{}, IState> {
     breakpoints: new Set(),
     programSpeed: defaultSpeed,
     currentInput: 0,
+    currentOutput: 0,
     errorOpen: false,
     errorMessage: '',
     errorType: '',
@@ -240,6 +242,7 @@ class App extends Component<{}, IState> {
           ? -1
           : newState.nextInstruction.getLineNumber(),
         currentInput: 0,
+        currentOutput: 0,
       });
 
       return true;
@@ -357,12 +360,21 @@ class App extends Component<{}, IState> {
       } while (noBreak && isNextInstSkip(this.state.state));
 
       const nextInput = this.state.state.environment.input.nextInput();
+      const nextOutput = this.state.state.environment.output.nextOutput();
       if (instructionResult instanceof Break)
         this.setState(
-          {isRunning: false, currentInput: nextInput},
+          {
+            isRunning: false,
+            currentInput: nextInput,
+            currentOutput: nextOutput,
+          },
           this.maybeFinish
         );
-      else this.setState({currentInput: nextInput}, this.maybeFinish);
+      else
+        this.setState(
+          {currentInput: nextInput, currentOutput: nextOutput},
+          this.maybeFinish
+        );
 
       this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
       this.scrollInRegisters(instructionResult.modifiedRegister);
@@ -715,6 +727,7 @@ class App extends Component<{}, IState> {
               <Row style={{height: '10%'}}>
                 <Col>
                   <OutputTape
+                    currentOutput={this.state.currentOutput}
                     outs={this.state.state.environment.output.values}
                   />
                 </Col>

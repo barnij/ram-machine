@@ -1,7 +1,11 @@
 import React, {Component} from 'react';
 import {InputGroup} from '@blueprintjs/core';
 
-function OutputItem(props: {value: bigint | null; special: boolean}) {
+function OutputItem(props: {
+  value: bigint | null;
+  special: boolean;
+  index: number;
+}) {
   let out = '';
   // eslint-disable-next-line eqeqeq
   if (props.value != null) {
@@ -23,7 +27,7 @@ function OutputItem(props: {value: bigint | null; special: boolean}) {
   }
 
   return (
-    <div style={style}>
+    <div id={'output' + props.index} style={style}>
       <InputGroup
         style={{
           textAlign: 'center',
@@ -39,17 +43,49 @@ function OutputItem(props: {value: bigint | null; special: boolean}) {
 }
 
 type outputProps = {
+  currentOutput: number;
   outs: bigint[];
 };
-export class OutputTape extends Component<outputProps, {}> {
+
+interface IOutputTapeState {
+  currectOutput: number;
+}
+
+export class OutputTape extends Component<outputProps, IOutputTapeState> {
+  state: Readonly<IOutputTapeState> = {
+    currectOutput: -1,
+  };
+
+  componentDidUpdate = () => {
+    if (this.props.currentOutput !== this.state.currectOutput) {
+      const container = document.getElementById('outputTape')!;
+      const inputElement = document.getElementById(
+        'output' + this.props.currentOutput
+      )!;
+      container.scrollTo({
+        top: 0,
+        left: inputElement.offsetLeft - container.offsetLeft,
+        behavior: 'auto',
+      });
+
+      this.setState({currectOutput: this.props.currentOutput});
+    }
+  };
+
   render() {
     const outs = this.props.outs;
     const outsList = outs.map((out: bigint, index: number) => (
-      <OutputItem key={index} value={out} special={false} />
+      <OutputItem key={index} index={index} value={out} special={false} />
     ));
     outsList.push(
-      <OutputItem key={outsList.length} value={null} special={true} />
+      <OutputItem
+        key={outsList.length}
+        index={outsList.length}
+        value={null}
+        special={true}
+      />
     );
+
     return (
       <div
         id="outputTape"
