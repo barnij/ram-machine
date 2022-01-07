@@ -632,6 +632,7 @@ class App extends Component<{}, IState> {
                         labelRenderer={this.state.sliderLabelRenderer}
                         value={this.state.programSpeed}
                         vertical={false}
+                        className="bp3-dark"
                       />
                     </Col>
                     <Col>

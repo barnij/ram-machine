@@ -14,4 +14,15 @@
 
 .table-dark {
     --bs-table-bg: #30404d;
+    border-color: var(--gray1BP);
+}
+
+.table>:not(:first-child) {
+    border-top: none;
+    border-top-width: 0;
+    border-top-style: none;
+}
+
+#registers thead {
+     border-color: var(--gray1BP);
 }
