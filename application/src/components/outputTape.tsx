@@ -60,7 +60,7 @@ export class OutputTape extends Component<outputProps, {}> {
         }}
         className="moz-scroller"
         onWheel={e => {
-          const container = document.getElementById('inputTape')!;
+          const container = document.getElementById('outputTape')!;
           const containerScrollPosition = container.scrollLeft;
           container.scrollTo({
             top: 0,
