@@ -89,6 +89,15 @@ export class InputTape extends Component<inputProps, {}> {
           width: '98%',
         }}
         className="moz-scroller"
+        onWheel={e => {
+          const container = document.getElementById('inputTape')!;
+          const containerScrollPosition = container.scrollLeft;
+          container.scrollTo({
+            top: 0,
+            left: containerScrollPosition + e.deltaY,
+            behavior: 'auto',
+          });
+        }}
       >
         {inputsList}
         {!this.props.disabled && (
