@@ -47,11 +47,7 @@ export function Registers(props: IRegisterProps) {
   }
 
   return (
-    <div
-      id="registers"
-      style={{overflowY: 'scroll', height: '500px'}}
-      className="moz-scroller"
-    >
+    <div id="registers" className="moz-scroller">
       <Table bordered size="sm" variant="dark">
         <colgroup>
           <col span={1} style={{width: '50%'}}></col>

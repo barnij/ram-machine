@@ -27,6 +27,7 @@ import {Registers} from './components/registers';
 import {Checkbox, Slider} from '@blueprintjs/core';
 import {Matrix, CellBase} from '@barnij/react-spreadsheet';
 import {animateScroll, scroller} from 'react-scroll';
+import Panel from './components/offcanvas';
 
 const engine = new Engine(new Parser(), new Interpreter());
 
@@ -60,6 +61,7 @@ interface IState {
   prevInstruction: number;
   editorData: Matrix.Matrix<CellBase<string>>;
   editorRange: [number, number];
+  isBigScreen: boolean;
   sliderLabelRenderer: () => string;
 }
 
@@ -85,6 +87,7 @@ class App extends Component<{}, IState> {
     editorData: Matrix.createEmpty<CellBase<string>>(START_NUMBER_OF_ROWS, 4),
     editorRange: [0, 0],
     fileDownloadUrl: undefined,
+    isBigScreen: true,
     sliderLabelRenderer: () => '',
   };
 
@@ -559,133 +562,171 @@ class App extends Component<{}, IState> {
     if (savedCode) this.loadFile(savedCode);
   };
 
-  componentDidMount = () => {
-    const heightOfWrapper = document.getElementById(
-      'spreadsheet_wrapper'
-    )?.clientHeight;
+  setup = () => {
+    let isBigScreen = false;
+    if (window.innerWidth > 1000) isBigScreen = true;
 
-    const paddingBottomOfWrapper = 2 * 5; //5px
-
-    const h =
-      (heightOfWrapper ?? paddingBottomOfWrapper) - paddingBottomOfWrapper;
-
-    const edi = document.getElementById('editor')!;
-    if (edi !== null && edi?.style) edi.style.height = h + 'px';
-
+    const editorDiv = document.getElementById('editor')!;
     const heightOfEditorRow = 34;
-    const nrOfRows = Math.floor(h / heightOfEditorRow);
+    const nrOfRows = Math.floor(editorDiv.clientHeight / heightOfEditorRow);
 
-    this.setState({editorRange: [0, nrOfRows - 1]});
+    this.setState(
+      {editorRange: [0, nrOfRows - 1], isBigScreen: isBigScreen},
+      () => {
+        if (this.state.isBigScreen) {
+          const aboveRegistersDiv = document.getElementById('aboveRegisters')!;
+          const arHeight = aboveRegistersDiv.clientHeight;
+          const registersDiv = document.getElementById('registers')!;
+          if (registersDiv?.style)
+            registersDiv.style.height =
+              window.innerHeight - 20 - arHeight + 'px';
+          this.forceUpdate();
+        }
+      }
+    );
+  };
+
+  componentDidMount = () => {
+    this.setup();
 
     this.restoreCode();
     window.addEventListener('beforeunload', this.saveCode);
+    window.addEventListener('resize', this.setup);
   };
 
   componentWillUnmount = () => {
+    window.removeEventListener('resize', this.setup);
     window.removeEventListener('beforeunload', this.saveCode);
+  };
+
+  controlColumn = (xsnr: number, title = true) => (
+    <Col
+      xs={xsnr}
+      id="controlColumn"
+      className={title ? 'specialborder' : undefined}
+    >
+      <div id="aboveRegisters">
+        {title && <Row id="title">RAM MACHINE</Row>}
+        <Row id="controlRow">
+          <Col>
+            <Row id="controlButtonsRow">
+              <ControlButtons
+                started={this.state.started}
+                running={this.state.isRunning}
+                completed={this.state.state.completed}
+                onClickStop={this.onClickStop}
+                onClickRun={this.onClickRun}
+                onClickPause={this.onClickPause}
+                onClickStep={this.onClickStep}
+                onClickDownload={this.onClickDownload}
+                onClickUpload={this.onClickUpload}
+                onClickRunTillBreakpoint={this.onClickRunTillBreakpoint}
+                onClickReset={this.onClickReset}
+              />
+              <a
+                style={{display: 'none'}}
+                download={'ramcode.ram'}
+                href={this.state.fileDownloadUrl}
+                ref={e => (this.dofileDownload = e)}
+              >
+                download it
+              </a>
+              <input
+                type="file"
+                style={{display: 'none'}}
+                multiple={false}
+                accept=".ram,.RAMCode"
+                onChange={evt => this.openFile(evt)}
+                ref={e => (this.dofileUpload = e)}
+              />
+            </Row>
+            <Row className="ps-2 pe-1 pt-2 d-flex align-items-center justify-content-center">
+              <Col>
+                Evaluation speed
+                <Slider
+                  min={1}
+                  max={maxSpeed}
+                  stepSize={1}
+                  labelValues={[]}
+                  onChange={(value: number) => {
+                    this.setState({
+                      programSpeed: value,
+                      sliderLabelRenderer: () =>
+                        Math.round((this.state.programSpeed / maxSpeed) * 100) +
+                        '%',
+                    });
+                  }}
+                  onRelease={() => {
+                    this.setState({sliderLabelRenderer: () => ''});
+                  }}
+                  labelRenderer={this.state.sliderLabelRenderer}
+                  value={this.state.programSpeed}
+                  vertical={false}
+                />
+              </Col>
+              <Col>
+                <Checkbox
+                  onChange={this.handleSkipAnimations}
+                  label="skip animations"
+                  checked={this.state.skipAnimations}
+                />
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <Row
+              className="d-flex align-items-center justify-content-center"
+              id="processorName"
+            >
+              Processor
+            </Row>
+            <Row className="mt-4 mb-4">
+              <Processor
+                instruction={this.state.state.nextInstruction.prettyPrint()}
+              />
+            </Row>
+          </Col>
+        </Row>
+      </div>
+      <Row>
+        <Col>
+          <Registers registers={this.state.state.environment.registers} />
+        </Col>
+      </Row>
+    </Col>
+  );
+
+  getControlColumn = (isBigScreen: boolean) => {
+    if (isBigScreen) return this.controlColumn(3);
+    const panelBody = (
+      <Container>
+        <Row>{this.controlColumn(12, false)}</Row>
+      </Container>
+    );
+    return (
+      <Col
+        xs={1}
+        style={{
+          display: 'grid',
+          alignContent: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Panel body={panelBody} />
+      </Col>
+    );
   };
 
   render() {
     return (
-      <div className="App bp3-dark">
-        <Container fluid>
-          <Row style={{height: '100vh'}}>
-            <Col sm={3} id="controlColumn">
-              <Row id="title">RAM MACHINE</Row>
-              <Row style={{height: '13%'}} id="controlRow">
-                <Col>
-                  <Row id="controlButtonsRow">
-                    <ControlButtons
-                      started={this.state.started}
-                      running={this.state.isRunning}
-                      completed={this.state.state.completed}
-                      onClickStop={this.onClickStop}
-                      onClickRun={this.onClickRun}
-                      onClickPause={this.onClickPause}
-                      onClickStep={this.onClickStep}
-                      onClickDownload={this.onClickDownload}
-                      onClickUpload={this.onClickUpload}
-                      onClickRunTillBreakpoint={this.onClickRunTillBreakpoint}
-                      onClickReset={this.onClickReset}
-                    />
-                    <a
-                      style={{display: 'none'}}
-                      download={'ramcode.ram'}
-                      href={this.state.fileDownloadUrl}
-                      ref={e => (this.dofileDownload = e)}
-                    >
-                      download it
-                    </a>
-                    <input
-                      type="file"
-                      style={{display: 'none'}}
-                      multiple={false}
-                      accept=".ram,.RAMCode"
-                      onChange={evt => this.openFile(evt)}
-                      ref={e => (this.dofileUpload = e)}
-                    />
-                  </Row>
-                  <Row className="ps-2 pe-1 pt-2 d-flex align-items-center justify-content-center">
-                    <Col>
-                      Evaluation speed
-                      <Slider
-                        min={1}
-                        max={maxSpeed}
-                        stepSize={1}
-                        labelValues={[]}
-                        onChange={(value: number) => {
-                          this.setState({
-                            programSpeed: value,
-                            sliderLabelRenderer: () =>
-                              Math.round(
-                                (this.state.programSpeed / maxSpeed) * 100
-                              ) + '%',
-                          });
-                        }}
-                        onRelease={() => {
-                          this.setState({sliderLabelRenderer: () => ''});
-                        }}
-                        labelRenderer={this.state.sliderLabelRenderer}
-                        value={this.state.programSpeed}
-                        vertical={false}
-                      />
-                    </Col>
-                    <Col>
-                      <Checkbox
-                        onChange={this.handleSkipAnimations}
-                        label="skip animations"
-                        checked={this.state.skipAnimations}
-                      />
-                    </Col>
-                  </Row>
-                </Col>
-              </Row>
-              <Row style={{height: '15%'}}>
-                <Col>
-                  <Row
-                    style={{height: '20%'}}
-                    className="d-flex align-items-center justify-content-center"
-                    id="processorName"
-                  >
-                    Processor
-                  </Row>
-                  <Row style={{height: '80%'}}>
-                    <Processor
-                      instruction={this.state.state.nextInstruction.prettyPrint()}
-                    />
-                  </Row>
-                </Col>
-              </Row>
-              <Row style={{height: '72%'}}>
-                <Col>
-                  <Registers
-                    registers={this.state.state.environment.registers}
-                  />
-                </Col>
-              </Row>
-            </Col>
-            <Col sm={9} id="codeColumn">
-              <Row style={{height: '8%'}}>
+      <div className="bp3-dark">
+        <Container id="App" fluid>
+          <Row>
+            {this.getControlColumn(this.state.isBigScreen)}
+            <Col id="codeColumn">
+              <Row className="tapeRow">
                 <Col>
                   <InputTape
                     inputs={this.state.inputs}
@@ -697,7 +738,7 @@ class App extends Component<{}, IState> {
                   />
                 </Col>
               </Row>
-              <Row style={{height: '84%'}}>
+              <Row>
                 <Col
                   id="spreadsheet_wrapper"
                   style={{
@@ -726,7 +767,7 @@ class App extends Component<{}, IState> {
                   ></EditorAlert>
                 </Col>
               </Row>
-              <Row style={{height: '8%'}}>
+              <Row className="tapeRow">
                 <Col>
                   <OutputTape
                     currentOutput={this.state.currentOutput}

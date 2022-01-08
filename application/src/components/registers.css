@@ -7,6 +7,10 @@
     }
 }
 
+#registers {
+    overflow-y: scroll;
+}
+
 .highlight {
     animation: highlight;
     animation-duration: 500ms;

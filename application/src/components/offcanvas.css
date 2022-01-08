@@ -1,0 +1,8 @@
+#launchPanelButton {
+  height: 90vh;
+  background-color: var(--lightgray);
+}
+
+#panel {
+  background-color: var(--lightgray);
+}
