@@ -19,3 +19,10 @@
 .Spreadsheet--dark-mode {
   background-color: var(--lightgray) !important;
 }
+
+#editor {
+    /* tapeRow heigh: 80 px - App.css */
+    margin-bottom: 20px;
+    height: calc(100vh - 2 * 80px - 20px);
+
+}

@@ -1,3 +1,12 @@
+#root {
+    background-color: var(--darkgray);
+}
+
+#App {
+    max-width: 1500px;
+    height: 100vh;
+}
+
 #editor-background {
     display: flex;
     align-content: flex-end;
@@ -6,9 +15,13 @@
 }
 
 #controlColumn {
-  background-color: var(--lightgray);
-  color: white;
-  border-right: 4px var(--color2) solid;
+    background-color: var(--lightgray);
+    color: white;
+    height: 100vh;
+}
+
+.specialborder {
+    border-right: 4px var(--color2) solid;
 }
 
 #codeColumn {
@@ -24,7 +37,11 @@
 }
 
 .bp3-dark .bp3-slider-handle {
-    background-color: aliceblue !important;
+    background-color: var(--bs-gray-500) !important;
+}
+
+.bp3-dark .bp3-control .bp3-control-indicator {
+    background-color: var(--bs-gray-500) !important;
 }
 
 #title {
@@ -43,4 +60,8 @@
 
 #speedRow {
     text-align: center;
+}
+
+.tapeRow {
+    height: 80px;
 }
