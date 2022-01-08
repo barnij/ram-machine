@@ -270,7 +270,8 @@ export class Parser {
           instruction instanceof ast.Jzero
         ) {
           if (![...labels.keys()].includes(instruction.argument.value)) {
-            throw new ParserSyntaxError(i, 'No matching label');
+            errorCaught = true;
+            parserErrors.set(i, new ParserSyntaxError(i, 'No matching label'));
           }
         }
         if (!errorCaught) {

@@ -1,5 +1,5 @@
 import {Parser, parseBigInt, validateArgumentType} from './parser';
-import {ParserError, ParserSyntaxError, ParserTypeError} from './errors';
+import {ParserGeneralError, ParserSyntaxError, ParserTypeError} from './errors';
 import * as ast from './ast';
 //#region Helper functions
 // parseBigInt
@@ -261,12 +261,16 @@ test('Parser: parseProgram - empty program', () => {
 test('Parser: parseProgram - repeated label throws Error', () => {
   const parser = new Parser();
   const programString = 'here: load =1\nhere: read 0\n';
-  expect(() => parser.parseProgram(programString)).toThrowError(ParserError);
+  expect(() => parser.parseProgram(programString)).toThrowError(
+    ParserGeneralError
+  );
 });
 test('Parser: parseProgram - jump with argument not coresponding to any label throws error', () => {
   const parser = new Parser();
   const programString = 'here: load =1\njump there\n';
-  expect(() => parser.parseProgram(programString)).toThrowError(ParserError);
+  expect(() => parser.parseProgram(programString)).toThrowError(
+    ParserGeneralError
+  );
 });
 test('Parser: parseProgram - program with jumps', () => {
   const parser = new Parser();
