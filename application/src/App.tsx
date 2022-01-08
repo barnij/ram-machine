@@ -701,7 +701,7 @@ class App extends Component<{}, IState> {
   getControlColumn = (isBigScreen: boolean) => {
     if (isBigScreen) return this.controlColumn(3);
     const panelBody = (
-      <Container>
+      <Container className="bp3-dark">
         <Row>{this.controlColumn(12, false)}</Row>
       </Container>
     );
