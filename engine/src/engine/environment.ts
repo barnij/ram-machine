@@ -30,12 +30,13 @@ class InputTape {
     return this.nextIndex;
   }
 
-  read(line: number): bigint | null {
-    if (this.values[this.nextIndex] == null) {
-      throw new InputError(line, 'empty input', this.nextIndex);
+  read(line: number): bigint {
+    const ret = this.values[this.nextIndex];
+    this.nextIndex++;
+    if (ret != null) {
+      return ret;
     } else {
-      this.nextIndex++;
-      return this.values[this.nextIndex - 1];
+      throw new InputError(line, 'empty input', this.nextIndex);
     }
   }
 }
