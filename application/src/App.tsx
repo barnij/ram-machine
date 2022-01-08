@@ -31,7 +31,7 @@ import {animateScroll, scroller} from 'react-scroll';
 const engine = new Engine(new Parser(), new Interpreter());
 
 const defaultSpeed = 1;
-const maxSpeed = 1000;
+const maxSpeed = 3000;
 
 function isNextInstSkip(state: State): boolean {
   return (
@@ -587,13 +587,14 @@ class App extends Component<{}, IState> {
 
   render() {
     return (
-      <div className="App">
+      <div className="App bp3-dark">
         <Container fluid>
           <Row style={{height: '100vh'}}>
             <Col sm={3} id="controlColumn">
-              <Row style={{height: '13%'}}>
+              <Row id="title">RAM MACHINE</Row>
+              <Row style={{height: '13%'}} id="controlRow">
                 <Col>
-                  <Row>
+                  <Row id="controlButtonsRow">
                     <ControlButtons
                       started={this.state.started}
                       running={this.state.isRunning}
@@ -624,7 +625,7 @@ class App extends Component<{}, IState> {
                       ref={e => (this.dofileUpload = e)}
                     />
                   </Row>
-                  <Row className="d-flex align-items-center justify-content-center">
+                  <Row className="ps-2 pe-1 pt-2 d-flex align-items-center justify-content-center">
                     <Col>
                       Evaluation speed
                       <Slider
@@ -636,7 +637,9 @@ class App extends Component<{}, IState> {
                           this.setState({
                             programSpeed: value,
                             sliderLabelRenderer: () =>
-                              this.state.programSpeed.toString(),
+                              Math.round(
+                                (this.state.programSpeed / maxSpeed) * 100
+                              ) + '%',
                           });
                         }}
                         onRelease={() => {
@@ -645,7 +648,6 @@ class App extends Component<{}, IState> {
                         labelRenderer={this.state.sliderLabelRenderer}
                         value={this.state.programSpeed}
                         vertical={false}
-                        className="bp3-dark"
                       />
                     </Col>
                     <Col>
@@ -683,7 +685,7 @@ class App extends Component<{}, IState> {
               </Row>
             </Col>
             <Col sm={9} id="codeColumn">
-              <Row style={{height: '10%'}}>
+              <Row style={{height: '8%'}}>
                 <Col>
                   <InputTape
                     inputs={this.state.inputs}
@@ -695,7 +697,7 @@ class App extends Component<{}, IState> {
                   />
                 </Col>
               </Row>
-              <Row style={{height: '80%'}}>
+              <Row style={{height: '84%'}}>
                 <Col
                   id="spreadsheet_wrapper"
                   style={{
@@ -724,7 +726,7 @@ class App extends Component<{}, IState> {
                   ></EditorAlert>
                 </Col>
               </Row>
-              <Row style={{height: '10%'}}>
+              <Row style={{height: '8%'}}>
                 <Col>
                   <OutputTape
                     currentOutput={this.state.currentOutput}
