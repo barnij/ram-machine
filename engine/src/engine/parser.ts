@@ -5,8 +5,6 @@ import {
   ParserError,
   ParserGeneralError,
 } from './errors';
-import * as fs from 'fs';
-import * as path from 'path';
 
 const EMPTY_LINE = /^\s*$/;
 const WHITESPACE = /\s+/;
@@ -285,12 +283,5 @@ export class Parser {
     }
     if (errorCaught) throw new ParserGeneralError(parserErrors);
     return new ast.Program(labels, programTree);
-  }
-  parseProgramFile(pathToFile: string): ast.Program {
-    const data = fs.readFileSync(
-      path.resolve(process.cwd(), pathToFile),
-      'utf-8'
-    );
-    return this.parseProgram(data);
   }
 }

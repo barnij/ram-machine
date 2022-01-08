@@ -1,3 +1,5 @@
+@import '~@blueprintjs/core/lib/css/blueprint.css';
+
 :root {
   --lightgray: #394b59;
   --darkgray: #30404d;
