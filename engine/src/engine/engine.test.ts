@@ -66,6 +66,7 @@ test('Engine: stepInstruction - interp 2 instructions program step by step', () 
   actionResult = ENGINE.stepInstruction(state);
   expect(actionResult).toBeInstanceOf(Ok);
   targetState.environment.registers.set(ACCUMULATOR, BigInt(3));
+  targetState.completed = true;
   targetCombine = targetState.nextInstruction as ast.Combine;
   targetState.nextInstruction = targetCombine.nextInstruction;
   expect(state).toStrictEqual(targetState);
