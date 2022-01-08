@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {InputGroup, Button} from '@blueprintjs/core';
-import Scroll from 'react-scroll';
+import {animateScroll} from 'react-scroll';
 
 function InputItem(props: {
   value: string;
@@ -38,7 +38,7 @@ function InputItem(props: {
   }
 
   return (
-    <div style={style}>
+    <div id={'input' + props.id} style={style}>
       <InputGroup
         style={{
           textAlign: 'center',
@@ -66,7 +66,35 @@ type inputProps = {
   ) => (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
-export class InputTape extends Component<inputProps, {}> {
+
+interface IInputTapeState {
+  currentInput: number;
+}
+
+export class InputTape extends Component<inputProps, IInputTapeState> {
+  state: Readonly<IInputTapeState> = {
+    currentInput: -1,
+  };
+
+  componentDidUpdate = () => {
+    if (
+      this.props.currentInput !== this.state.currentInput &&
+      this.props.inputs.length > this.props.currentInput
+    ) {
+      const container = document.getElementById('inputTape')!;
+      const inputElement = document.getElementById(
+        'input' + this.props.currentInput
+      )!;
+      container.scrollTo({
+        top: 0,
+        left: inputElement.offsetLeft - container.offsetLeft,
+        behavior: 'auto',
+      });
+
+      this.setState({currentInput: this.props.currentInput});
+    }
+  };
+
   render() {
     const inputs = this.props.inputs;
     const inputsList = inputs.map((input: string, index: number) => (
@@ -89,6 +117,15 @@ export class InputTape extends Component<inputProps, {}> {
           width: '98%',
         }}
         className="moz-scroller"
+        onWheel={e => {
+          const container = document.getElementById('inputTape')!;
+          const containerScrollPosition = container.scrollLeft;
+          container.scrollTo({
+            top: 0,
+            left: containerScrollPosition + e.deltaY,
+            behavior: 'auto',
+          });
+        }}
       >
         {inputsList}
         {!this.props.disabled && (
@@ -100,7 +137,7 @@ export class InputTape extends Component<inputProps, {}> {
               disabled={this.props.disabled}
               onClick={() => {
                 this.props.inputAdd();
-                Scroll.animateScroll.scrollMore(500, {
+                animateScroll.scrollMore(500, {
                   containerId: 'inputTape',
                   horizontal: true,
                   delay: 0,

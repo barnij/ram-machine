@@ -43,6 +43,10 @@ class InputTape {
 class OutputTape {
   values: bigint[] = [];
 
+  nextOutput() {
+    return this.values.length;
+  }
+
   write(value: bigint) {
     this.values.push(value);
   }
