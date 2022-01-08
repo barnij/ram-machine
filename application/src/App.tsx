@@ -578,11 +578,10 @@ class App extends Component<{}, IState> {
       <div className="App">
         <Container fluid>
           <Row style={{height: '100vh'}}>
-            <Col sm={3}>
+            <Col sm={3} id="controlColumn">
               <Row style={{height: '13%'}}>
-                <Col style={{backgroundColor: 'lightgreen'}}>
+                <Col>
                   <Row>
-                    Controls buttons
                     <ControlButtons
                       started={this.state.started}
                       running={this.state.isRunning}
@@ -634,6 +633,7 @@ class App extends Component<{}, IState> {
                         labelRenderer={this.state.sliderLabelRenderer}
                         value={this.state.programSpeed}
                         vertical={false}
+                        className="bp3-dark"
                       />
                     </Col>
                     <Col>
@@ -647,10 +647,11 @@ class App extends Component<{}, IState> {
                 </Col>
               </Row>
               <Row style={{height: '15%'}}>
-                <Col style={{backgroundColor: 'lightblue'}}>
+                <Col>
                   <Row
-                    style={{height: '20%', backgroundColor: '#66b3ff'}}
+                    style={{height: '20%'}}
                     className="d-flex align-items-center justify-content-center"
+                    id="processorName"
                   >
                     Processor
                   </Row>
@@ -662,18 +663,16 @@ class App extends Component<{}, IState> {
                 </Col>
               </Row>
               <Row style={{height: '72%'}}>
-                <Col style={{backgroundColor: 'green'}}>
-                  <div>Registers</div>
+                <Col>
                   <Registers
                     registers={this.state.state.environment.registers}
                   />
                 </Col>
               </Row>
             </Col>
-            <Col sm={9}>
+            <Col sm={9} id="codeColumn">
               <Row style={{height: '10%'}}>
                 <Col>
-                  Input tape{' '}
                   <InputTape
                     inputs={this.state.inputs}
                     disabled={this.state.started}
@@ -688,7 +687,6 @@ class App extends Component<{}, IState> {
                 <Col
                   id="spreadsheet_wrapper"
                   style={{
-                    backgroundColor: 'orange',
                     paddingTop: '5px',
                   }}
                 >
@@ -715,8 +713,7 @@ class App extends Component<{}, IState> {
                 </Col>
               </Row>
               <Row style={{height: '10%'}}>
-                <Col style={{backgroundColor: 'yellow'}}>
-                  Output tape
+                <Col>
                   <OutputTape
                     outs={this.state.state.environment.output.values}
                   />

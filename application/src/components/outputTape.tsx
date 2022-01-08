@@ -25,10 +25,14 @@ function OutputItem(props: {value: bigint | null; special: boolean}) {
   return (
     <div style={style}>
       <InputGroup
-        style={{textAlign: 'center'}}
+        style={{
+          textAlign: 'center',
+          color: 'white',
+          backgroundColor: 'var(--gray1BP)',
+        }}
         disabled={true}
         fill={false}
-        placeholder={out}
+        value={out}
       />
     </div>
   );
@@ -48,11 +52,13 @@ export class OutputTape extends Component<outputProps, {}> {
     );
     return (
       <div
+        id="outputTape"
         style={{
           overflow: 'scroll hidden',
           whiteSpace: 'nowrap',
           width: '98%',
         }}
+        className="moz-scroller"
       >
         {outsList}
       </div>

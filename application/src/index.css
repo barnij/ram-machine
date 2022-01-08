@@ -1,3 +1,9 @@
+:root {
+  --lightgray: #394b59;
+  --darkgray: #30404d;
+  --gray1BP: #5C7080;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -10,4 +16,52 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+#controlColumn {
+  background-color: var(--lightgray);
+  color: white;
+}
+
+#codeColumn {
+  background-color: var(--darkgray);
+}
+
+#processorName {
+  background-color: var(--darkgray);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  /* background: #f1f1f1; */
+  background: var(--darkgray);
+  border-radius: 10px;
+}
+
+.moz-scroller {
+  scrollbar-color: var(--darkgray);
+  scrollbar-width: thin;
+}
+
+#controlColumn ::-webkit-scrollbar-track {
+  /* background: #f1f1f1; */
+  background: var(--lightgray);
+  border-radius: 10px;
+}
+
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

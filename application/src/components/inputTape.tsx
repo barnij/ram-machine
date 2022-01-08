@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {InputGroup, Button} from '@blueprintjs/core';
+import Scroll from 'react-scroll';
 
 function InputItem(props: {
   value: string;
@@ -39,7 +40,11 @@ function InputItem(props: {
   return (
     <div style={style}>
       <InputGroup
-        style={{textAlign: 'center'}}
+        style={{
+          textAlign: 'center',
+          backgroundColor: 'var(--gray1BP)',
+          color: 'white',
+        }}
         name={props.id.toString()}
         disabled={props.disabled}
         fill={false}
@@ -77,11 +82,13 @@ export class InputTape extends Component<inputProps, {}> {
     ));
     return (
       <div
+        id="inputTape"
         style={{
           overflow: 'scroll hidden',
           whiteSpace: 'nowrap',
           width: '98%',
         }}
+        className="moz-scroller"
       >
         {inputsList}
         {!this.props.disabled && (
@@ -91,7 +98,15 @@ export class InputTape extends Component<inputProps, {}> {
               intent="success"
               text=""
               disabled={this.props.disabled}
-              onClick={this.props.inputAdd}
+              onClick={() => {
+                this.props.inputAdd();
+                Scroll.animateScroll.scrollMore(500, {
+                  containerId: 'inputTape',
+                  horizontal: true,
+                  delay: 0,
+                  duration: 0,
+                });
+              }}
             />
           </div>
         )}
