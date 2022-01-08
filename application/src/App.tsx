@@ -276,15 +276,43 @@ class App extends Component<{}, IState> {
   };
 
   runProgram = () => {
-    if (this.state.skipAnimations) {
-      engine.complete(this.state.state);
-      this.forceUpdate(this.maybeFinish);
-    } else {
-      if (this.state.state.completed || this.state.paused) return;
+    try {
+      if (this.state.skipAnimations) {
+        engine.complete(this.state.state);
+        this.setState(
+          {
+            started: this.state.started && !this.state.state.completed,
+            paused: this.state.paused && !this.state.state.completed,
+            isRunning: this.state.isRunning && !this.state.state.completed,
+          },
+          this.maybeFinish
+        );
+      } else {
+        if (this.state.state.completed || this.state.paused) return;
 
-      this.onClickStep(true);
+        this.onClickStep(true);
 
-      this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
+        this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
+      }
+    } catch (err) {
+      let msg = 'ram machine encountered unknown problem';
+      if (err instanceof InterpreterError) {
+        msg = 'line ' + (err.line + 1) + ': ';
+        if (err instanceof InputError)
+          msg += err.message + ' ' + err.inputId + '\n';
+        else if (err instanceof RegisterError)
+          msg += err.message + ' ' + err.regId + '\n';
+        else msg += err.message;
+      }
+
+      this.setState({
+        started: false,
+        isRunning: false,
+        paused: true,
+        errorMessage: msg,
+        errorOpen: true,
+        errorType: 'Runtime Error',
+      });
     }
   };
 
@@ -295,15 +323,42 @@ class App extends Component<{}, IState> {
       this.state.paused
     )
       return;
+    try {
+      if (this.state.skipAnimations) {
+        engine.completeTillBreak(this.state.state);
+        this.setState(
+          {
+            started: this.state.started && !this.state.state.completed,
+            paused: this.state.paused && !this.state.state.completed,
+            isRunning: false,
+          },
+          this.maybeFinish
+        );
+      } else {
+        this.onClickStep();
+        this.sleep(maxSpeed - this.state.programSpeed).then(
+          this.runProgramTillBP
+        );
+      }
+    } catch (err) {
+      let msg = 'ram machine encountered unknown problem';
+      if (err instanceof InterpreterError) {
+        msg = 'line ' + (err.line + 1) + ': ';
+        if (err instanceof InputError)
+          msg += err.message + ' ' + err.inputId + '\n';
+        else if (err instanceof RegisterError)
+          msg += err.message + ' ' + err.regId + '\n';
+        else msg += err.message;
+      }
 
-    if (this.state.skipAnimations) {
-      engine.completeTillBreak(this.state.state);
-      this.setState({isRunning: false}, this.maybeFinish);
-    } else {
-      this.onClickStep();
-      this.sleep(maxSpeed - this.state.programSpeed).then(
-        this.runProgramTillBP
-      );
+      this.setState({
+        started: false,
+        isRunning: false,
+        paused: true,
+        errorMessage: msg,
+        errorOpen: true,
+        errorType: 'Runtime Error',
+      });
     }
   };
 
@@ -363,22 +418,44 @@ class App extends Component<{}, IState> {
       const nextOutput = this.state.state.environment.output.nextOutput();
       if (instructionResult instanceof Break)
         this.setState(
-          {
-            isRunning: false,
-            currentInput: nextInput,
-            currentOutput: nextOutput,
+          prev => {
+            return {
+              started: prev.started && !this.state.state.completed,
+              paused: prev.paused && !this.state.state.completed,
+              isRunning: false,
+              currentInput: nextInput,
+              currentOutput: nextOutput,
+            };
           },
-          this.maybeFinish
+          () => {
+            this.maybeFinish;
+            this.scrollInEditor(
+              this.state.state.nextInstruction.getLineNumber()
+            );
+            this.scrollInRegisters(instructionResult.modifiedRegister);
+            this.paintRowWithState(this.state.state);
+          }
         );
       else
         this.setState(
-          {currentInput: nextInput, currentOutput: nextOutput},
-          this.maybeFinish
+          prev => {
+            return {
+              started: prev.started && !this.state.state.completed,
+              paused: prev.paused && !this.state.state.completed,
+              isRunning: prev.isRunning && !this.state.state.completed,
+              currentInput: nextInput,
+              currentOutput: nextOutput,
+            };
+          },
+          () => {
+            this.maybeFinish;
+            this.scrollInEditor(
+              this.state.state.nextInstruction.getLineNumber()
+            );
+            this.scrollInRegisters(instructionResult.modifiedRegister);
+            this.paintRowWithState(this.state.state);
+          }
         );
-
-      this.scrollInEditor(this.state.state.nextInstruction.getLineNumber());
-      this.scrollInRegisters(instructionResult.modifiedRegister);
-      this.paintRowWithState(this.state.state);
     } catch (err) {
       let msg = 'ram machine encountered unknown problem';
       if (err instanceof InterpreterError) {
@@ -411,9 +488,11 @@ class App extends Component<{}, IState> {
         paused: false,
       },
       () => {
-        if (isNextInstSkip(this.state.state)) this.runProgram();
-        else
+        if (isNextInstSkip(this.state.state) || this.state.skipAnimations)
+          this.runProgram();
+        else {
           this.sleep(maxSpeed - this.state.programSpeed).then(this.runProgram);
+        }
       }
     );
   };
@@ -428,7 +507,8 @@ class App extends Component<{}, IState> {
         paused: false,
       },
       () => {
-        if (isNextInstSkip(this.state.state)) this.runProgramTillBP();
+        if (isNextInstSkip(this.state.state) || this.state.skipAnimations)
+          this.runProgramTillBP();
         else
           this.sleep(maxSpeed - this.state.programSpeed).then(
             this.runProgramTillBP
