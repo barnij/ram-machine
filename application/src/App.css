@@ -29,11 +29,12 @@
 
 #title {
     justify-content: center;
+    background-color: var(--darkgray);
 }
 
 #controlRow {
     padding-top: 10px;
-    background-color: var(--color2);
+    background-color: var(--lightgray);
 }
 
 #controlButtonsRow {
