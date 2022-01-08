@@ -3,6 +3,7 @@ import {Parser} from '../engine/parser';
 import {Engine} from '../engine/engine';
 import {readFile} from 'fs/promises';
 import * as path from 'path';
+import * as fs from 'fs';
 
 // to get input from stdin:
 // import {ReadStream} from 'tty';
@@ -21,8 +22,12 @@ export async function interpret(
   const input = await readFile(path.resolve(process.cwd(), inputPath), 'utf-8');
 
   const engine = new Engine(new Parser(), new Interpreter());
-  const state = engine.makeStateFromFile(
-    programPath,
+  const data = fs.readFileSync(
+    path.resolve(process.cwd(), programPath),
+    'utf-8'
+  );
+  const state = engine.makeStateFromString(
+    data,
     input.split(WHITESPACE).map(x => BigInt(x))
   );
   engine.complete(state);
