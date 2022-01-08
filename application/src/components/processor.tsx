@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {InputGroup} from '@blueprintjs/core';
 import {Col, Container, Row} from 'react-bootstrap';
+import './processor.css';
 
 type processorProps = {
   instruction: {
@@ -11,7 +12,7 @@ type processorProps = {
 export class Processor extends Component<processorProps, {}> {
   render() {
     return (
-      <div style={{margin: 'auto'}}>
+      <div style={{margin: 'auto'}} id="processor">
         <Container fluid={true}>
           <Row>
             <Col>instruction:</Col>

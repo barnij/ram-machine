@@ -115,6 +115,7 @@ export class InputTape extends Component<inputProps, IInputTapeState> {
           overflow: 'scroll hidden',
           whiteSpace: 'nowrap',
           width: '98%',
+          paddingTop: '10px',
         }}
         className="moz-scroller"
         onWheel={e => {

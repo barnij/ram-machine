@@ -1,11 +1,45 @@
 #editor-background {
-    background-color: orange;
     display: flex;
     align-content: flex-end;
     flex-direction: column;
     padding-bottom: 10px;
 }
 
+#controlColumn {
+  background-color: var(--lightgray);
+  color: white;
+  border-right: 4px var(--color2) solid;
+}
+
+#codeColumn {
+  background-color: var(--darkgray);
+}
+
+#processorName {
+  background-color: var(--darkgray);
+}
+
 .editor-class {
     flex-grow: 1;
+}
+
+.bp3-dark .bp3-slider-handle {
+    background-color: aliceblue !important;
+}
+
+#title {
+    justify-content: center;
+}
+
+#controlRow {
+    padding-top: 10px;
+    background-color: var(--color2);
+}
+
+#controlButtonsRow {
+    margin-bottom: 10px;
+}
+
+#speedRow {
+    text-align: center;
 }

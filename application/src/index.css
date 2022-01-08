@@ -4,6 +4,11 @@
   --lightgray: #394b59;
   --darkgray: #30404d;
   --gray1BP: #5C7080;
+  --color2: #303744;
+}
+
+#root {
+  overflow-y: hidden;
 }
 
 body {
@@ -18,19 +23,6 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
-}
-
-#controlColumn {
-  background-color: var(--lightgray);
-  color: white;
-}
-
-#codeColumn {
-  background-color: var(--darkgray);
-}
-
-#processorName {
-  background-color: var(--darkgray);
 }
 
 ::-webkit-scrollbar {

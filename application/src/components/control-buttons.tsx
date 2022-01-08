@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Button, ButtonGroup} from '@blueprintjs/core';
+import './control-buttons.css';
 
 interface IStopButtonProps {
   started: boolean;
@@ -130,7 +131,7 @@ interface IControlButtonsProps {
 export class ControlButtons extends Component<IControlButtonsProps, {}> {
   render() {
     return (
-      <div>
+      <div id="controlButtons">
         <ButtonGroup>
           <RunPauseButton
             running={this.props.running}
