@@ -34,7 +34,6 @@ const defaultSpeed = 1;
 const maxSpeed = 3000;
 
 function isNextInstSkip(state: State): boolean {
-  console.log(state.nextInstruction);
   return (
     state.nextInstruction instanceof Skip ||
     (state.nextInstruction instanceof Combine &&
