@@ -483,6 +483,7 @@ class App extends Component<{}, IState> {
 
   onClickRun = () => {
     if (!this.state.started && !this.initState()) return;
+    this.saveCode(new CustomEvent('saveCode'));
 
     this.setState(
       {
@@ -502,6 +503,7 @@ class App extends Component<{}, IState> {
 
   onClickRunTillBreakpoint = () => {
     if (!this.state.started && !this.initState()) return;
+    this.saveCode(new CustomEvent('saveCode'));
 
     this.setState(
       {
