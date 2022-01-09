@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@barnij/react-spreadsheet": "^0.6.4",
+    "@barnij/react-spreadsheet": "^0.6.5",
     "@blueprintjs/core": "^3.52.0",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",

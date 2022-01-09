@@ -208,8 +208,8 @@ class App extends Component<{}, IState> {
     this.setState(({redRows, prevInstruction}) => {
       if (prevInstruction !== -1) {
         const r = new Map(redRows);
-        const curRed = r.get(prevInstruction);
-        const newRed = 0.05 + (curRed ?? 0);
+        const curRed = r.get(prevInstruction) ?? 0;
+        const newRed = curRed + (curRed < 0.05 ? 0.05 : 0.005);
         r.set(prevInstruction, newRed);
         return {redRows: r, prevInstruction: row};
       }
@@ -483,6 +483,7 @@ class App extends Component<{}, IState> {
 
   onClickRun = () => {
     if (!this.state.started && !this.initState()) return;
+    this.saveCode(new CustomEvent('saveCode'));
 
     this.setState(
       {
@@ -502,6 +503,7 @@ class App extends Component<{}, IState> {
 
   onClickRunTillBreakpoint = () => {
     if (!this.state.started && !this.initState()) return;
+    this.saveCode(new CustomEvent('saveCode'));
 
     this.setState(
       {
@@ -805,7 +807,7 @@ class App extends Component<{}, IState> {
         <Container id="App" fluid>
           <Row>
             {this.getControlColumn(this.state.isBigScreen)}
-            <Col id="codeColumn">
+            <Col xs={this.state.isBigScreen ? 9 : 11} id="codeColumn">
               <Row className="tapeRow">
                 <Col>
                   <InputTape
