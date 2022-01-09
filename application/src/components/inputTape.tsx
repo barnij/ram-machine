@@ -47,6 +47,7 @@ function InputItem(props: {
         }}
         name={props.id.toString()}
         disabled={props.disabled}
+        autoComplete="off"
         fill={false}
         value={input}
         rightElement={props.disabled ? undefined : removeButton}
