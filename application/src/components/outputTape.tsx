@@ -17,6 +17,7 @@ function OutputItem(props: {
     display: string;
     border?: string;
     borderRadius?: string;
+    width?: string;
   } = {
     margin: '10px',
     display: 'inline-block',
@@ -25,6 +26,7 @@ function OutputItem(props: {
     style.border = 'inset green';
     style.borderRadius = '5px';
   }
+  if (out.length > 21) style.width = out.length * 9 + 'px';
 
   return (
     <div id={'output' + props.index} style={style}>
