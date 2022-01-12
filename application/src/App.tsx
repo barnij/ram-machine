@@ -28,6 +28,8 @@ import {Checkbox, Slider} from '@blueprintjs/core';
 import {Matrix, CellBase} from '@barnij/react-spreadsheet';
 import {animateScroll, scroller} from 'react-scroll';
 import Panel from './components/offcanvas';
+import isFirefox from './components/firefoxChecker';
+import Cookies from 'js-cookie';
 
 const engine = new Engine(new Parser(), new Interpreter());
 
@@ -62,6 +64,8 @@ interface IState {
   editorData: Matrix.Matrix<CellBase<string>>;
   editorRange: [number, number];
   isBigScreen: boolean;
+  specialAlert?: string;
+  specialAlertOpen: boolean;
   sliderLabelRenderer: () => string;
 }
 
@@ -88,6 +92,7 @@ class App extends Component<{}, IState> {
     editorRange: [0, 0],
     fileDownloadUrl: undefined,
     isBigScreen: true,
+    specialAlertOpen: false,
     sliderLabelRenderer: () => '',
   };
 
@@ -190,7 +195,9 @@ class App extends Component<{}, IState> {
   };
 
   scrollInRegisters = (nr: bigint | undefined) => {
-    if (typeof nr !== 'undefined') {
+    const registers = document.getElementById('registers')!;
+
+    if (typeof nr !== 'undefined' && registers) {
       scroller.scrollTo('reg' + nr, {containerId: 'registers'});
       this.highlightRegister(nr);
     }
@@ -198,6 +205,8 @@ class App extends Component<{}, IState> {
 
   highlightRegister = (reg: bigint) => {
     const register = document.getElementById('register' + reg)!;
+    if (!register) return;
+
     register.classList.add('highlight');
     setTimeout(() => {
       register.classList.remove('highlight');
@@ -284,6 +293,8 @@ class App extends Component<{}, IState> {
         engine.complete(this.state.state);
         this.setState(
           {
+            currentOutput: this.state.state.environment.output.nextOutput(),
+            currentInput: this.state.state.environment.input.nextInput(),
             started: this.state.started && !this.state.state.completed,
             paused: this.state.paused && !this.state.state.completed,
             isRunning: this.state.isRunning && !this.state.state.completed,
@@ -331,6 +342,8 @@ class App extends Component<{}, IState> {
         engine.completeTillBreak(this.state.state);
         this.setState(
           {
+            currentOutput: this.state.state.environment.output.nextOutput(),
+            currentInput: this.state.state.environment.input.nextInput(),
             started: this.state.started && !this.state.state.completed,
             paused: this.state.paused && !this.state.state.completed,
             isRunning: false,
@@ -668,9 +681,26 @@ class App extends Component<{}, IState> {
     );
   };
 
+  showFirefoxAlert = () => {
+    if (isFirefox() && !Cookies.get('foxWarnDis')) {
+      this.setState({
+        specialAlert: 'firefoxWarning',
+        specialAlertOpen: true,
+        errorType: 'Usage warning',
+      });
+    }
+  };
+
+  handleCloseFirefoxAlert = () => {
+    const dontShow = confirm('Do not show the firefox warning again?');
+    this.setState({specialAlertOpen: false});
+    if (dontShow)
+      Cookies.set('foxWarnDis', '1', {expires: 365, sameSite: 'strict'});
+  };
+
   componentDidMount = () => {
     this.setup();
-
+    this.showFirefoxAlert();
     this.restoreCode();
     window.addEventListener('beforeunload', this.saveCode);
     window.addEventListener('resize', this.setup);
@@ -805,6 +835,13 @@ class App extends Component<{}, IState> {
     return (
       <div className="bp3-dark">
         <Container id="App" fluid>
+          <EditorAlert
+            alertType={this.state.specialAlert}
+            message=""
+            title={this.state.errorType}
+            isOpen={this.state.specialAlertOpen}
+            handleClose={this.handleCloseFirefoxAlert}
+          />
           <Row>
             {this.getControlColumn(this.state.isBigScreen)}
             <Col xs={this.state.isBigScreen ? 9 : 11} id="codeColumn">
@@ -842,7 +879,7 @@ class App extends Component<{}, IState> {
                   <EditorAlert
                     isOpen={this.state.errorOpen}
                     message={this.state.errorMessage}
-                    errorType={this.state.errorType}
+                    title={this.state.errorType}
                     handleClose={() => {
                       this.setState({errorOpen: false});
                     }}
