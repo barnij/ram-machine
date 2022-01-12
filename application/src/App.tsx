@@ -543,13 +543,15 @@ class App extends Component<{}, IState> {
   };
 
   onClickReset = () => {
-    if (confirm('Are you sure to reset editor? Your code will be deleted.'))
+    if (confirm('Are you sure to reset editor? Your code will be deleted.')) {
       this.setState({
         editorData: Matrix.createEmpty<CellBase<string>>(
           START_NUMBER_OF_ROWS,
           4
         ),
       });
+      this.resetRedRows();
+    }
   };
 
   onClickDownload = () => {
@@ -564,7 +566,10 @@ class App extends Component<{}, IState> {
   };
 
   onClickUpload = () => {
-    if (this.dofileUpload !== null) this.dofileUpload.click();
+    if (this.dofileUpload !== null) {
+      this.resetRedRows();
+      this.dofileUpload.click();
+    }
   };
 
   openFile(event: React.ChangeEvent<HTMLInputElement>) {
