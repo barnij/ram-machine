@@ -34,6 +34,7 @@ interface IEditorProps {
 export function parseMatrix(data: Matrix.Matrix<CellBase<string>>) {
   let text = '';
 
+  let iterations = data.length;
   for (const row of data) {
     const label = row[0]?.value;
     const instruction = row[1]?.value;
@@ -56,7 +57,7 @@ export function parseMatrix(data: Matrix.Matrix<CellBase<string>>) {
       text += ' #' + comment;
     }
 
-    text += '\n';
+    if (--iterations) text += '\n';
   }
 
   return text;
