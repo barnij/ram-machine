@@ -192,6 +192,7 @@ export class Parser {
     instruction: ast.Instruction;
   } {
     let label: null | ast.Label;
+    string = string.toLowerCase();
     const commentlessString = string.split('#')[0];
     const commentEndIndex = commentlessString.indexOf(':');
     let instructionString = commentlessString.trim();
