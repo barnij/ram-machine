@@ -432,7 +432,7 @@ class App extends Component<{}, IState> {
 
       const nextInput = this.state.state.environment.input.nextInput();
       const nextOutput = this.state.state.environment.output.nextOutput();
-      if (instructionResult instanceof Break)
+      if (instructionResult instanceof Break && !noBreak)
         this.setState(
           prev => {
             return {
