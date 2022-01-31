@@ -119,7 +119,7 @@ export class Parser {
     ) {
       throw new ParserSyntaxError(
         -1,
-        instructionCode + 'is not a valid instruction code'
+        instructionCode + ' is not a valid instruction code'
       );
     }
     if (instructionArguments.length !== 1) {
