@@ -18,7 +18,7 @@
     "web-vitals": "^2.1.3"
   },
   "scripts": {
-    "install-engine": "cd ./engine && npm install --no-audit",
+    "install-engine": "cd ./ram-engine && npm install --no-audit",
     "full-install": "npm run install-engine && npm install --no-audit",
     "start": "npm run fix && react-scripts start",
     "build": "react-scripts build",
