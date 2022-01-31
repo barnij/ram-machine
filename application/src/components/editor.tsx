@@ -35,6 +35,15 @@ export function parseMatrix(data: Matrix.Matrix<CellBase<string>>) {
   let text = '';
 
   let iterations = data.length;
+  let maxLabelLength = 0;
+  let maxArgumentLength = 0;
+  for (const row of data) {
+    const labelLength = row[0]?.value?.length ?? 0;
+    maxLabelLength = Math.max(labelLength, maxLabelLength);
+    const argumentLength = row[2]?.value?.length ?? 0;
+    maxArgumentLength = Math.max(argumentLength, maxArgumentLength);
+  }
+
   for (const row of data) {
     const label = row[0]?.value;
     const instruction = row[1]?.value;
@@ -42,19 +51,27 @@ export function parseMatrix(data: Matrix.Matrix<CellBase<string>>) {
     const comment = row[3]?.value;
 
     if (label) {
-      text += label + ': ';
+      text += label;
+      text += ': ';
+      text += ' '.repeat(maxLabelLength - label.length);
+    } else {
+      text += ' '.repeat(maxLabelLength + 2);
     }
 
     if (instruction) {
-      text += instruction + ' ';
+      text += instruction;
+      text += ' '.repeat(6 - instruction.length);
     }
 
     if (argument) {
-      text += argument + ' ';
+      text += argument;
+      text += ' '.repeat(maxArgumentLength - argument.length + 1);
+    } else {
+      text += ' '.repeat(maxArgumentLength + 1);
     }
 
     if (comment) {
-      text += ' #' + comment;
+      text += '#' + comment;
     }
 
     if (--iterations) text += '\n';
