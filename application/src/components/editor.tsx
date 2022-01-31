@@ -61,6 +61,8 @@ export function parseMatrix(data: Matrix.Matrix<CellBase<string>>) {
     if (instruction) {
       text += instruction;
       text += ' '.repeat(6 - instruction.length);
+    } else {
+      text += ' '.repeat(6);
     }
 
     if (argument) {
