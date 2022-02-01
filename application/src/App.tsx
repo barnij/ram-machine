@@ -136,6 +136,25 @@ class App extends Component<{}, IState> {
   };
 
   deleteRowInEditor = (row: number) => {
+    if (row === 0) {
+      this.setState(prev => {
+        const copyData = Matrix.set<CellBase<string>>(
+          {row, column: 0},
+          {value: ''},
+          prev.editorData
+        );
+        for (let i = 1; i < 4; i++)
+          Matrix.mutableSet<CellBase<string>>(
+            {row, column: i},
+            {value: ''},
+            copyData
+          );
+
+        return {editorData: copyData};
+      });
+      return;
+    }
+
     this.setState(
       prev => {
         const dataFirst = prev.editorData.slice(0, row);
