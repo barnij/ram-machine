@@ -6,8 +6,9 @@ import {
   Matrix,
   Mode,
 } from '@barnij/react-spreadsheet';
-import {Icon, Intent} from '@blueprintjs/core';
+import {Button, Icon, Intent} from '@blueprintjs/core';
 import './editor.css';
+import {animateScroll} from 'react-scroll';
 
 type RowIndicatorProps = {
   row: number;
@@ -95,6 +96,20 @@ export class Editor extends Component<IEditorProps, IEditorState> {
     this.props.handleAddRow(this.state.selectedPoint.row);
   };
 
+  addRowButton = () => {
+    this.props.handleAddRow(this.props.data.length);
+    animateScroll.scrollMore(100, {
+      containerId: 'editor',
+      delay: 0,
+      duration: 0,
+    });
+  };
+
+  deleteRowButton = () => {
+    if (this.props.data.length < 1) return;
+    this.props.handleDeleteRow(this.props.data.length - 1);
+  };
+
   deleteRow = () => {
     if (
       !this.state.selectedPoint ||
@@ -173,11 +188,13 @@ export class Editor extends Component<IEditorProps, IEditorState> {
             if (event.key === 'Delete' && event.shiftKey) {
               this.props.resetRedRows();
               this.deleteRow();
+              event.preventDefault();
             }
           }}
           onActivate={(selected: Point) => {
             this.setState(() => ({selectedPoint: selected}));
           }}
+          onBlur={() => this.setState({selectedPoint: null})}
           onModeChange={(mode: Mode) => {
             if (mode === 'edit') {
               this.setState(() => ({editMode: true}));
@@ -187,6 +204,15 @@ export class Editor extends Component<IEditorProps, IEditorState> {
             }
           }}
         />
+        <div style={{paddingLeft: 1}}>
+          <Button icon="add" onClick={() => this.addRowButton()}></Button>
+          <Button
+            icon="delete"
+            disabled={this.props.data.length < 1}
+            style={{marginLeft: 10}}
+            onClick={() => this.deleteRowButton()}
+          ></Button>
+        </div>
       </div>
     );
   }
